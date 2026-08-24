@@ -1,0 +1,44 @@
+{
+  "description": "Daily autonomous scraping of active Florida distressed-property data sources via Browserbase",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "daily_scrape_pipeline",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_pipeline": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runDailyScrapePipeline"
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Run daily scrape pipeline",
+            "description": "Scrape all active FL sources + upsert properties"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 2 * * *",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "name": "Daily Scrape Pipeline"
+}
