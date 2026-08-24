@@ -47,6 +47,19 @@ export default function PWAInstall({ variant = "nav" }) {
 
   if (installed) return null;
 
+  if (variant === "mobiletab") {
+    return (
+      <button
+        onClick={install}
+        disabled={!deferred}
+        className="flex h-9 w-9 items-center justify-center rounded-lg text-black/40 transition-colors hover:bg-black/5 disabled:opacity-30"
+        aria-label="Install app"
+      >
+        <Download className="h-5 w-5" />
+      </button>
+    );
+  }
+
   if (variant === "nav") {
     return (
       <button

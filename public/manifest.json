@@ -1,29 +1,26 @@
 {
-  "name": "Hidden Property Intel",
-  "short_name": "HPI",
+  "name": "Hidden Property Intel — Find What Others Miss",
+  "short_name": "Property Intel",
   "description": "Discover deeper property intelligence, hard-to-find records, ownership insights, opportunity signals, and investment data beyond the traditional listing.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#FFFFFF",
+  "orientation": "portrait",
+  "background_color": "#0A0A0A",
   "theme_color": "#D49A16",
+  "scope": "/",
+  "categories": ["business", "finance", "productivity"],
   "icons": [
     {
-      "src": "https://base44.app/api/apps/6a8ba268665196e93b7d57f7/files/mp/public/6a8ba268665196e93b7d57f7/889c98886_android-chrome-192x192.png",
-      "sizes": "192x192",
+      "src": "https://base44.app/api/apps/6a8ba268665196e93b7d57f7/files/mp/public/6a8ba268665196e93b7d57f7/96fd67272_logo-icon-128.png",
+      "sizes": "128x128",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://base44.app/api/apps/6a8ba268665196e93b7d57f7/files/mp/public/6a8ba268665196e93b7d57f7/028133fcd_android-chrome-512x512.png",
-      "sizes": "512x512",
+      "src": "https://base44.app/api/apps/6a8ba268665196e93b7d57f7/files/mp/public/6a8ba268665196e93b7d57f7/04b825eac_apple-touch-icon.png",
+      "sizes": "180x180",
       "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "https://base44.app/api/apps/6a8ba268665196e93b7d57f7/files/mp/public/6a8ba268665196e93b7d57f7/ee11aa82f_favicon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
   ]
 }

@@ -6,7 +6,7 @@ import { IMAGES } from "@/lib/luxury";
 import LuxuryListingCard from "@/components/luxury/LuxuryListingCard";
 import FAQ from "@/components/FAQ";
 import PWAInstall from "@/components/PWAInstall";
-import { ArrowRight, Radar, Brain, FileSignature, Building2, Users, Scale, BadgeCheck } from "lucide-react";
+import { ArrowRight, Radar, Brain, FileSignature, Building2, Users, Scale, BadgeCheck, Search, Sparkles, Plus } from "lucide-react";
 
 const INVESTOR_STEPS = [
   { n: "01", t: "Browse off-market inventory", d: "Distressed, probate, tax-delinquent, and foreclosure properties scraped daily from county records — none of it on the MLS." },
@@ -41,6 +41,18 @@ const PLANS = [
   { name: "Pro", price: 149, tagline: "For active investors", features: ["Everything in Starter", "Ownership chains + owner contacts", "Place bids", "ROI calculators", "Market analytics"], featured: true },
   { name: "Elite", price: 499, tagline: "Institutional grade", features: ["Everything in Pro", "Proxy (auto) bidding", "Smart-contract closing", "Unlimited saved searches", "Commercial properties"], featured: false },
 ];
+
+function QuickAction({ icon: Icon, label, to }) {
+  return (
+    <Link
+      to={to}
+      className="flex shrink-0 items-center gap-2 rounded-full border border-black/15 px-4 py-2.5 text-xs font-medium text-black/70 transition-colors hover:bg-black hover:text-white"
+    >
+      <Icon className="h-3.5 w-3.5" />
+      {label}
+    </Link>
+  );
+}
 
 export default function LuxuryHome() {
   const [featured, setFeatured] = useState([]);
@@ -81,6 +93,26 @@ export default function LuxuryHome() {
               </div>
             ))}
           </dl>
+        </div>
+      </section>
+
+      {/* Mobile quick actions — app-like shortcut bar */}
+      <section className="border-b border-black/10 bg-white lg:hidden">
+        <div className="px-4 py-4">
+          <button
+            onClick={() => window.dispatchEvent(new Event("open-mobile-search"))}
+            className="flex w-full items-center gap-3 rounded-xl border border-black/15 bg-black/[0.02] px-4 py-3.5 text-left"
+          >
+            <Search className="h-5 w-5 text-gold" />
+            <span className="flex-1 text-sm text-black/50">AI search — city, price, distress type…</span>
+            <Sparkles className="h-4 w-4 text-black/30" />
+          </button>
+          <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+            <QuickAction icon={Building2} label="Inventory" to="/listings" />
+            <QuickAction icon={Brain} label="AI Deal Score" to="/calculators" />
+            <QuickAction icon={Plus} label="List Property" to="/seller/post-property" />
+            <QuickAction icon={ArrowRight} label="Pipeline" to="/investor/pipeline" />
+          </div>
         </div>
       </section>
 
