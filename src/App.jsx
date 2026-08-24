@@ -12,6 +12,18 @@ import LuxuryHome from '@/pages/LuxuryHome';
 import Listings from '@/pages/Listings';
 import PropertyDetail from '@/pages/PropertyDetail';
 import Calculators from '@/pages/Calculators';
+import Bidding from '@/pages/Bidding';
+import InvestorSignup from '@/pages/InvestorSignup';
+import InvestorDashboard from '@/pages/InvestorDashboard';
+import SellerDashboard from '@/pages/SellerDashboard';
+import SellerPostProperty from '@/pages/SellerPostProperty';
+import NegotiationAssistant from '@/pages/NegotiationAssistant';
+import Login from '@/pages/Login';
+import Register from '@/pages/Register';
+import ForgotPassword from '@/pages/ForgotPassword';
+import ResetPassword from '@/pages/ResetPassword';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import { Navigate } from 'react-router-dom';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -39,11 +51,23 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route element={<LuxLayout />}>
         <Route path="/" element={<LuxuryHome />} />
         <Route path="/listings" element={<Listings />} />
         <Route path="/properties/:id" element={<PropertyDetail />} />
+        <Route path="/properties/:id/bid" element={<Bidding />} />
         <Route path="/calculators" element={<Calculators />} />
+        <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
+          <Route path="/investor/signup" element={<InvestorSignup />} />
+          <Route path="/investor/dashboard" element={<InvestorDashboard />} />
+          <Route path="/seller/dashboard" element={<SellerDashboard />} />
+          <Route path="/seller/post-property" element={<SellerPostProperty />} />
+          <Route path="/seller/negotiation/:propertyId" element={<NegotiationAssistant />} />
+        </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
