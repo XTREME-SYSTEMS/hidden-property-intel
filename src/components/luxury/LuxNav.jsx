@@ -23,13 +23,14 @@ export default function LuxNav() {
     { label: "Outreach", to: "/admin/outreach" },
   ];
 
+  const linkClass = "font-brand text-[11px] font-medium uppercase tracking-[0.3em] text-black/70 transition-colors hover:text-black";
   const renderLink = (l, onClick) =>
     l.to ? (
-      <Link key={l.label} to={l.to} onClick={onClick} className="text-[11px] font-semibold uppercase tracking-[0.25em] text-black/70 transition-colors hover:text-black">
+      <Link key={l.label} to={l.to} onClick={onClick} className={linkClass}>
         {l.label}
       </Link>
     ) : (
-      <a key={l.label} href={l.href} onClick={onClick} className="text-[11px] font-semibold uppercase tracking-[0.25em] text-black/70 transition-colors hover:text-black">
+      <a key={l.label} href={l.href} onClick={onClick} className={linkClass}>
         {l.label}
       </a>
     );
@@ -38,8 +39,8 @@ export default function LuxNav() {
     <header className="fixed top-0 z-50 w-full border-b border-black/10 bg-white/80 backdrop-blur-xl">
       <div className="mx-auto flex h-28 max-w-[1400px] items-center justify-between px-6 lg:px-12">
         <Link to="/" aria-label="Hidden Property Intel" className="flex items-center">
-          <Logo variant="dark" className="hidden h-24 w-auto sm:block" />
-          <Logo variant="dark" compact className="h-16 w-16 sm:hidden" />
+          <Logo variant="dark" className="hidden h-24 w-auto md:block" />
+          <Logo variant="dark" compact className="h-20 w-20 md:hidden" />
         </Link>
 
         <nav className="hidden items-center gap-10 lg:flex">
@@ -54,7 +55,7 @@ export default function LuxNav() {
         <div className="flex items-center gap-4">
           <AlertsBell user={user} />
           <PWAInstall variant="nav" />
-          <Link to="/seller/post-property" className="hidden rounded-sm bg-black px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.25em] text-white transition-colors hover:bg-black/80 sm:inline-block">
+          <Link to="/seller/post-property" className="hidden rounded-sm bg-black px-5 py-2.5 font-brand text-[11px] font-medium uppercase tracking-[0.3em] text-white transition-colors hover:bg-black/80 sm:inline-block">
             List your property
           </Link>
           <button onClick={() => setOpen(!open)} className="lg:hidden" aria-label="Menu">
