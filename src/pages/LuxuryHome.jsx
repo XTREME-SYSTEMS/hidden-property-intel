@@ -65,24 +65,23 @@ export default function LuxuryHome() {
       {/* Hero */}
       <section className="relative h-[94vh] min-h-[660px] w-full overflow-hidden bg-black">
         <Image src={IMAGES.estate} alt="Hidden Property Intel" fittingType="fill" className="absolute inset-0 h-full w-full object-cover opacity-80" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/80" />
-        <div className="relative mx-auto flex h-full max-w-[1400px] flex-col justify-center px-6 pt-24 pb-20 lg:px-12">
-          <p className="text-[11px] uppercase tracking-[0.4em] text-gold-warm">Hidden Property Intel · Find what others miss.</p>
-          <h1 className="mt-6 max-w-3xl font-display text-4xl font-light leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl">
-            Distressed properties,<br />serious investors.
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/85" />
+        <div className="relative mx-auto flex h-full max-w-[1400px] flex-col justify-end px-6 pb-24 pt-32 lg:justify-center lg:px-12 lg:pb-20 lg:pt-24">
+          <p className="text-[10px] uppercase tracking-[0.45em] text-gold-warm sm:text-[11px]">Hidden Property Intel · Find what others miss.</p>
+          <h1 className="mt-5 max-w-3xl font-display text-[2.6rem] font-normal leading-[1.02] tracking-[-0.02em] text-white sm:mt-6 sm:text-5xl lg:text-6xl lg:font-light">
+            Distressed properties,<br />
+            <span className="text-gold-warm">serious investors.</span>
           </h1>
-          <p className="mt-7 max-w-xl text-base leading-relaxed text-white/70">
-            We scrape county records daily to surface off-market distressed, inherited, and under-stress properties —
-            then connect motivated sellers with verified investors ready to close. AI pricing, ownership-chain
-            intelligence, and on-chain escrow built in.
+          <p className="mt-6 max-w-md text-[15px] leading-relaxed text-white/75 sm:mt-7 sm:text-base">
+            Off-market deals, AI-scored and ready to close — before they ever reach the MLS.
           </p>
-          <div className="mt-10 flex flex-wrap gap-4">
-            <Link to="/listings" className="group inline-flex items-center gap-3 rounded-sm bg-white px-7 py-4 text-[11px] uppercase tracking-[0.3em] text-black transition-colors hover:bg-black hover:text-white">
-              Browse distressed inventory
+          <div className="mt-9 flex flex-wrap gap-3 sm:gap-4">
+            <Link to="/listings" className="group inline-flex items-center gap-2.5 rounded-md bg-white px-6 py-3.5 font-brand text-[11px] font-semibold uppercase tracking-[0.22em] text-black transition-all duration-200 hover:bg-gold-warm hover:text-black sm:px-7 sm:py-4 sm:tracking-[0.25em]">
+              Browse inventory
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
-            <Link to="/seller/post-property" className="inline-flex items-center gap-3 rounded-sm border border-white/40 px-7 py-4 text-[11px] uppercase tracking-[0.3em] text-white transition-colors hover:bg-white/10">
-              List your property — free
+            <Link to="/seller/post-property" className="inline-flex items-center gap-2.5 rounded-md border border-white/30 px-6 py-3.5 font-brand text-[11px] font-semibold uppercase tracking-[0.22em] text-white backdrop-blur-sm transition-all duration-200 hover:border-white/60 hover:bg-white/10 sm:px-7 sm:py-4 sm:tracking-[0.25em]">
+              List — it's free
             </Link>
           </div>
           <dl className="mt-14 grid max-w-3xl grid-cols-2 gap-8 border-t border-white/10 pt-8 sm:grid-cols-4">
