@@ -5,6 +5,7 @@ import { base44 } from "@/api/base44Client";
 import { IMAGES } from "@/lib/luxury";
 import LuxuryListingCard from "@/components/luxury/LuxuryListingCard";
 import FAQ from "@/components/FAQ";
+import PWAInstall from "@/components/PWAInstall";
 import { ArrowRight, Radar, Brain, FileSignature, Building2, Users, Scale, BadgeCheck } from "lucide-react";
 
 const INVESTOR_STEPS = [
@@ -257,6 +258,21 @@ export default function LuxuryHome() {
         <p className="text-[11px] uppercase tracking-[0.4em] text-black/40">Frequently asked</p>
         <h2 className="mt-3 font-display text-4xl font-light tracking-tight sm:text-5xl">Questions, answered.</h2>
         <div className="mt-10"><FAQ /></div>
+      </section>
+
+      {/* PWA install */}
+      <section className="mx-auto max-w-[1400px] px-6 py-24 lg:px-12 lg:py-32">
+        <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.4em] text-black/40">PropertyIntel app</p>
+            <h2 className="mt-3 font-display text-4xl font-light tracking-tight sm:text-5xl">Your deal pipeline, in your pocket.</h2>
+            <p className="mt-6 max-w-md leading-relaxed text-black/60">
+              Install PropertyIntel on your phone or desktop for a full-screen, app-like experience.
+              Browse distressed inventory, place bids, negotiate, and close on-chain — no app store, always up to date.
+            </p>
+          </div>
+          <PWAInstall variant="card" />
+        </div>
       </section>
 
       {/* Final CTA */}
