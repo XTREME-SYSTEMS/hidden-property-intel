@@ -1,0 +1,85 @@
+{
+  "name": "Subscription",
+  "type": "object",
+  "properties": {
+    "investor_id": {
+      "type": "string"
+    },
+    "plan": {
+      "type": "string",
+      "enum": [
+        "starter",
+        "pro",
+        "elite"
+      ]
+    },
+    "price": {
+      "type": "number"
+    },
+    "billing_cycle": {
+      "type": "string",
+      "enum": [
+        "monthly",
+        "annual"
+      ],
+      "default": "monthly"
+    },
+    "stripe_customer_id": {
+      "type": "string"
+    },
+    "stripe_subscription_id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "past_due",
+        "cancelled",
+        "trial"
+      ],
+      "default": "trial"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "current_period_end": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "investor_id",
+    "plan"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.investor_id": "{{user.id}}"
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,0 +1,144 @@
+{
+  "name": "SmartContract",
+  "type": "object",
+  "properties": {
+    "property_id": {
+      "type": "string"
+    },
+    "investor_id": {
+      "type": "string"
+    },
+    "seller_id": {
+      "type": "string"
+    },
+    "contract_type": {
+      "type": "string",
+      "enum": [
+        "purchase_agreement",
+        "escrow",
+        "deed_transfer"
+      ]
+    },
+    "terms": {
+      "type": "object",
+      "properties": {
+        "price": {
+          "type": "number"
+        },
+        "earnest_money": {
+          "type": "number"
+        },
+        "closing_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "contingencies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "blockchain": {
+      "type": "string",
+      "enum": [
+        "polygon"
+      ],
+      "default": "polygon"
+    },
+    "contract_address": {
+      "type": "string"
+    },
+    "deploy_tx_hash": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "deployed",
+        "signed",
+        "funded",
+        "closed",
+        "cancelled"
+      ],
+      "default": "draft"
+    },
+    "abi": {
+      "type": "string"
+    },
+    "signed_by": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "signed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "signature_hash": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "property_id",
+    "investor_id",
+    "seller_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.investor_id": "{{user.id}}"
+        },
+        {
+          "data.seller_id": "{{user.id}}"
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.investor_id": "{{user.id}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.investor_id": "{{user.id}}"
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

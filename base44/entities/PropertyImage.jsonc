@@ -1,0 +1,55 @@
+{
+  "name": "PropertyImage",
+  "type": "object",
+  "properties": {
+    "property_id": {
+      "type": "string"
+    },
+    "image_url": {
+      "type": "string"
+    },
+    "image_type": {
+      "type": "string",
+      "enum": [
+        "street_view",
+        "satellite",
+        "interior",
+        "exterior",
+        "scraped",
+        "user_uploaded"
+      ]
+    },
+    "caption": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string"
+    },
+    "is_primary": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "property_id",
+    "image_url"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

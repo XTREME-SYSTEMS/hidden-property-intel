@@ -1,0 +1,128 @@
+{
+  "name": "Investor",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "company": {
+      "type": "string"
+    },
+    "investment_types": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "target_markets": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "target_price_range": {
+      "type": "object",
+      "properties": {
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        }
+      }
+    },
+    "subscription_plan": {
+      "type": "string",
+      "enum": [
+        "starter",
+        "pro",
+        "elite"
+      ]
+    },
+    "subscription_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "past_due",
+        "cancelled",
+        "trial"
+      ]
+    },
+    "total_bids": {
+      "type": "number",
+      "default": 0
+    },
+    "properties_won": {
+      "type": "number",
+      "default": 0
+    },
+    "total_invested": {
+      "type": "number",
+      "default": 0
+    },
+    "rating": {
+      "type": "number"
+    },
+    "verified": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "user_id",
+    "name",
+    "email"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.user_id": "{{user.id}}"
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.user_id": "{{user.id}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.user_id": "{{user.id}}"
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

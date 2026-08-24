@@ -1,0 +1,83 @@
+{
+  "name": "DataSource",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "county_assessor",
+        "tax_records",
+        "probate_court",
+        "foreclosure",
+        "auction",
+        "obituary",
+        "mls"
+      ]
+    },
+    "url": {
+      "type": "string"
+    },
+    "scrape_frequency": {
+      "type": "string",
+      "enum": [
+        "daily",
+        "weekly",
+        "monthly"
+      ],
+      "default": "daily"
+    },
+    "scrape_config": {
+      "type": "object"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "inactive",
+        "error"
+      ],
+      "default": "active"
+    },
+    "last_run_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "properties_yielded": {
+      "type": "number",
+      "default": 0
+    },
+    "health_score": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "name",
+    "type",
+    "url"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

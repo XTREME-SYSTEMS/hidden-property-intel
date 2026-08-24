@@ -1,0 +1,138 @@
+{
+  "name": "NegotiationThread",
+  "type": "object",
+  "properties": {
+    "seller_id": {
+      "type": "string"
+    },
+    "property_id": {
+      "type": "string"
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sender": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "ai_analysis": {
+            "type": "string"
+          },
+          "suggestions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sent_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "offers_analyzed": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "bid_id": {
+            "type": "string"
+          },
+          "bid_amount": {
+            "type": "number"
+          },
+          "ai_assessment": {
+            "type": "string"
+          },
+          "recommendation": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "counter_offers_suggested": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "terms": {
+            "type": "string"
+          },
+          "reasoning": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "resolved",
+        "closed"
+      ],
+      "default": "active"
+    },
+    "outcome": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "seller_id",
+    "property_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.seller_id": "{{user.id}}"
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.seller_id": "{{user.id}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.seller_id": "{{user.id}}"
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
