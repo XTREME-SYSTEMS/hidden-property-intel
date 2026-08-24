@@ -24,6 +24,16 @@ export default async function(req) {
         messages: [],
         status: 'active'
       });
+    } else if (!thread.investor_id && !isSeller && user.role !== 'admin') {
+      // first investor to message claims an unassigned thread
+      await base44.asServiceRole.entities.NegotiationThread.update(thread.id, { investor_id: user.id });
+      thread.investor_id = user.id;
+    }
+
+    // enforce 1:1 negotiation: only the seller, the thread's investor, or admin may post
+    const isParty = isSeller || user.role === 'admin' || (thread.investor_id && thread.investor_id === user.id);
+    if (!isParty) {
+      return Response.json({ error: 'This negotiation thread belongs to another investor' }, { status: 403 });
     }
 
     const userMsg = { sender: 'user', role: senderRole, content, sent_at: new Date().toISOString() };

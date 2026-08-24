@@ -19,7 +19,7 @@ export default async function(req) {
     }
 
     const key = secrets.get('STRIPE_SECRET_KEY');
-    const appId = secrets.get('BASE44_APP_ID') || '';
+    const appId = Deno.env.get('BASE44_APP_ID') || secrets.get('BASE44_APP_ID') || '';
     const productName = PLAN_PRODUCTS[plan];
 
     const prodRes = await fetch('https://api.stripe.com/v1/products?limit=100', {
