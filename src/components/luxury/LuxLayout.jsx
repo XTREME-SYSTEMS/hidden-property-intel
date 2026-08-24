@@ -7,7 +7,7 @@ export default function LuxLayout() {
   return (
     <div className="min-h-screen bg-white text-black">
       <LuxNav />
-      <main className="pt-28"><Outlet /></main>
+      <main className="pt-20 md:pt-28"><Outlet /></main>
       <LuxFooter />
     </div>
   );

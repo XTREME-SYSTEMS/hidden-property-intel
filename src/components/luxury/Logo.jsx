@@ -34,12 +34,12 @@ export default function Logo({ variant = "dark", compact = false, className = ""
   const s = ASSETS[variant] || ASSETS.dark;
   return (
     <img
-      src={s.src768}
+      src={s.src512}
       srcSet={`${s.src320} 320w, ${s.src512} 512w, ${s.src768} 768w`}
-      sizes="(max-width: 768px) 320px, (max-width: 1024px) 512px, 768px"
+      sizes="(max-width: 768px) 170px, 250px"
       alt="Hidden Property Intel"
       className={className}
-      style={{ objectFit: "contain", ...style }}
+      style={{ ...style }}
     />
   );
 }
