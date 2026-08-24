@@ -1,4 +1,4 @@
-const CACHE = 'propertyintel-v1';
+const CACHE = 'propertyintel-v2';
 const SHELL = ['/', '/index.html', '/manifest.json'];
 
 self.addEventListener('install', (e) => {
@@ -20,6 +20,15 @@ self.addEventListener('fetch', (e) => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
 
+  // Never intercept Vite dev / build chunks — always let them go to network.
+  const isViteChunk =
+    url.pathname.startsWith('/src/') ||
+    url.pathname.startsWith('/node_modules/.vite/') ||
+    url.pathname.startsWith('/@vite/') ||
+    url.pathname.startsWith('/@react-refresh') ||
+    url.pathname.startsWith('/api/');
+  if (isViteChunk) return;
+
   // Network-first for navigation, fall back to cached shell.
   if (req.mode === 'navigate') {
     e.respondWith(
@@ -34,8 +43,10 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // Cache-first for same-origin static assets.
-  if (url.origin === self.location.origin) {
+  // Cache-first ONLY for static assets (images, fonts, icons, manifest).
+  const isStaticAsset =
+    /\.(png|jpg|jpeg|gif|webp|svg|ico|woff|woff2|ttf|eot|otf|css|json)$/.test(url.pathname);
+  if (isStaticAsset && url.origin === self.location.origin) {
     e.respondWith(
       caches.match(req).then((cached) => {
         if (cached) return cached;
@@ -47,4 +58,5 @@ self.addEventListener('fetch', (e) => {
       })
     );
   }
+  // Everything else (JS chunks, etc.): network-only, no caching.
 });
