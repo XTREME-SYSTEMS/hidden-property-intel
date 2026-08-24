@@ -12,6 +12,7 @@ import LuxuryHome from '@/pages/LuxuryHome';
 import Listings from '@/pages/Listings';
 import PropertyDetail from '@/pages/PropertyDetail';
 import Calculators from '@/pages/Calculators';
+import BrandLogos from '@/pages/BrandLogos';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -44,6 +45,7 @@ const AuthenticatedApp = () => {
         <Route path="/listings" element={<Listings />} />
         <Route path="/properties/:id" element={<PropertyDetail />} />
         <Route path="/calculators" element={<Calculators />} />
+        <Route path="/brand-logos" element={<BrandLogos />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

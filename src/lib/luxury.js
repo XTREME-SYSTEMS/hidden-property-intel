@@ -5,11 +5,24 @@ export const IMAGES = {
   penthouse: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/7bc2db482_generated_image.png",
   kitchen: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/b615fd174_generated_image.png",
   bedroom: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/cd8e1e116_generated_image.png",
-  estate: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/bd264d797_generated_image.png",
-  manor: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/567ae869d_generated_image.png",
-  interior: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/a9e94bf9c_generated_image.png",
-  aerial: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/14b8aad6b_generated_image.png",
+  estate: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/c32957146_generated_image.png",
+  manor: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/4c7ef3a70_generated_image.png",
+  interior: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/6a88b8710_generated_image.png",
+  aerial: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/6b91c6a13_generated_image.png",
 };
+
+export const LOGOS = [
+  { id: 1, name: "Line Art", url: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/3eb8721ab_generated_image.png" },
+  { id: 2, name: "Negative Space", url: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/0ae99915f_generated_image.png" },
+  { id: 3, name: "Crest Emblem", url: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/cef129392_generated_image.png" },
+  { id: 4, name: "Gold Monogram", url: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/82689270b_generated_image.png" },
+  { id: 5, name: "Abstract Teal", url: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/969b9d9b5_generated_image.png" },
+  { id: 6, name: "Gold Badge", url: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/f3deb0352_generated_image.png" },
+  { id: 7, name: "Single Stroke", url: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/283ae94b2_generated_image.png" },
+  { id: 8, name: "Platinum Diamond", url: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/54154e3a4_generated_image.png" },
+  { id: 9, name: "Isometric 3D", url: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/0ac9cb1e2_generated_image.png" },
+  { id: 10, name: "Emerald Grid", url: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/e58cd961e_generated_image.png" },
+];
 
 export const ESTATES = [
   { id: "e1", name: "Villa Noir", location: "Beverly Hills, California", price: 24500000, beds: 7, baths: 9, sqft: 14200, img: IMAGES.hero, tag: "Architectural" },
