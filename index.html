@@ -27,6 +27,31 @@
     <title>Hidden Property Intel — Find What Others Miss</title>
   </head>
   <body>
+    <script>
+      // Purge stale service workers BEFORE app JS loads — old v1 worker served
+      // stale cached JS chunks (old React copies) causing "Cannot read properties
+      // of null (reading 'useState')". Must run before main.jsx fetches any chunks.
+      (function () {
+        if (!('serviceWorker' in navigator)) return;
+        if (sessionStorage.getItem('sw_purged')) {
+          sessionStorage.removeItem('sw_purged');
+          return;
+        }
+        navigator.serviceWorker.getRegistrations().then(function (regs) {
+          if (regs.length === 0) return;
+          sessionStorage.setItem('sw_purged', '1');
+          Promise.all(regs.map(function (r) { return r.unregister(); })).then(function () {
+            if (window.caches && caches.keys) {
+              return caches.keys().then(function (keys) {
+                return Promise.all(keys.map(function (k) { return caches.delete(k); }));
+              });
+            }
+          }).then(function () {
+            window.location.reload();
+          });
+        });
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
