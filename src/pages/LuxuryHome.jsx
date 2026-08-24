@@ -51,7 +51,7 @@ export default function LuxuryHome() {
     <div className="font-body">
       {/* Hero */}
       <section className="relative h-[94vh] min-h-[660px] w-full overflow-hidden bg-black">
-        <Image src={IMAGES.hero} alt="PropertyIntel" fittingType="fill" className="absolute inset-0 h-full w-full object-cover opacity-80" />
+        <Image src={IMAGES.estate} alt="PropertyIntel" fittingType="fill" className="absolute inset-0 h-full w-full object-cover opacity-80" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/80" />
         <div className="relative mx-auto flex h-full max-w-[1400px] flex-col justify-center px-6 pt-24 pb-20 lg:px-12">
           <p className="text-[11px] uppercase tracking-[0.4em] text-white/60">PropertyIntel · The distressed property marketplace</p>
@@ -85,13 +85,18 @@ export default function LuxuryHome() {
 
       {/* Positioning */}
       <section className="mx-auto max-w-[1400px] px-6 py-24 lg:px-12 lg:py-32">
-        <div className="grid gap-12 lg:grid-cols-[1fr_1.4fr]">
-          <p className="text-[11px] uppercase tracking-[0.4em] text-black/40">Two sides. One marketplace.</p>
-          <p className="font-display text-2xl font-light leading-snug tracking-tight text-black sm:text-3xl">
-            Most platforms serve one side of the deal. PropertyIntel serves both — giving sellers a free, AI-guided
-            path to a fair cash offer, and investors a daily-refreshed pipeline of off-market distressed inventory
-            with the underwriting already done.
-          </p>
+        <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
+          <div className="relative aspect-[4/5] overflow-hidden bg-black">
+            <Image src={IMAGES.manor} alt="Distressed estate awaiting renewal" fittingType="fill" className="h-full w-full object-cover" />
+          </div>
+          <div className="flex flex-col justify-center">
+            <p className="text-[11px] uppercase tracking-[0.4em] text-black/40">Two sides. One marketplace.</p>
+            <p className="mt-6 font-display text-2xl font-light leading-snug tracking-tight text-black sm:text-3xl">
+              Most platforms serve one side of the deal. PropertyIntel serves both — giving sellers a free, AI-guided
+              path to a fair cash offer, and investors a daily-refreshed pipeline of off-market distressed inventory
+              with the underwriting already done.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -204,7 +209,10 @@ export default function LuxuryHome() {
       <section id="sellers" className="mx-auto max-w-[1400px] px-6 py-24 lg:px-12 lg:py-32">
         <div className="grid gap-12 lg:grid-cols-[1fr_1.2fr]">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.4em] text-black/40">For sellers</p>
+            <div className="relative aspect-[4/3] overflow-hidden bg-black">
+              <Image src={IMAGES.interior} alt="Renovation interior" fittingType="fill" className="h-full w-full object-cover" />
+            </div>
+            <p className="mt-8 text-[11px] uppercase tracking-[0.4em] text-black/40">For sellers</p>
             <h2 className="mt-3 font-display text-4xl font-light leading-tight tracking-tight sm:text-5xl">List free.<br />Sell on your terms.</h2>
             <p className="mt-6 max-w-md leading-relaxed text-black/60">
               Whether you're dealing with a probate inheritance, a pre-foreclosure, or a property that's become a
@@ -252,17 +260,21 @@ export default function LuxuryHome() {
       </section>
 
       {/* Final CTA */}
-      <section className="bg-black px-6 py-24 text-center text-white lg:px-12 lg:py-32">
-        <h2 className="mx-auto max-w-2xl font-display text-4xl font-light leading-tight tracking-tight sm:text-5xl">
-          Join the marketplace built for both sides of the deal.
-        </h2>
-        <div className="mt-10 flex flex-wrap justify-center gap-4">
-          <Link to="/listings" className="inline-flex items-center gap-3 rounded-sm bg-white px-7 py-4 text-[11px] uppercase tracking-[0.3em] text-black transition-colors hover:bg-black hover:text-white">
-            Browse inventory <ArrowRight className="h-4 w-4" />
-          </Link>
-          <Link to="/listings" className="inline-flex items-center gap-3 rounded-sm border border-white/40 px-7 py-4 text-[11px] uppercase tracking-[0.3em] text-white transition-colors hover:bg-white/10">
-            List your property
-          </Link>
+      <section className="relative overflow-hidden bg-black px-6 py-24 text-center text-white lg:px-12 lg:py-32">
+        <Image src={IMAGES.aerial} alt="" fittingType="fill" className="absolute inset-0 h-full w-full object-cover opacity-30" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/80" />
+        <div className="relative">
+          <h2 className="mx-auto max-w-2xl font-display text-4xl font-light leading-tight tracking-tight sm:text-5xl">
+            Join the marketplace built for both sides of the deal.
+          </h2>
+          <div className="mt-10 flex flex-wrap justify-center gap-4">
+            <Link to="/listings" className="inline-flex items-center gap-3 rounded-sm bg-white px-7 py-4 text-[11px] uppercase tracking-[0.3em] text-black transition-colors hover:bg-black hover:text-white">
+              Browse inventory <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link to="/listings" className="inline-flex items-center gap-3 rounded-sm border border-white/40 px-7 py-4 text-[11px] uppercase tracking-[0.3em] text-white transition-colors hover:bg-white/10">
+              List your property
+            </Link>
+          </div>
         </div>
       </section>
     </div>

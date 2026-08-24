@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { IMAGES } from "@/lib/luxury";
+import { Image } from "@/components/ui/image";
 import LuxuryListingCard from "@/components/luxury/LuxuryListingCard";
 import { DISTRESS_TYPES, labelFor } from "@/components/DistressBadge";
 import { Search, SlidersHorizontal } from "lucide-react";
@@ -46,8 +48,10 @@ export default function Listings() {
 
   return (
     <div>
-      <section className="border-b border-black/10 bg-black px-6 py-20 text-white lg:px-12 lg:py-28">
-        <div className="mx-auto max-w-[1400px]">
+      <section className="relative overflow-hidden border-b border-black/10 bg-black px-6 py-20 text-white lg:px-12 lg:py-28">
+        <Image src={IMAGES.aerial} alt="" fittingType="fill" className="absolute inset-0 h-full w-full object-cover opacity-25" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/85" />
+        <div className="relative mx-auto max-w-[1400px]">
           <p className="text-[11px] uppercase tracking-[0.4em] text-white/50">Distressed inventory</p>
           <h1 className="mt-5 font-display text-5xl font-light tracking-tight sm:text-6xl">Off-market properties, refreshed daily.</h1>
           <p className="mt-6 max-w-lg leading-relaxed text-white/60">

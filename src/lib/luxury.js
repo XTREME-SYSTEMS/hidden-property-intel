@@ -5,6 +5,10 @@ export const IMAGES = {
   penthouse: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/7bc2db482_generated_image.png",
   kitchen: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/b615fd174_generated_image.png",
   bedroom: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/cd8e1e116_generated_image.png",
+  estate: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/bd264d797_generated_image.png",
+  manor: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/567ae869d_generated_image.png",
+  interior: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/a9e94bf9c_generated_image.png",
+  aerial: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/14b8aad6b_generated_image.png",
 };
 
 export const ESTATES = [
