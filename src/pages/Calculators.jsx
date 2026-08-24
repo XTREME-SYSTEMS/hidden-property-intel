@@ -1,21 +1,22 @@
 import React from "react";
-import ROICalculator from "@/components/ROICalculator";
-import ExitStrategyModel from "@/components/ExitStrategyModel";
+import DealAnalyzer from "@/components/DealAnalyzer";
 
 export default function Calculators() {
   return (
-    <div className="mx-auto max-w-6xl px-6 py-14">
-      <h1 className="font-display text-3xl font-semibold tracking-tight">Investment calculators</h1>
-      <p className="mt-3 max-w-2xl text-[#6B7B72]">
-        Model any deal four ways — long-term rental, fix &amp; flip, wholesale assignment, or short-term rental.
-        Every output updates live as you type.
-      </p>
-      <div className="mt-9"><ROICalculator /></div>
-      <h2 className="mt-14 font-display text-2xl font-semibold tracking-tight">Exit-strategy model</h2>
-      <p className="mt-2 text-[#6B7B72]">Compare Flip, BRRRR, Buy &amp; Hold, and Wholesale on the same property.</p>
-      <div className="mt-6 rounded-3xl bg-white p-6 ring-1 ring-[#E5EDEA] sm:p-8">
-        <ExitStrategyModel />
-      </div>
+    <div className="bg-white">
+      <section className="bg-[#0a0a0a] px-6 py-16 text-white lg:px-12 lg:py-20">
+        <div className="mx-auto max-w-[1400px]">
+          <p className="text-[11px] uppercase tracking-[0.4em] text-[#c5a059]">Deal Analyzer</p>
+          <h1 className="mt-4 font-display text-4xl font-bold tracking-tight sm:text-5xl">Run the numbers.</h1>
+          <p className="mt-4 max-w-lg text-sm leading-relaxed text-white/60">
+            Model any distressed deal in real time. Every metric updates live as you type — ROI, cash-on-cash, projected profit, and annualized returns.
+          </p>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-[1400px] px-6 py-10 lg:px-12 lg:py-14">
+        <DealAnalyzer />
+      </section>
     </div>
   );
 }

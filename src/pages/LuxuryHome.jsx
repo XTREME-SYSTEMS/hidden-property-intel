@@ -60,7 +60,7 @@ function QuickAction({ icon: Icon, label, to }) {
 export default function LuxuryHome() {
   const [featured, setFeatured] = useState([]);
   useEffect(() => {
-    base44.entities.Property.filter({ status: "active", is_featured: true }, "-property_score", 6).then(setFeatured).catch(() => {});
+    base44.entities.Property.filter({ status: "active", is_featured: true }, "-property_score", 4).then(setFeatured).catch(() => {});
   }, []);
 
   return (
@@ -70,32 +70,29 @@ export default function LuxuryHome() {
         <Image src={IMAGES.estate} alt="Hidden Property Intel" fittingType="fill" className="absolute inset-0 h-full w-full object-cover opacity-80" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/85" />
         <div className="relative mx-auto flex h-full max-w-[1400px] flex-col justify-end px-6 pb-28 pt-36 lg:justify-center lg:px-12 lg:pb-20 lg:pt-24">
-          <p className="text-[10px] uppercase tracking-[0.45em] text-gold-warm sm:text-[11px]">Hidden Property Intel · Find what others miss.</p>
-          <h1 className="mt-5 max-w-3xl font-display text-[2.6rem] font-normal leading-[1.02] tracking-[-0.02em] text-white sm:mt-6 sm:text-5xl lg:text-6xl lg:font-light">
-            Distressed properties,<br />
-            <span className="text-gold-warm">serious investors.</span>
+          <p className="text-[10px] uppercase tracking-[0.45em] text-[#c5a059] sm:text-[11px]">Hidden Property Intel</p>
+          <h1 className="mt-5 max-w-3xl font-display text-[2.8rem] font-bold leading-[1.02] tracking-[-0.02em] text-white sm:mt-6 sm:text-5xl lg:text-6xl">
+            FIND WHAT<br />OTHERS MISS.
           </h1>
-          <p className="mt-6 max-w-md text-[15px] leading-relaxed text-white/75 sm:mt-7 sm:text-base">
-            Off-market deals, AI-scored and ready to close — before they ever reach the MLS.
+          <p className="mt-5 max-w-md text-[15px] font-medium leading-relaxed text-[#c5a059] sm:mt-6 sm:text-base">
+            Off-Market. Distressed. Profitable.
+          </p>
+          <p className="mt-3 max-w-md text-sm leading-relaxed text-white/60 sm:text-base">
+            AI-scored distressed properties, ready to close — before they ever reach the MLS.
           </p>
           <div className="mt-9 flex flex-wrap gap-3 sm:gap-4">
-            <Link to="/listings" className="group inline-flex items-center gap-2.5 rounded-md bg-white px-6 py-3.5 font-brand text-[11px] font-semibold uppercase tracking-[0.22em] text-black transition-all duration-200 hover:bg-gold-warm hover:text-black sm:px-7 sm:py-4 sm:tracking-[0.25em]">
-              Browse inventory
+            <Link to="/listings" className="group inline-flex items-center gap-2.5 rounded-md bg-[#c5a059] px-6 py-3.5 font-brand text-[11px] font-semibold uppercase tracking-[0.22em] text-[#0a0a0a] transition-all duration-200 hover:bg-[#c5a059]/90 sm:px-7 sm:py-4 sm:tracking-[0.25em]">
+              I'm an Investor
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
-            <Link to="/seller/post-property" className="inline-flex items-center gap-2.5 rounded-md border border-white/30 px-6 py-3.5 font-brand text-[11px] font-semibold uppercase tracking-[0.22em] text-white backdrop-blur-sm transition-all duration-200 hover:border-white/60 hover:bg-white/10 sm:px-7 sm:py-4 sm:tracking-[0.25em]">
-              List — it's free
+            <Link to="/seller/post-property" className="inline-flex items-center gap-2.5 rounded-md border border-white/30 px-6 py-3.5 font-brand text-[11px] font-semibold uppercase tracking-[0.22em] text-white backdrop-blur-sm transition-all duration-200 hover:border-[#c5a059] hover:text-[#c5a059] sm:px-7 sm:py-4 sm:tracking-[0.25em]">
+              I'm a Seller
             </Link>
           </div>
-          <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-[10px] uppercase tracking-[0.2em] text-white/45">
-            <span className="flex items-center gap-1.5"><Scale className="h-3.5 w-3.5 text-gold-warm" /> Proxy bidding</span>
-            <span className="flex items-center gap-1.5"><FileSignature className="h-3.5 w-3.5 text-gold-warm" /> On-chain escrow</span>
-            <span className="flex items-center gap-1.5"><Brain className="h-3.5 w-3.5 text-gold-warm" /> AI negotiation</span>
-          </div>
           <dl className="mt-10 grid max-w-3xl grid-cols-2 gap-6 border-t border-white/10 pt-6 sm:mt-14 sm:grid-cols-4 sm:gap-8 sm:pt-8">
-            {[["12,847", "Properties tracked"], ["$340M", "In property value"], ["1,200+", "Active investors"], ["1,400+", "Deals closed"]].map(([v, l]) => (
+            {[["12,847", "Active Properties"], ["1,200+", "Verified Investors"], ["1,400+", "Deals Closed"], ["$340M", "Total Value"]].map(([v, l]) => (
               <div key={l}>
-                <dd className="font-display text-2xl font-light tabular-nums sm:text-3xl">{v}</dd>
+                <dd className="font-display text-2xl font-light tabular-nums text-[#c5a059] sm:text-3xl">{v}</dd>
                 <dt className="mt-1 text-[10px] uppercase tracking-[0.3em] text-white/50">{l}</dt>
               </div>
             ))}
@@ -191,16 +188,16 @@ export default function LuxuryHome() {
       <section className="mx-auto max-w-[1400px] px-6 py-24 lg:px-12 lg:py-32">
         <div className="flex items-end justify-between border-b border-black/10 pb-6">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.4em] text-black/40">Featured inventory</p>
-            <h2 className="mt-3 font-display text-3xl font-light tracking-tight sm:text-4xl">Fresh distressed opportunities</h2>
+            <p className="text-[11px] uppercase tracking-[0.4em] text-[#c5a059]">Featured Opportunities</p>
+            <h2 className="mt-3 font-display text-3xl font-bold tracking-tight sm:text-4xl">Fresh distressed deals.</h2>
           </div>
-          <Link to="/listings" className="hidden items-center gap-2 text-[11px] uppercase tracking-[0.3em] hover:text-black/60 sm:flex">
+          <Link to="/listings" className="hidden items-center gap-2 text-[11px] uppercase tracking-[0.3em] hover:text-[#c5a059] sm:flex">
             All properties <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
-        <div className="mt-10 grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
           {featured.map((p) => <LuxuryListingCard key={p.id} property={p} />)}
-          {!featured.length && <p className="text-sm text-black/50">Loading inventory…</p>}
+          {!featured.length && <p className="text-sm text-[#707070]">Loading inventory…</p>}
         </div>
       </section>
 

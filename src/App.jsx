@@ -12,6 +12,8 @@ import LuxuryHome from '@/pages/LuxuryHome';
 import Listings from '@/pages/Listings';
 import PropertyDetail from '@/pages/PropertyDetail';
 import Calculators from '@/pages/Calculators';
+import MapSearch from '@/pages/MapSearch';
+import SavedProperties from '@/pages/SavedProperties';
 import Bidding from '@/pages/Bidding';
 import InvestorSignup from '@/pages/InvestorSignup';
 import InvestorDashboard from '@/pages/InvestorDashboard';
@@ -68,11 +70,13 @@ const AuthenticatedApp = () => {
         <Route path="/properties/:id" element={<PropertyDetail />} />
         <Route path="/properties/:id/bid" element={<Bidding />} />
         <Route path="/calculators" element={<Calculators />} />
+        <Route path="/map" element={<MapSearch />} />
         <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
           <Route path="/investor/signup" element={<InvestorSignup />} />
           <Route path="/investor/dashboard" element={<InvestorDashboard />} />
           <Route path="/investor/pipeline" element={<InvestorPipeline />} />
           <Route path="/alerts" element={<Alerts />} />
+          <Route path="/saved" element={<SavedProperties />} />
           <Route path="/seller/dashboard" element={<SellerDashboard />} />
           <Route path="/seller/post-property" element={<SellerPostProperty />} />
           <Route path="/seller/negotiation/:propertyId" element={<NegotiationChat />} />

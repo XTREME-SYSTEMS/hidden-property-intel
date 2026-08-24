@@ -8,32 +8,32 @@ export default function LuxuryListingCard({ property }) {
   const img = property.images?.[0]?.url;
   return (
     <Link to={`/properties/${property.id}`} className="group block">
-      <div className="relative aspect-[4/5] overflow-hidden bg-black">
+      <div className="relative aspect-[4/5] overflow-hidden bg-[#121212]">
         {img ? (
           <Image src={img} fittingType="fill" alt={property.address} className="h-full w-full object-cover opacity-90 transition-transform duration-[1200ms] ease-out group-hover:scale-105" />
         ) : (
           <div className="grid h-full place-items-center text-[10px] uppercase tracking-[0.3em] text-white/40">No image</div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-        <span className="absolute left-4 top-4 rounded-sm bg-white/90 px-2.5 py-1 text-[9px] uppercase tracking-[0.25em] text-black backdrop-blur">
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
+        <span className="absolute left-3 top-3 rounded-full bg-[#c5a059] px-2.5 py-1 text-[9px] font-medium uppercase tracking-[0.15em] text-[#0a0a0a]">
           {labelFor(property.distress_type)}
         </span>
-        <span className="absolute right-4 top-4 rounded-sm bg-black/70 px-2.5 py-1 text-[9px] uppercase tracking-[0.25em] text-white backdrop-blur tabular-nums">
-          Score {Math.round(property.property_score || 0)}
+        <span className="absolute right-3 top-3 rounded-full bg-[#0a0a0a]/80 px-2.5 py-1 text-[9px] font-medium uppercase tracking-[0.15em] text-[#c5a059] tabular-nums backdrop-blur">
+          HPI {Math.round(property.property_score || 0)}
         </span>
-        <div className="absolute bottom-4 left-4 right-4 text-white">
-          <p className="font-display text-lg leading-tight tracking-tight">{property.city}, {property.state}</p>
-          <p className="mt-1 text-[10px] uppercase tracking-[0.25em] text-white/60">{labelFor(property.distress_type)} · {property.zip_code}</p>
+        <div className="absolute bottom-3 left-3 right-3 text-white">
+          <p className="font-display text-base leading-tight tracking-tight">{property.city}, {property.state}</p>
+          <p className="mt-0.5 text-[9px] uppercase tracking-[0.2em] text-white/50">{property.zip_code}</p>
         </div>
       </div>
-      <div className="mt-4 flex items-baseline justify-between">
+      <div className="mt-3 flex items-baseline justify-between">
         <div>
-          <p className="text-[9px] uppercase tracking-[0.3em] text-black/40">Asking</p>
-          <p className="font-display text-xl tabular-nums">{money(property.proposed_asking_price)}</p>
+          <p className="text-[9px] uppercase tracking-[0.25em] text-[#707070]">Asking</p>
+          <p className="font-display text-lg tabular-nums">{money(property.proposed_asking_price)}</p>
         </div>
         <div className="text-right">
-          <p className="text-[9px] uppercase tracking-[0.3em] text-black/40">Est. value</p>
-          <p className="text-sm tabular-nums text-black/60">{money(property.estimated_value)}</p>
+          <p className="text-[9px] uppercase tracking-[0.25em] text-[#707070]">Est. value</p>
+          <p className="text-sm tabular-nums text-[#707070]">{money(property.estimated_value)}</p>
         </div>
       </div>
     </Link>

@@ -13,6 +13,7 @@ export default function LuxNav() {
 
   const links = [
     { label: "Inventory", to: "/listings" },
+    { label: "Map", to: "/map" },
     { label: "For Investors", href: "/#investors" },
     { label: "For Sellers", href: "/#sellers" },
     { label: "Calculators", to: "/calculators" },
