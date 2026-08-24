@@ -1,0 +1,53 @@
+{
+  "name": "Bid",
+  "type": "object",
+  "properties": {
+    "property_id": {
+      "type": "string"
+    },
+    "investor_id": {
+      "type": "string"
+    },
+    "investor_name": {
+      "type": "string"
+    },
+    "bid_amount": {
+      "type": "number"
+    },
+    "bid_type": {
+      "type": "string",
+      "enum": [
+        "initial",
+        "counter",
+        "proxy"
+      ],
+      "default": "initial"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "accepted",
+        "rejected",
+        "outbid",
+        "withdrawn"
+      ],
+      "default": "active"
+    },
+    "is_proxy_bid": {
+      "type": "boolean",
+      "default": false
+    },
+    "max_proxy_amount": {
+      "type": "number"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "property_id",
+    "bid_amount"
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "name": "PropertyScore",
+  "type": "object",
+  "properties": {
+    "property_id": {
+      "type": "string"
+    },
+    "overall_score": {
+      "type": "number"
+    },
+    "distress_severity": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ]
+    },
+    "repair_cost_estimate": {
+      "type": "number"
+    },
+    "after_repair_value": {
+      "type": "number"
+    },
+    "estimated_roi": {
+      "type": "number"
+    },
+    "comparable_sales": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "sale_price": {
+            "type": "number"
+          },
+          "sale_date": {
+            "type": "string"
+          },
+          "sqft": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "score_factors": {
+      "type": "object",
+      "properties": {
+        "equity": {
+          "type": "number"
+        },
+        "distress_level": {
+          "type": "number"
+        },
+        "location_score": {
+          "type": "number"
+        },
+        "market_trend": {
+          "type": "number"
+        },
+        "repair_cost_ratio": {
+          "type": "number"
+        }
+      }
+    },
+    "ai_analysis": {
+      "type": "string"
+    },
+    "scored_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "model_version": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "property_id"
+  ]
+}

@@ -1,0 +1,137 @@
+{
+  "name": "Property",
+  "type": "object",
+  "properties": {
+    "address": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "zip_code": {
+      "type": "string"
+    },
+    "lat": {
+      "type": "number"
+    },
+    "lng": {
+      "type": "number"
+    },
+    "property_type": {
+      "type": "string",
+      "enum": [
+        "residential",
+        "commercial",
+        "land",
+        "multi-family",
+        "mixed-use"
+      ],
+      "default": "residential"
+    },
+    "distress_type": {
+      "type": "string",
+      "enum": [
+        "pre-foreclosure",
+        "foreclosure",
+        "probate_inherited",
+        "tax_delinquent",
+        "code_violation",
+        "divorce",
+        "bankruptcy",
+        "auction",
+        "short_sale",
+        "bank_owned"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "under_contract",
+        "closed",
+        "expired",
+        "draft"
+      ],
+      "default": "active"
+    },
+    "estimated_value": {
+      "type": "number"
+    },
+    "proposed_asking_price": {
+      "type": "number"
+    },
+    "property_score": {
+      "type": "number"
+    },
+    "square_footage": {
+      "type": "number"
+    },
+    "bedrooms": {
+      "type": "number"
+    },
+    "bathrooms": {
+      "type": "number"
+    },
+    "year_built": {
+      "type": "number"
+    },
+    "lot_size": {
+      "type": "number"
+    },
+    "description": {
+      "type": "string"
+    },
+    "seller_id": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "scraped",
+        "user_submitted",
+        "mls_import"
+      ],
+      "default": "scraped"
+    },
+    "source_url": {
+      "type": "string"
+    },
+    "scraped_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "days_on_market": {
+      "type": "number"
+    },
+    "images": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "caption": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "is_featured": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "address",
+    "city",
+    "state",
+    "zip_code"
+  ]
+}

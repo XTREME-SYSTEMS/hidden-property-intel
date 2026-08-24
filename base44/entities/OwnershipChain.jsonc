@@ -1,0 +1,42 @@
+{
+  "name": "OwnershipChain",
+  "type": "object",
+  "properties": {
+    "property_id": {
+      "type": "string"
+    },
+    "transfers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "from_owner": {
+            "type": "string"
+          },
+          "to_owner": {
+            "type": "string"
+          },
+          "transfer_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "transfer_type": {
+            "type": "string"
+          },
+          "sale_price": {
+            "type": "number"
+          },
+          "document_url": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "property_id"
+  ]
+}

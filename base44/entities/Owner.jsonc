@@ -1,0 +1,51 @@
+{
+  "name": "Owner",
+  "type": "object",
+  "properties": {
+    "property_id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "owner_type": {
+      "type": "string",
+      "enum": [
+        "current",
+        "previous",
+        "potential_heir"
+      ],
+      "default": "current"
+    },
+    "contact_phone": {
+      "type": "string"
+    },
+    "contact_email": {
+      "type": "string"
+    },
+    "contact_address": {
+      "type": "string"
+    },
+    "relationship_to_property": {
+      "type": "string"
+    },
+    "acquired_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "ownership_percentage": {
+      "type": "number"
+    },
+    "is_verified": {
+      "type": "boolean",
+      "default": false
+    },
+    "source": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "property_id",
+    "name"
+  ]
+}
