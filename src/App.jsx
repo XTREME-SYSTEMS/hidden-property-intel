@@ -10,6 +10,8 @@ import ScrollToTop from './components/ScrollToTop';
 import LuxLayout from '@/components/luxury/LuxLayout';
 import LuxuryHome from '@/pages/LuxuryHome';
 import Listings from '@/pages/Listings';
+import PropertyDetail from '@/pages/PropertyDetail';
+import Calculators from '@/pages/Calculators';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -40,6 +42,8 @@ const AuthenticatedApp = () => {
       <Route element={<LuxLayout />}>
         <Route path="/" element={<LuxuryHome />} />
         <Route path="/listings" element={<Listings />} />
+        <Route path="/properties/:id" element={<PropertyDetail />} />
+        <Route path="/calculators" element={<Calculators />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

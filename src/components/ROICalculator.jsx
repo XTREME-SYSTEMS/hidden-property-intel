@@ -5,7 +5,7 @@ function Field({ label, value, onChange, suffix }) {
   return (
     <label className="block">
       <span className="text-xs uppercase tracking-widest text-[#6B7B72]">{label}</span>
-      <div className="mt-1.5 flex items-center rounded-xl bg-white ring-1 ring-[#E5EDEA] focus-within:ring-2 focus-within:ring-emerald-400">
+      <div className="mt-1.5 flex items-center rounded-xl bg-white ring-1 ring-[#E5EDEA] focus-within:ring-2 focus-within:ring-black">
         <input
           type="number"
           value={value}
@@ -20,8 +20,8 @@ function Field({ label, value, onChange, suffix }) {
 
 function Out({ label, value }) {
   return (
-    <div className="rounded-xl bg-[#0F2A1D] p-4 text-white">
-      <p className="text-[10px] uppercase tracking-widest text-emerald-300">{label}</p>
+    <div className="rounded-xl bg-black p-4 text-white">
+      <p className="text-[10px] uppercase tracking-widest text-white/60">{label}</p>
       <p className="mt-1 text-xl font-semibold tabular-nums">{value}</p>
     </div>
   );
@@ -92,7 +92,7 @@ export default function ROICalculator({ defaultPrice = 250000, defaultRepairs = 
             key={t}
             onClick={() => setTab(i)}
             className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${
-              tab === i ? "bg-[#0F2A1D] text-white" : "bg-white text-[#1A2B22] ring-1 ring-[#E5EDEA] hover:bg-[#E5EDEA]"
+              tab === i ? "bg-black text-white" : "bg-white text-[#1A2B22] ring-1 ring-[#E5EDEA] hover:bg-[#E5EDEA]"
             }`}
           >
             {t}

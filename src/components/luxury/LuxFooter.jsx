@@ -1,30 +1,31 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import Logo from "@/components/luxury/Logo";
 
 export default function LuxFooter() {
+  const cols = [
+    { h: "Explore", items: [["Inventory", "/listings"], ["How it works", "/"], ["ROI calculators", "/calculators"], ["Market data", "/listings"]] },
+    { h: "For Investors", items: [["Browse inventory", "/listings"], ["Pricing", "/#investors"], ["Smart contracts", "/listings"], ["Ownership chains", "/listings"]] },
+    { h: "For Sellers", items: [["List your property", "/listings"], ["AI pricing", "/#sellers"], ["Negotiation assistant", "/#sellers"], ["No commissions", "/#sellers"]] },
+    { h: "Company", items: [["About", "/"], ["Concierge", "/"], ["Press", "/"], ["Contact", "/"]] },
+  ];
   return (
     <footer className="bg-black text-white">
       <div className="mx-auto max-w-[1400px] px-6 py-20 lg:px-12">
-        <div className="grid gap-12 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
+        <div className="grid gap-12 lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr]">
           <div>
-            <div className="flex items-center gap-3">
-              <span className="grid h-9 w-9 place-items-center rounded-sm bg-white text-xs font-semibold tracking-widest text-black">P</span>
-              <span className="text-sm font-medium uppercase tracking-[0.3em]">PropertyIntel</span>
-            </div>
+            <Logo variant="light" />
             <p className="mt-6 max-w-xs text-sm leading-relaxed text-white/50">
-              A private collection of the world's most extraordinary residences, curated for the discerning few.
+              The marketplace where distressed sellers meet serious investors — backed by AI pricing, ownership-chain
+              intelligence, and on-chain escrow.
             </p>
           </div>
-          {[
-            { h: "Explore", items: ["Residences", "Portfolio", "Collections", "Journal"] },
-            { h: "Company", items: ["About", "Advisory", "Press", "Careers"] },
-            { h: "Connect", items: ["Enquire", "Concierge", "Newsletter", "Contact"] },
-          ].map((c) => (
+          {cols.map((c) => (
             <div key={c.h}>
               <p className="text-[10px] uppercase tracking-[0.3em] text-white/40">{c.h}</p>
               <ul className="mt-6 space-y-3">
-                {c.items.map((i) => (
-                  <li key={i}><Link to="/listings" className="text-sm text-white/70 transition-colors hover:text-white">{i}</Link></li>
+                {c.items.map(([label, to]) => (
+                  <li key={label}><Link to={to} className="text-sm text-white/70 transition-colors hover:text-white">{label}</Link></li>
                 ))}
               </ul>
             </div>

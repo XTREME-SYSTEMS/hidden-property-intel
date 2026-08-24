@@ -68,7 +68,7 @@ export default function PropertyDetail() {
     return (
       <div className="mx-auto max-w-7xl px-6 py-24">
         <p className="font-display text-2xl">Property not found</p>
-        <Link to="/properties" className="mt-4 inline-block text-sm text-emerald-700">← Back to search</Link>
+        <Link to="/listings" className="mt-4 inline-block text-sm text-emerald-700">← Back to search</Link>
       </div>
     );
   }
@@ -85,7 +85,7 @@ export default function PropertyDetail() {
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-10">
-      <Link to="/properties" className="inline-flex items-center gap-1.5 text-sm text-[#6B7B72] hover:text-[#1A2B22]">
+      <Link to="/listings" className="inline-flex items-center gap-1.5 text-sm text-[#6B7B72] hover:text-[#1A2B22]">
         <ArrowLeft className="h-4 w-4" /> Back to search
       </Link>
 
@@ -118,7 +118,7 @@ export default function PropertyDetail() {
         </div>
         <div className="flex items-center gap-5">
           <ScoreGauge score={property.property_score || 0} size={72} label="AI score" />
-          <Link to="/properties" className="rounded-full bg-emerald-500 px-6 py-3.5 text-sm font-medium text-white hover:bg-emerald-600">
+          <Link to="/listings" className="rounded-full bg-emerald-500 px-6 py-3.5 text-sm font-medium text-white hover:bg-emerald-600">
             Place a bid
           </Link>
         </div>
