@@ -2,9 +2,12 @@ import React from "react";
 
 export function Mark({ className = "h-8 w-8" }) {
   return (
-    <svg viewBox="0 0 40 40" className={className} fill="none" stroke="currentColor" aria-hidden="true">
-      <rect x="7.5" y="7.5" width="25" height="25" rx="2" transform="rotate(45 20 20)" strokeWidth="1.5" />
-      <rect x="14.5" y="14.5" width="11" height="11" rx="1" transform="rotate(45 20 20)" fill="currentColor" stroke="none" />
+    <svg viewBox="0 0 40 40" className={className} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" strokeLinecap="round" aria-hidden="true">
+      <path d="M4 19 L13 9 L22 19" />
+      <path d="M7 19 L7 33 L19 33 L19 19" />
+      <path d="M11 33 L11 26 L15 26 L15 33" />
+      <path d="M23 33 L23 14 L34 14 L34 33" />
+      <path d="M26 19 L26 21 M31 19 L31 21 M26 24 L26 26 M31 24 L31 26" />
     </svg>
   );
 }
