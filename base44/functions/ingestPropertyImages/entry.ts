@@ -14,12 +14,12 @@ import { fetchPropertyImages, hasRealImages } from '../../shared/propertyImages.
  * - Validates each URL is reachable and is an image (HEAD/GET check)
  * - No AI-generated images — only real scraped photos
  *
- * Runs every 2 hours via the Property Image Ingestion workflow.
- * Processes 3 properties per run to stay within serverless time limits.
+ * Runs every 30 minutes via the Property Image Ingestion workflow.
+ * Processes 6 properties per run (time-safety valve prevents timeouts).
  */
 
-const BATCH_SIZE = 3;
-const SCAN_SIZE = 50;
+const BATCH_SIZE = 6;
+const SCAN_SIZE = 100;
 const TIME_LIMIT_MS = 250000;
 
 export default async function(req) {

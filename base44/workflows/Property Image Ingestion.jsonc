@@ -1,6 +1,6 @@
 {
   "name": "Property Image Ingestion",
-  "description": "Every 2 hours: scans all properties missing real photos, fetches real listing images from the web using the property address, validates they are real reachable images, and stores them in property.images. No AI images.",
+  "description": "Every 30 minutes: scans all properties missing real photos, fetches real listing images from the web using the property address, validates they are real reachable images, and stores them in property.images. No AI images.",
   "definition": {
     "document": {
       "dsl": "1.0.0",
@@ -30,7 +30,7 @@
       "trigger_type": "scheduled",
       "events": [],
       "schedule_mode": "recurring",
-      "cron_expression": "30 */2 * * *",
+      "cron_expression": "*/30 * * * *",
       "one_time_date": null,
       "timezone": "America/New_York",
       "interval_value": null,
