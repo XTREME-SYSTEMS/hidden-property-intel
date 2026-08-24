@@ -22,6 +22,15 @@
     --accent-foreground: 0 0% 5%;
     --silver: 0 0% 72%;
     --silver-soft: 0 0% 88%;
+    --gold: 42 81% 46%;
+    --gold-soft: 42 76% 58%;
+    --gold-warm: 42 86% 66%;
+    --charcoal: 0 0% 9%;
+    --ink: 0 0% 4%;
+    --off-white: 60 11% 96%;
+    --light-surface: 60 11% 93%;
+    --muted-text: 60 2% 41%;
+    --brand-border: 60 7% 84%;
     --destructive: 0 0% 5%;
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 90%;

@@ -13,11 +13,13 @@ export default function PropertyBrief({ property, score, owners = [], chain, bid
     const h = (t, size = 16) => { doc.setFont("helvetica", "bold"); doc.setFontSize(size); doc.text(t, left, y); y += size + 6; };
     const p = (t, size = 10) => { doc.setFont("helvetica", "normal"); doc.setFontSize(size); doc.text(String(t), left, y, { maxWidth: 500 }); y += 14; };
 
-    doc.setFillColor(15, 42, 29); doc.rect(0, 0, 612, 70, "F");
+    doc.setFillColor(10, 10, 10); doc.rect(0, 0, 612, 70, "F");
+    doc.setFillColor(212, 154, 22); doc.rect(0, 70, 612, 3, "F");
     doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(20);
     doc.text("HIDDEN PROPERTY INTEL", left, 44);
     doc.setFontSize(9); doc.setFont("helvetica", "normal");
-    doc.text("Investor Brief — confidential", 612 - left - 150, 44);
+    doc.setTextColor(212, 154, 22);
+    doc.text("Find what others miss.", 612 - left - 110, 44);
     doc.setTextColor(20, 20, 20);
 
     y = 100;
@@ -72,7 +74,7 @@ export default function PropertyBrief({ property, score, owners = [], chain, bid
   return (
     <button
       onClick={generate}
-      className="inline-flex items-center gap-2 rounded-full bg-[#0F2A1D] px-5 py-2.5 text-sm text-white hover:bg-[#1A2B22]"
+      className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm text-white hover:bg-charcoal"
     >
       <Download className="h-4 w-4" /> Download investor brief
     </button>

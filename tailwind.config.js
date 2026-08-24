@@ -48,6 +48,17 @@ module.exports = {
   				DEFAULT: 'hsl(var(--silver))',
   				soft: 'hsl(var(--silver-soft))'
   			},
+  			gold: {
+  				DEFAULT: 'hsl(var(--gold))',
+  				soft: 'hsl(var(--gold-soft))',
+  				warm: 'hsl(var(--gold-warm))'
+  			},
+  			charcoal: 'hsl(var(--charcoal))',
+  			ink: 'hsl(var(--ink))',
+  			'off-white': 'hsl(var(--off-white))',
+  			'light-surface': 'hsl(var(--light-surface))',
+  			'muted-text': 'hsl(var(--muted-text))',
+  			'brand-border': 'hsl(var(--brand-border))',
   			chart: {
   				'1': 'hsl(var(--chart-1))',
   				'2': 'hsl(var(--chart-2))',

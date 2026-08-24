@@ -14,7 +14,8 @@ export default function LuxFooter() {
       <div className="mx-auto max-w-[1400px] px-6 py-20 lg:px-12">
         <div className="grid gap-12 lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr]">
           <div>
-            <Logo variant="light" />
+            <Logo variant="light" className="h-10 w-auto" />
+            <p className="mt-4 text-[10px] uppercase tracking-[0.3em] text-gold">Find what others miss.</p>
             <p className="mt-6 max-w-xs text-sm leading-relaxed text-white/50">
               The marketplace where distressed sellers meet serious investors — backed by AI pricing, ownership-chain
               intelligence, and on-chain escrow.
@@ -33,7 +34,7 @@ export default function LuxFooter() {
         </div>
         <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 text-[11px] uppercase tracking-[0.2em] text-white/40 sm:flex-row">
           <span>© {new Date().getFullYear()} Hidden Property Intel. All rights reserved.</span>
-          <span>Black · White · Silver</span>
+          <span>Black · Gold · White</span>
         </div>
       </div>
     </footer>

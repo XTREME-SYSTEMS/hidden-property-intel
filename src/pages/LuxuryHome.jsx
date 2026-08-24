@@ -55,7 +55,7 @@ export default function LuxuryHome() {
         <Image src={IMAGES.estate} alt="Hidden Property Intel" fittingType="fill" className="absolute inset-0 h-full w-full object-cover opacity-80" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/80" />
         <div className="relative mx-auto flex h-full max-w-[1400px] flex-col justify-center px-6 pt-24 pb-20 lg:px-12">
-          <p className="text-[11px] uppercase tracking-[0.4em] text-white/60">Hidden Property Intel · The distressed property marketplace</p>
+          <p className="text-[11px] uppercase tracking-[0.4em] text-gold-warm">Hidden Property Intel · Find what others miss.</p>
           <h1 className="mt-6 max-w-3xl font-display text-4xl font-light leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl">
             Distressed properties,<br />serious investors.
           </h1>

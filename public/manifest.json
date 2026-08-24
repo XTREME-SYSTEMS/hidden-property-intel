@@ -1,20 +1,29 @@
 {
-  "name": "Hidden Property Intel — Distressed & Luxury Property Intelligence",
-  "short_name": "Hidden Property Intel",
-  "description": "AI-powered marketplace to discover, score, and trade distressed and luxury real estate with smart-contract escrow.",
+  "name": "Hidden Property Intel",
+  "short_name": "HPI",
+  "description": "Discover deeper property intelligence, hard-to-find records, ownership insights, opportunity signals, and investment data beyond the traditional listing.",
   "start_url": "/",
-  "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
-  "categories": ["business", "finance", "productivity"],
+  "background_color": "#FFFFFF",
+  "theme_color": "#D49A16",
   "icons": [
     {
-      "src": "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/cc03bd7b0_generated_image.png",
-      "sizes": "192x192 512x512",
+      "src": "https://base44.app/api/apps/6a8ba268665196e93b7d57f7/files/mp/public/6a8ba268665196e93b7d57f7/889c98886_android-chrome-192x192.png",
+      "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "https://base44.app/api/apps/6a8ba268665196e93b7d57f7/files/mp/public/6a8ba268665196e93b7d57f7/028133fcd_android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://base44.app/api/apps/6a8ba268665196e93b7d57f7/files/mp/public/6a8ba268665196e93b7d57f7/ee11aa82f_favicon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

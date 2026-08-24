@@ -1,39 +1,45 @@
 import React from "react";
 
+const ASSETS = {
+  // variant="dark" = dark text on light background
+  dark: {
+    src768: "https://base44.app/api/apps/6a8ba268665196e93b7d57f7/files/mp/public/6a8ba268665196e93b7d57f7/54c549333_logo-header-768w.png",
+    src512: "https://base44.app/api/apps/6a8ba268665196e93b7d57f7/files/mp/public/6a8ba268665196e93b7d57f7/cfd8c45f3_logo-header-512w.png",
+    src320: "https://base44.app/api/apps/6a8ba268665196e93b7d57f7/files/mp/public/6a8ba268665196e93b7d57f7/cb2dc7ec7_logo-header-320w.png",
+  },
+  // variant="light" = light text on dark background
+  light: {
+    src768: "https://base44.app/api/apps/6a8ba268665196e93b7d57f7/files/mp/public/6a8ba268665196e93b7d57f7/3a14fe095_logo-header-dark-768w.png",
+    src512: "https://base44.app/api/apps/6a8ba268665196e93b7d57f7/files/mp/public/6a8ba268665196e93b7d57f7/ba9012e33_logo-header-dark-512w.png",
+    src320: "https://base44.app/api/apps/6a8ba268665196e93b7d57f7/files/mp/public/6a8ba268665196e93b7d57f7/d115f1924_logo-header-dark-320w.png",
+  },
+  icon: "https://base44.app/api/apps/6a8ba268665196e93b7d57f7/files/mp/public/6a8ba268665196e93b7d57f7/96fd67272_logo-icon-128.png",
+};
+
 export function Mark({ className = "h-8 w-8" }) {
-  return (
-    <svg viewBox="0 0 40 40" className={className} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" strokeLinecap="round" aria-hidden="true">
-      <path d="M4 19 L13 9 L22 19" />
-      <path d="M7 19 L7 33 L19 33 L19 19" />
-      <path d="M11 33 L11 26 L15 26 L15 33" />
-      <path d="M23 33 L23 14 L34 14 L34 33" />
-      <path d="M26 19 L26 21 M31 19 L31 21 M26 24 L26 26 M31 24 L31 26" />
-    </svg>
-  );
+  return <img src={ASSETS.icon} alt="" className={className} />;
 }
 
-function Spread({ word }) {
+export default function Logo({ variant = "dark", compact = false, className = "", style = {} }) {
+  if (compact) {
+    return (
+      <img
+        src={ASSETS.icon}
+        alt="Hidden Property Intel"
+        className={className}
+        style={{ objectFit: "contain", ...style }}
+      />
+    );
+  }
+  const s = ASSETS[variant] || ASSETS.dark;
   return (
-    <span className="flex w-full justify-between">
-      {word.split("").map((c, i) => (
-        <span key={i}>{c}</span>
-      ))}
-    </span>
-  );
-}
-
-export default function Logo({ variant = "dark", className = "" }) {
-  const ink = variant === "light" ? "text-white" : "text-black";
-  return (
-    <div className={`flex items-center gap-3 ${ink} ${className}`}>
-      <Mark className="h-8 w-8 shrink-0" />
-      <div className="w-[7.5rem] text-[11px] font-medium uppercase leading-none">
-        <Spread word="Hidden" />
-        <div className="h-[2px]" />
-        <Spread word="Property" />
-        <div className="h-[2px]" />
-        <Spread word="Intel" />
-      </div>
-    </div>
+    <img
+      src={s.src768}
+      srcSet={`${s.src320} 320w, ${s.src512} 512w, ${s.src768} 768w`}
+      sizes="(max-width: 768px) 320px, (max-width: 1024px) 512px, 768px"
+      alt="Hidden Property Intel"
+      className={className}
+      style={{ objectFit: "contain", ...style }}
+    />
   );
 }

@@ -10,7 +10,7 @@ export default function ScoreGauge({ score = 0, size = 56, label }) {
     <div className="inline-flex flex-col items-center gap-1">
       <div className="relative" style={{ width: size, height: size }}>
         <svg width={size} height={size} className="-rotate-90">
-          <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#E5EDEA" strokeWidth="5" />
+          <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#EFEFEB" strokeWidth="5" />
           <circle
             cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth="5"
             strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - pct)}
@@ -24,7 +24,7 @@ export default function ScoreGauge({ score = 0, size = 56, label }) {
           {Math.round(score)}
         </span>
       </div>
-      {label && <span className="text-[10px] uppercase tracking-widest text-[#6B7B72]">{label}</span>}
+      {label && <span className="text-[10px] uppercase tracking-widest text-muted-text">{label}</span>}
     </div>
   );
 }
