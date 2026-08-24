@@ -32,52 +32,52 @@ export default function MobileNav() {
   return (
     <>
       <nav
-        className="fixed bottom-0 left-0 right-0 z-40 border-t border-black/10 bg-white/95 backdrop-blur-xl lg:hidden"
+        className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-white border-t border-black/[0.06] shadow-[0_-1px_24px_rgba(0,0,0,0.05)]"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
-        <div className="grid grid-cols-5 h-16">
+        <div className="grid grid-cols-5 h-[58px]">
           {tabs.map((tab) => {
             const active = isActive(tab.to);
 
             if (tab.action === "install") {
               return (
-                <div key={tab.label} className="flex flex-col items-center justify-center gap-1.5">
-                  <PWAInstall variant="mobiletab" />
-                  <span className="font-brand text-[10px] uppercase tracking-[0.15em] text-black/40">{tab.label}</span>
+                <div key={tab.label} className="flex items-center justify-center">
+                  <PWAInstall variant="mobiletab" active={active} />
                 </div>
               );
             }
 
-            const content = (
-              <>
+            const inner = (
+              <span
+                className={`flex flex-col items-center gap-1 rounded-xl px-3 py-1.5 transition-colors duration-200 ${
+                  active ? "bg-black/[0.04]" : ""
+                }`}
+              >
                 <tab.icon
-                  className="h-[22px] w-[22px]"
-                  strokeWidth={active ? 2.2 : 1.75}
+                  className="h-[21px] w-[21px] transition-colors duration-200"
+                  strokeWidth={active ? 2.25 : 1.6}
                 />
-                <span className="font-brand text-[10px] uppercase tracking-[0.15em]">
+                <span className="font-brand text-[9.5px] uppercase tracking-[0.14em] leading-none">
                   {tab.label}
                 </span>
-                <span
-                  className={`h-1 w-1 rounded-full transition-colors ${active ? "bg-gold" : "bg-transparent"}`}
-                />
-              </>
+              </span>
             );
 
-            const className = `flex flex-col items-center justify-center gap-1.5 transition-colors ${
-              active ? "text-black" : "text-black/40"
+            const className = `flex items-center justify-center transition-colors duration-200 ${
+              active ? "text-black" : "text-black/35"
             }`;
 
             if (tab.action) {
               return (
                 <button key={tab.label} onClick={tab.action} className={className} aria-label={tab.label}>
-                  {content}
+                  {inner}
                 </button>
               );
             }
 
             return (
               <Link key={tab.label} to={tab.to} className={className}>
-                {content}
+                {inner}
               </Link>
             );
           })}

@@ -7,7 +7,7 @@ import Logo from "@/components/luxury/Logo";
  * variant="nav"  -> compact single icon button for the header
  * variant="card" -> full branded card with both buttons (for landing pages)
  */
-export default function PWAInstall({ variant = "nav" }) {
+export default function PWAInstall({ variant = "nav", active = false }) {
   const [deferred, setDeferred] = useState(null);
   const [installed, setInstalled] = useState(false);
   const [isIos, setIsIos] = useState(false);
@@ -52,10 +52,15 @@ export default function PWAInstall({ variant = "nav" }) {
       <button
         onClick={install}
         disabled={!deferred}
-        className="flex items-center justify-center text-black/40 transition-colors disabled:opacity-30"
+        className={`flex items-center justify-center transition-colors disabled:opacity-30 ${
+          deferred ? (active ? "text-black" : "text-black/35") : "text-black/25"
+        }`}
         aria-label="Install app"
       >
-        <Download className="h-[22px] w-[22px]" strokeWidth={1.75} />
+        <span className={`flex flex-col items-center gap-1 rounded-xl px-3 py-1.5 transition-colors duration-200 ${deferred && active ? "bg-black/[0.04]" : ""}`}>
+          <Download className="h-[21px] w-[21px]" strokeWidth={deferred && active ? 2.25 : 1.6} />
+          <span className="font-brand text-[9.5px] uppercase tracking-[0.14em] leading-none">{deferred ? "Install" : "Add"}</span>
+        </span>
       </button>
     );
   }
