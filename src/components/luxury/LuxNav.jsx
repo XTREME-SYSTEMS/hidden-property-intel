@@ -36,10 +36,10 @@ export default function LuxNav() {
 
   return (
     <header className="fixed top-0 z-50 w-full border-b border-black/10 bg-white/80 backdrop-blur-xl">
-      <div className="mx-auto flex h-20 max-w-[1400px] items-center justify-between px-6 lg:px-12">
+      <div className="mx-auto flex h-28 max-w-[1400px] items-center justify-between px-6 lg:px-12">
         <Link to="/" aria-label="Hidden Property Intel" className="flex items-center">
-          <Logo variant="dark" className="hidden h-16 w-auto sm:block" />
-          <Logo variant="dark" compact className="h-12 w-12 sm:hidden" />
+          <Logo variant="dark" className="hidden h-24 w-auto sm:block" />
+          <Logo variant="dark" compact className="h-16 w-16 sm:hidden" />
         </Link>
 
         <nav className="hidden items-center gap-10 lg:flex">
