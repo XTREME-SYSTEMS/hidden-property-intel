@@ -69,7 +69,7 @@ export default function LuxuryHome() {
       <section className="relative h-[94vh] min-h-[660px] w-full overflow-hidden bg-black">
         <Image src={IMAGES.estate} alt="Hidden Property Intel" fittingType="fill" className="absolute inset-0 h-full w-full object-cover opacity-80" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/85" />
-        <div className="relative mx-auto flex h-full max-w-[1400px] flex-col justify-center px-6 pb-28 pt-36 lg:px-12 lg:pb-20 lg:pt-24">
+        <div className="relative mx-auto flex h-full max-w-[1400px] flex-col justify-end px-6 pb-28 pt-36 lg:justify-center lg:px-12 lg:pb-20 lg:pt-24">
           <p className="text-[10px] uppercase tracking-[0.45em] text-gold-warm sm:text-[11px]">Hidden Property Intel · Find what others miss.</p>
           <h1 className="mt-5 max-w-3xl font-display text-[2.6rem] font-normal leading-[1.02] tracking-[-0.02em] text-white sm:mt-6 sm:text-5xl lg:text-6xl lg:font-light">
             Distressed properties,<br />
