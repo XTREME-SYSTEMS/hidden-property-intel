@@ -26,6 +26,21 @@ export default function SmartContractDetail() {
 
   useEffect(() => { load(); }, [id]);
 
+  const closeDeal = async () => {
+    setBusy(true);
+    try {
+      await base44.entities.SmartContract.update(contract.id, { status: 'closed' });
+      if (property) {
+        try {
+          await base44.entities.Property.update(property.id, { status: 'closed' });
+        } catch (e) { /* property update may fail for investors — admin/seller only */ }
+      }
+      setMsg('Deal closed — property marked as closed.');
+      load();
+    } catch (e) { setMsg(e.response?.data?.error || e.message); }
+    setBusy(false);
+  };
+
   const sign = async () => {
     // Verify the user is authorized to sign (must be the buyer/investor or seller)
     const isBuyer = contract.investor_id === user?.id;
@@ -38,7 +53,10 @@ export default function SmartContractDetail() {
     setBusy(true);
     try {
       const signedBy = contract.signed_by || [];
-      const entry = { user_id: user.id, name: user.full_name || user.email, signed_at: new Date().toISOString(), signature_hash: crypto.randomUUID() };
+      const sigData = `${user.id}:${contract.id}:${Date.now()}`;
+      const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(sigData));
+      const signatureHash = [...new Uint8Array(hashBuffer)].map(b => b.toString(16).padStart(2, '0')).join('');
+      const entry = { user_id: user.id, name: user.full_name || user.email, signed_at: new Date().toISOString(), signature_hash: signatureHash };
       const updated = [...signedBy, entry];
       const bothSigned = updated.length >= 2;
       await base44.entities.SmartContract.update(contract.id, { signed_by: updated, status: bothSigned ? "signed" : contract.status });
@@ -105,6 +123,11 @@ export default function SmartContractDetail() {
         {contract.status !== "signed" && (
           <button onClick={sign} disabled={busy || alreadySigned} className="mt-4 rounded-sm bg-black px-5 py-3 text-[11px] uppercase tracking-[0.3em] text-white disabled:opacity-50">
             {alreadySigned ? "Signed by you" : busy ? "Signing…" : "Sign contract"}
+          </button>
+        )}
+        {contract.status === "signed" && user?.role === "admin" && (
+          <button onClick={closeDeal} disabled={busy} className="mt-4 rounded-sm bg-emerald-700 px-5 py-3 text-[11px] uppercase tracking-[0.3em] text-white disabled:opacity-50">
+            {busy ? "Closing…" : "Close deal"}
           </button>
         )}
         {msg && <p className="mt-3 text-sm text-black/70">{msg}</p>}

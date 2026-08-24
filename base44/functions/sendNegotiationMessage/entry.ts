@@ -15,12 +15,17 @@ export default async function(req) {
     const senderRole = isSeller ? 'seller' : 'investor';
     const sellerId = property.seller_id || user.id;
 
-    let thread = (await base44.asServiceRole.entities.NegotiationThread.filter({ property_id, seller_id: sellerId }))[0];
+    let thread;
+    if (isSeller) {
+      thread = (await base44.asServiceRole.entities.NegotiationThread.filter({ property_id, seller_id: sellerId }))[0];
+    } else {
+      thread = (await base44.asServiceRole.entities.NegotiationThread.filter({ property_id, investor_id: user.id }))[0];
+    }
     if (!thread) {
       thread = await base44.asServiceRole.entities.NegotiationThread.create({
         property_id,
         seller_id: sellerId,
-        investor_id: investor_id || user.id,
+        investor_id: isSeller ? (investor_id || null) : user.id,
         messages: [],
         status: 'active'
       });

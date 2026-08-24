@@ -4,8 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { money } from "@/lib/format";
 import LuxuryListingCard from "@/components/luxury/LuxuryListingCard";
 import { Trash2, Plus } from "lucide-react";
-
-const DISTRESS = ["pre-foreclosure", "foreclosure", "probate_inherited", "tax_delinquent", "code_violation", "divorce", "bankruptcy", "auction", "short_sale", "bank_owned"];
+import { DISTRESS_TYPES as DISTRESS } from "@/lib/constants";
 
 export default function InvestorDashboard() {
   const [investor, setInvestor] = useState(null);
@@ -29,16 +28,14 @@ export default function InvestorDashboard() {
       ]);
       setBids(b);
       setSavedSearches(ss);
-      // Fetch property details for bids to show address instead of raw ID
+      // Bulk-fetch property details for bids (single API call instead of N)
+      const propIds = [...new Set(b.map(bid => bid.property_id).filter(Boolean))];
       const propMap = {};
-      await Promise.all(b.map(async (bid) => {
-        if (!propMap[bid.property_id]) {
-          try {
-            const p = await base44.entities.Property.get(bid.property_id);
-            propMap[bid.property_id] = p;
-          } catch (e) { /* ignore */ }
-        }
-      }));
+      if (propIds.length) {
+        const allProps = await base44.entities.Property.list('-created_date', 500);
+        const idSet = new Set(propIds);
+        allProps.forEach(p => { if (idSet.has(p.id)) propMap[p.id] = p; });
+      }
       setBidProperties(propMap);
       const markets = (investor?.target_markets || []).map((m) => (m || "").toLowerCase());
       let rec = props;
@@ -56,7 +53,9 @@ export default function InvestorDashboard() {
   const saveSearch = async () => {
     if (!newSearch.name) return;
     try {
-      await base44.entities.SavedSearch.create({ name: newSearch.name, filters: { state: newSearch.state, distress_type: newSearch.distress_type } });
+      const u = await base44.auth.me();
+      if (!u) return;
+      await base44.entities.SavedSearch.create({ user_id: u.id, name: newSearch.name, filters: { state: newSearch.state, distress_type: newSearch.distress_type } });
       setNewSearch({ name: "", state: "", distress_type: "" });
       load();
     } catch (e) { /* ignore */ }

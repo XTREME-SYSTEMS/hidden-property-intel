@@ -11,6 +11,9 @@
     "investor_name": {
       "type": "string"
     },
+    "seller_id": {
+      "type": "string"
+    },
     "bid_amount": {
       "type": "number"
     },
@@ -49,5 +52,43 @@
   "required": [
     "property_id",
     "bid_amount"
-  ]
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.investor_id": "{{user.id}}"
+        },
+        {
+          "data.seller_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {},
+    "update": {
+      "$or": [
+        {
+          "data.investor_id": "{{user.id}}"
+        },
+        {
+          "data.seller_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }

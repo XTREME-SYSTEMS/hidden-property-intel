@@ -2,9 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { ArrowRight, ArrowLeft, Sparkles } from "lucide-react";
-
-const DISTRESS = ["pre-foreclosure", "foreclosure", "probate_inherited", "tax_delinquent", "code_violation", "divorce", "bankruptcy", "auction", "short_sale", "bank_owned"];
-const TYPES = ["residential", "commercial", "land", "multi-family", "mixed-use"];
+import { DISTRESS_TYPES as DISTRESS, PROPERTY_TYPES as TYPES } from "@/lib/constants";
 const inputCls = "w-full rounded-sm border border-black/15 bg-white px-4 py-3 text-sm outline-none focus:border-black";
 
 export default function SellerPostProperty() {
@@ -55,6 +53,21 @@ export default function SellerPostProperty() {
         seller_id: u.id, source: "user_submitted", status: "active"
       };
       const res = await base44.entities.Property.create(payload);
+      // Create or update Seller profile
+      const existingSeller = await base44.entities.Seller.filter({ user_id: u.id });
+      if (!existingSeller[0]) {
+        await base44.entities.Seller.create({
+          user_id: u.id,
+          name: u.full_name || u.email,
+          email: u.email,
+          property_count: 1,
+          joined_at: new Date().toISOString()
+        });
+      } else {
+        await base44.entities.Seller.update(existingSeller[0].id, {
+          property_count: (existingSeller[0].property_count || 0) + 1
+        });
+      }
       nav(`/properties/${res.id}`);
     } catch (e) { alert(e.message); }
     setBusy(false);

@@ -29,9 +29,12 @@ export default function InvestorPipeline() {
       const d = await base44.entities.Deal.list("-created_date", 200);
       setDeals(d);
       const ids = [...new Set(d.map((x) => x.property_id).filter(Boolean))];
-      const fetched = await Promise.all(ids.map((id) => base44.entities.Property.get(id).catch(() => null)));
       const map = {};
-      fetched.forEach((p) => { if (p?.id) map[p.id] = p; });
+      if (ids.length) {
+        const allProps = await base44.entities.Property.list('-created_date', 500);
+        const idSet = new Set(ids);
+        allProps.forEach(p => { if (idSet.has(p.id)) map[p.id] = p; });
+      }
       setProps(map);
     } catch (e) { /* ignore */ }
     setLoading(false);

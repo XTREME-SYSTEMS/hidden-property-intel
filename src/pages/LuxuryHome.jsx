@@ -69,7 +69,7 @@ export default function LuxuryHome() {
               Browse distressed inventory
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
-            <Link to="/listings" className="inline-flex items-center gap-3 rounded-sm border border-white/40 px-7 py-4 text-[11px] uppercase tracking-[0.3em] text-white transition-colors hover:bg-white/10">
+            <Link to="/seller/post-property" className="inline-flex items-center gap-3 rounded-sm border border-white/40 px-7 py-4 text-[11px] uppercase tracking-[0.3em] text-white transition-colors hover:bg-white/10">
               List your property — free
             </Link>
           </div>
@@ -137,7 +137,7 @@ export default function LuxuryHome() {
                   </li>
                 ))}
               </ol>
-              <Link to="/listings" className="mt-8 inline-flex items-center gap-3 border-b border-black pb-2 text-[11px] uppercase tracking-[0.3em] hover:text-black/60">
+              <Link to="/seller/post-property" className="mt-8 inline-flex items-center gap-3 border-b border-black pb-2 text-[11px] uppercase tracking-[0.3em] hover:text-black/60">
                 List your property <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
@@ -197,7 +197,7 @@ export default function LuxuryHome() {
                     </li>
                   ))}
                 </ul>
-                <Link to="/listings" className={`mt-8 rounded-sm py-3.5 text-center text-[11px] uppercase tracking-[0.3em] transition-colors ${p.featured ? "bg-black text-white hover:bg-black/80" : "border border-white/40 text-white hover:bg-white/10"}`}>
+                <Link to="/investor/signup" className={`mt-8 rounded-sm py-3.5 text-center text-[11px] uppercase tracking-[0.3em] transition-colors ${p.featured ? "bg-black text-white hover:bg-black/80" : "border border-white/40 text-white hover:bg-white/10"}`}>
                   Choose {p.name}
                 </Link>
               </div>
@@ -220,7 +220,7 @@ export default function LuxuryHome() {
               burden — Hidden Property Intel gets you a fair cash offer from a verified investor, with an AI assistant in
               your corner. No commissions. No fees.
             </p>
-            <Link to="/listings" className="mt-8 inline-flex items-center gap-3 rounded-sm bg-black px-7 py-4 text-[11px] uppercase tracking-[0.3em] text-white transition-colors hover:bg-black/80">
+            <Link to="/seller/post-property" className="mt-8 inline-flex items-center gap-3 rounded-sm bg-black px-7 py-4 text-[11px] uppercase tracking-[0.3em] text-white transition-colors hover:bg-black/80">
               List your property — free <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -287,7 +287,7 @@ export default function LuxuryHome() {
             <Link to="/listings" className="inline-flex items-center gap-3 rounded-sm bg-white px-7 py-4 text-[11px] uppercase tracking-[0.3em] text-black transition-colors hover:bg-black hover:text-white">
               Browse inventory <ArrowRight className="h-4 w-4" />
             </Link>
-            <Link to="/listings" className="inline-flex items-center gap-3 rounded-sm border border-white/40 px-7 py-4 text-[11px] uppercase tracking-[0.3em] text-white transition-colors hover:bg-white/10">
+            <Link to="/seller/post-property" className="inline-flex items-center gap-3 rounded-sm border border-white/40 px-7 py-4 text-[11px] uppercase tracking-[0.3em] text-white transition-colors hover:bg-white/10">
               List your property
             </Link>
           </div>

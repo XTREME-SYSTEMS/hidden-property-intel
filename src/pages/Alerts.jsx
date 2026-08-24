@@ -41,8 +41,8 @@ export default function Alerts() {
   };
 
   const toggle = (key) => () => {
-    const next = { ...pref, [key]: !(pref?.[key] !== false) };
-    savePref({ [key]: next[key] });
+    const current = pref?.[key] !== false;
+    savePref({ [key]: !current });
   };
 
   return (

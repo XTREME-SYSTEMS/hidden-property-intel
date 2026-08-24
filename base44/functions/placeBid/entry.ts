@@ -19,6 +19,11 @@ export default async function(req) {
       return Response.json({ error: 'Property is not accepting bids' }, { status: 400 });
     }
 
+    // Prevent shill bidding: seller cannot bid on their own property
+    if (property.seller_id && property.seller_id === user.id) {
+      return Response.json({ error: 'You cannot bid on your own property' }, { status: 400 });
+    }
+
     // Subscription gate (admin bypass)
     let investor;
     if (user.role !== 'admin') {
@@ -50,6 +55,7 @@ export default async function(req) {
       property_id,
       investor_id: user.id,
       investor_name: investor?.name || user.full_name || user.email,
+      seller_id: property.seller_id || null,
       bid_amount,
       bid_type: is_proxy_bid ? 'proxy' : 'initial',
       status: 'active',

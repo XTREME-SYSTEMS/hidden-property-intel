@@ -14,6 +14,7 @@ export function bidExpiryIso() {
  */
 export async function processProxyBids(base44, { property_id, new_bid_amount, exclude_investor_id }) {
   const existing = await base44.asServiceRole.entities.Bid.filter({ property_id });
+  const property = await base44.asServiceRole.entities.Property.get(property_id);
   const proxies = existing.filter(
     (b) =>
       b.is_proxy_bid &&
@@ -42,6 +43,7 @@ export async function processProxyBids(base44, { property_id, new_bid_amount, ex
     property_id,
     investor_id: topProxy.investor_id,
     investor_name: topProxy.investor_name,
+    seller_id: property?.seller_id || null,
     bid_amount: proxyBidAmount,
     bid_type: 'proxy',
     status: 'active',

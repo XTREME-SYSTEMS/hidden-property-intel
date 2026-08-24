@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { Plus, Play, Trash2, Power, Pencil, X } from "lucide-react";
+import { DISTRESS_TYPES as DISTRESS } from "@/lib/constants";
 
 const TYPES = ["county_assessor", "tax_records", "probate_court", "foreclosure", "auction", "obituary", "mls"];
-const DISTRESS = ["pre-foreclosure", "foreclosure", "probate_inherited", "tax_delinquent", "code_violation", "divorce", "bankruptcy", "auction", "short_sale", "bank_owned"];
 const FREQ = ["daily", "weekly", "monthly"];
 
 const empty = { name: "", type: "foreclosure", url: "", state: "FL", county: "", distress_type: "foreclosure", max_results: 20, scrape_frequency: "daily", method: "ai" };

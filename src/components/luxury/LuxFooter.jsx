@@ -6,7 +6,7 @@ export default function LuxFooter() {
   const cols = [
     { h: "Explore", items: [["Inventory", "/listings"], ["How it works", "/"], ["ROI calculators", "/calculators"], ["Market data", "/listings"]] },
     { h: "For Investors", items: [["Browse inventory", "/listings"], ["Pricing", "/#investors"], ["Smart contracts", "/listings"], ["Ownership chains", "/listings"]] },
-    { h: "For Sellers", items: [["List your property", "/listings"], ["AI pricing", "/#sellers"], ["Negotiation assistant", "/#sellers"], ["No commissions", "/#sellers"]] },
+    { h: "For Sellers", items: [["List your property", "/seller/post-property"], ["AI pricing", "/#sellers"], ["Negotiation assistant", "/#sellers"], ["No commissions", "/#sellers"]] },
     { h: "Company", items: [["About", "/"], ["Concierge", "/"], ["Press", "/"], ["Contact", "/"]] },
   ];
   return (

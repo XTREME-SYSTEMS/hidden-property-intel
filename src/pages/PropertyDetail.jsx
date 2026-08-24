@@ -45,18 +45,23 @@ export default function PropertyDetail() {
   const [titleRisk, setTitleRisk] = useState(null);
   const [active, setActive] = useState(0);
   const [unlocked, setUnlocked] = useState(false);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     let alive = true;
     setProperty(null);
     (async () => {
-      const p = await base44.entities.Property.get(id);
+      const [p, u] = await Promise.all([
+        base44.entities.Property.get(id),
+        base44.auth.me().catch(() => null)
+      ]);
       if (!alive) return;
-      setProperty(p);
+      setProperty(p); setUser(u);
+      const isAdmin = u?.role === 'admin';
       const [sc, ch, ow, bd, tr] = await Promise.all([
         base44.entities.PropertyScore.filter({ property_id: id }),
         base44.entities.OwnershipChain.filter({ property_id: id }),
-        base44.entities.Owner.filter({ property_id: id }),
+        isAdmin ? base44.entities.Owner.filter({ property_id: id }) : Promise.resolve([]),
         base44.entities.Bid.filter({ property_id: id }, "-bid_amount", 20),
         base44.entities.TitleRisk.filter({ property_id: id }),
       ]);
@@ -123,7 +128,7 @@ export default function PropertyDetail() {
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <ScoreGauge score={property.property_score || 0} size={72} label="AI score" />
-          <Link to="/listings" className="rounded-full bg-emerald-500 px-6 py-3.5 text-sm font-medium text-white hover:bg-emerald-600">
+          <Link to={`/properties/${id}/bid`} className="rounded-full bg-emerald-500 px-6 py-3.5 text-sm font-medium text-white hover:bg-emerald-600">
             Place a bid
           </Link>
           <WatchButton propertyId={property.id} />
@@ -179,9 +184,9 @@ export default function PropertyDetail() {
                 <p className="mt-1 text-sm text-[#6B7B72]">
                   {owners.length} owner record{owners.length === 1 ? "" : "s"} and {chain?.transfers?.length || 0} recorded transfers available.
                 </p>
-                <button onClick={() => setUnlocked(true)} className="mt-5 rounded-full bg-[#0F2A1D] px-5 py-2.5 text-sm text-white hover:bg-[#1A2B22]">
-                  Preview as Pro subscriber
-                </button>
+                <Link to="/investor/signup" className="mt-5 inline-flex rounded-full bg-[#0F2A1D] px-5 py-2.5 text-sm text-white hover:bg-[#1A2B22]">
+                  Upgrade to Pro
+                </Link>
               </div>
             ) : (
               <div className="space-y-8">

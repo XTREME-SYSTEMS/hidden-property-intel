@@ -51,7 +51,7 @@ export default function LuxNav() {
         <div className="flex items-center gap-4">
           <AlertsBell user={user} />
           <PWAInstall variant="nav" />
-          <Link to="/listings" className="hidden rounded-sm bg-black px-5 py-2.5 text-[11px] uppercase tracking-[0.25em] text-white transition-colors hover:bg-black/80 sm:inline-block">
+          <Link to="/seller/post-property" className="hidden rounded-sm bg-black px-5 py-2.5 text-[11px] uppercase tracking-[0.25em] text-white transition-colors hover:bg-black/80 sm:inline-block">
             List your property
           </Link>
           <button onClick={() => setOpen(!open)} className="lg:hidden" aria-label="Menu">

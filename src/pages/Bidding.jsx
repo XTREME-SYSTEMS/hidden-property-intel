@@ -68,8 +68,8 @@ export default function Bidding() {
     try {
       const res = await base44.functions.invoke("generateSmartContract", {
         property_id: id,
-        investor_id: topBid.investor_id || topBid.id,
-        seller_id: property.seller_id || "seller",
+        investor_id: topBid.investor_id,
+        seller_id: property.seller_id || topBid.investor_id,
         contract_type: "escrow",
         terms: {
           price: topBid.bid_amount,
@@ -99,8 +99,9 @@ export default function Bidding() {
         </div>
       ) : (
         <div className="mt-10 rounded-sm border border-black/10 p-6">
-          <p className="text-[10px] uppercase tracking-[0.3em] text-black/40">Current highest bid</p>
-          <p className="mt-2 font-display text-4xl font-light tabular-nums">{money(highest)}</p>
+          <p className="text-[10px] uppercase tracking-[0.3em] text-black/40">{highest > 0 ? "Current highest bid" : "Starting bid"}</p>
+          <p className="mt-2 font-display text-4xl font-light tabular-nums">{money(highest > 0 ? highest : property.proposed_asking_price || 0)}</p>
+          {highest === 0 && <p className="mt-2 text-xs text-black/40">Place a bid to start the auction</p>}
         </div>
       )}
 

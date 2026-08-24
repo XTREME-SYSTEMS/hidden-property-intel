@@ -15,7 +15,7 @@ export default function PropertyBrief({ property, score, owners = [], chain, bid
 
     doc.setFillColor(15, 42, 29); doc.rect(0, 0, 612, 70, "F");
     doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(20);
-    doc.text("PROPERTYINTEL", left, 44);
+    doc.text("HIDDEN PROPERTY INTEL", left, 44);
     doc.setFontSize(9); doc.setFont("helvetica", "normal");
     doc.text("Investor Brief — confidential", 612 - left - 150, 44);
     doc.setTextColor(20, 20, 20);

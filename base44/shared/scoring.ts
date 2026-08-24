@@ -70,8 +70,8 @@ Estimate: total outstanding lien amount (USD), mortgage balance (USD), whether t
     response_json_schema: TITLE_SCHEMA
   });
 
-  await base44.asServiceRole.entities.TitleRisk.create({
-    property_id,
+  const existingRisks = await base44.asServiceRole.entities.TitleRisk.filter({ property_id });
+  const riskData = {
     lien_total: r.lien_total,
     mortgage_balance: r.mortgage_balance,
     has_judgments: r.has_judgments,
@@ -82,7 +82,12 @@ Estimate: total outstanding lien amount (USD), mortgage balance (USD), whether t
     details: r.details,
     ai_analysis: r.ai_analysis,
     checked_at: new Date().toISOString()
-  });
+  };
+  if (existingRisks[0]) {
+    await base44.asServiceRole.entities.TitleRisk.update(existingRisks[0].id, riskData);
+  } else {
+    await base44.asServiceRole.entities.TitleRisk.create({ property_id, ...riskData });
+  }
   return r;
 }
 
@@ -109,8 +114,8 @@ Find comparable sales within 1 mile in the last 12 months, estimate current mark
     response_json_schema: SCHEMA
   });
 
-  await base44.asServiceRole.entities.PropertyScore.create({
-    property_id,
+  const existingScores = await base44.asServiceRole.entities.PropertyScore.filter({ property_id });
+  const scoreData = {
     overall_score: r.overall_score,
     distress_severity: r.distress_severity,
     repair_cost_estimate: r.repair_cost_estimate,
@@ -121,7 +126,12 @@ Find comparable sales within 1 mile in the last 12 months, estimate current mark
     ai_analysis: r.ai_analysis,
     scored_at: new Date().toISOString(),
     model_version: 'gemini_3_flash-v1'
-  });
+  };
+  if (existingScores[0]) {
+    await base44.asServiceRole.entities.PropertyScore.update(existingScores[0].id, scoreData);
+  } else {
+    await base44.asServiceRole.entities.PropertyScore.create({ property_id, ...scoreData });
+  }
 
   await base44.asServiceRole.entities.Property.update(property_id, {
     estimated_value: r.estimated_value,
