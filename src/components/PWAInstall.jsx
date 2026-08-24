@@ -52,10 +52,10 @@ export default function PWAInstall({ variant = "nav" }) {
       <button
         onClick={install}
         disabled={!deferred}
-        className="flex h-9 w-9 items-center justify-center rounded-lg text-black/40 transition-colors hover:bg-black/5 disabled:opacity-30"
+        className="flex h-7 w-7 items-center justify-center text-black/35 transition-colors disabled:opacity-30"
         aria-label="Install app"
       >
-        <Download className="h-5 w-5" />
+        <Download className="h-[22px] w-[22px]" strokeWidth={2} />
       </button>
     );
   }
