@@ -5,6 +5,9 @@
     "seller_id": {
       "type": "string"
     },
+    "investor_id": {
+      "type": "string"
+    },
     "property_id": {
       "type": "string"
     },
@@ -102,6 +105,9 @@
         },
         {
           "data.seller_id": "{{user.id}}"
+        },
+        {
+          "data.investor_id": "{{user.id}}"
         }
       ]
     },
@@ -114,6 +120,9 @@
         },
         {
           "data.seller_id": "{{user.id}}"
+        },
+        {
+          "data.investor_id": "{{user.id}}"
         }
       ]
     },
@@ -126,6 +135,9 @@
         },
         {
           "data.seller_id": "{{user.id}}"
+        },
+        {
+          "data.investor_id": "{{user.id}}"
         }
       ]
     },
