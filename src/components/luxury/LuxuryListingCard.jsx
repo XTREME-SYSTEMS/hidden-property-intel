@@ -22,8 +22,8 @@ export default function LuxuryListingCard({ property }) {
           Score {Math.round(property.property_score || 0)}
         </span>
         <div className="absolute bottom-4 left-4 right-4 text-white">
-          <p className="font-display text-lg leading-tight tracking-tight">{property.address}</p>
-          <p className="mt-1 text-[10px] uppercase tracking-[0.25em] text-white/60">{property.city}, {property.state}</p>
+          <p className="font-display text-lg leading-tight tracking-tight">{property.city}, {property.state}</p>
+          <p className="mt-1 text-[10px] uppercase tracking-[0.25em] text-white/60">{labelFor(property.distress_type)} · {property.zip_code}</p>
         </div>
       </div>
       <div className="mt-4 flex items-baseline justify-between">

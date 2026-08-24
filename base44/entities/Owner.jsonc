@@ -42,6 +42,20 @@
     },
     "source": {
       "type": "string"
+    },
+    "outreach_status": {
+      "type": "string",
+      "enum": [
+        "new",
+        "contacted",
+        "responded",
+        "opted_out"
+      ],
+      "default": "new"
+    },
+    "contacted_at": {
+      "type": "string",
+      "format": "date-time"
     }
   },
   "required": [

@@ -111,9 +111,9 @@ export default function PropertyDetail() {
             <DistressBadge type={property.distress_type} />
             <span className="rounded-full bg-[#E5EDEA] px-2.5 py-1 text-[11px]">{labelFor(property.property_type)}</span>
           </div>
-          <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">{property.address}</h1>
+          <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">{unlocked ? property.address : `${property.city}, ${property.state} ${property.zip_code}`}</h1>
           <p className="mt-1 inline-flex items-center gap-1.5 text-sm text-[#6B7B72]">
-            <MapPin className="h-4 w-4" />{property.city}, {property.state} {property.zip_code}
+            <MapPin className="h-4 w-4" />{unlocked ? `${property.city}, ${property.state} ${property.zip_code}` : "Full address revealed with a Pro subscription"}
           </p>
         </div>
         <div className="flex items-center gap-5">

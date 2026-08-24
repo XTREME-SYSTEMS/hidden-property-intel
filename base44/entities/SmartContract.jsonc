@@ -17,7 +17,8 @@
         "purchase_agreement",
         "escrow",
         "deed_transfer"
-      ]
+      ],
+      "default": "escrow"
     },
     "terms": {
       "type": "object",
@@ -66,6 +67,9 @@
       "default": "draft"
     },
     "abi": {
+      "type": "string"
+    },
+    "source_code": {
       "type": "string"
     },
     "signed_by": {
