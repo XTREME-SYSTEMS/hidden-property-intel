@@ -34,6 +34,8 @@ const SCHEMA = {
   }
 };
 
+import { hasRealImages, fetchPropertyImages } from './propertyImages.ts';
+
 const TITLE_SCHEMA = {
   type: 'object',
   properties: {
@@ -127,19 +129,12 @@ Find comparable sales within 1 mile in the last 12 months, estimate current mark
     property_score: r.overall_score
   });
 
-  // attach an AI-generated exterior image if the property has none
-  if (!property.images || property.images.length === 0) {
+  // fetch REAL listing photos via Browserbase (no AI-generated images)
+  if (!hasRealImages(property)) {
     try {
-      const img = await base44.asServiceRole.integrations.Core.GenerateImage({
-        prompt: `Realistic exterior real estate photograph of a ${property.property_type || 'residential'} property in ${property.city}, ${property.state}, showing signs of ${property.distress_type || 'deferred maintenance'} and disrepair, overcast daylight, wide angle, professional listing photo`
-      });
-      if (img?.url) {
-        await base44.asServiceRole.entities.Property.update(property_id, {
-          images: [{ url: img.url, type: 'exterior', caption: `${property.city}, ${property.state}` }]
-        });
-      }
+      await fetchPropertyImages(base44, property);
     } catch (e) {
-      console.error('image gen failed', property_id, e?.message);
+      console.error('real image fetch failed', property_id, e?.message);
     }
   }
 

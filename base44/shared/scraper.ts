@@ -11,6 +11,8 @@
  * Both paths upsert Property + Owner records with address+zip dedupe.
  */
 
+import { fetchPropertyImages, hasRealImages } from './propertyImages.ts';
+
 const VALID_DISTRESS = new Set([
   'pre-foreclosure', 'foreclosure', 'probate_inherited', 'tax_delinquent',
   'code_violation', 'divorce', 'bankruptcy', 'auction', 'short_sale', 'bank_owned'
@@ -169,7 +171,8 @@ export async function scrapeSource(base44, { source, url, distress_type, state }
       await base44.asServiceRole.entities.Property.update(existing[0].id, payload);
       updated++;
     } else {
-      const created = await base44.asServiceRole.entities.Property.create(payload);
+      // mandate images: new properties start as 'draft' until real photos are fetched
+      const created = await base44.asServiceRole.entities.Property.create({ ...payload, status: 'draft' });
       if (p.owner_name) {
         await base44.asServiceRole.entities.Owner.create({
           property_id: created.id,
@@ -178,7 +181,18 @@ export async function scrapeSource(base44, { source, url, distress_type, state }
           source: sourceName
         });
       }
-      newRecords.push(created);
+      // auto-fetch real listing images; promote to 'active' only if images are found
+      try {
+        const imgResult = await fetchPropertyImages(base44, created);
+        if (imgResult.found > 0) {
+          await base44.asServiceRole.entities.Property.update(created.id, { status: 'active' });
+        }
+      } catch (e) {
+        console.error('image fetch failed for', created.id, e?.message);
+      }
+      // re-read to reflect any image update
+      const refreshed = await base44.asServiceRole.entities.Property.get(created.id);
+      newRecords.push(refreshed);
       isNew++;
     }
   }

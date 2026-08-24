@@ -37,6 +37,10 @@ export default async function(req) {
     metrics.watchlists = watchlists.length;
     metrics.title_risks = titleRisks.length;
     const titleCoverage = properties.length ? Math.round((titleRisks.length / properties.length) * 100) : 100;
+    const withImages = properties.filter(p => Array.isArray(p.images) && p.images.some(i => i.type === 'scraped' || i.type === 'street_view' || i.type === 'satellite' || i.type === 'user_uploaded'));
+    const imageCoverage = properties.length ? Math.round((withImages.length / properties.length) * 100) : 100;
+    metrics.image_coverage_pct = imageCoverage;
+    metrics.draft_properties = properties.filter(p => p.status === 'draft').length;
 
     // scrape pipeline health — auto-heal first, then record the check
     const recentFailed = jobs.filter(j => j.status === 'failed');
@@ -128,6 +132,13 @@ export default async function(req) {
       name: 'watchlist',
       status: 'healthy',
       detail: `${metrics.watchlists} properties watched`
+    });
+
+    // image coverage — properties without real photos stay as draft
+    checks.push({
+      name: 'image_coverage',
+      status: imageCoverage >= 80 ? 'healthy' : imageCoverage >= 50 ? 'degraded' : 'critical',
+      detail: `${imageCoverage}% of properties have real listing photos (${metrics.draft_properties} in draft)`
     });
 
     const overall = checks.some(c => c.status === 'critical') ? 'critical'
