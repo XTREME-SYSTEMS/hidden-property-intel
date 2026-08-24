@@ -1,23 +1,24 @@
 {
-  "description": "Twice-daily autonomous scraping of active Florida distressed-property data sources (20 sources per run, cycles through all 126)",
+  "name": "Property Cross-Reference",
+  "description": "Daily cross-reference of active properties against the live web to detect sold/off-market listings and update their status",
   "definition": {
     "document": {
       "dsl": "1.0.0",
-      "name": "daily_scrape_pipeline",
+      "name": "property_cross_reference",
       "version": "1.0",
       "namespace": "base44"
     },
     "do": [
       {
-        "run_pipeline": {
+        "cross_reference": {
           "call": "invoke_backend_function",
           "with": {
-            "function_name": "runDailyScrapePipeline"
+            "function_name": "crossReferenceProperties"
           },
           "then": "end",
           "x-base44": {
-            "title": "Run scrape pipeline",
-            "description": "Scrape 20 FL sources + create draft properties"
+            "title": "Cross-reference active properties",
+            "description": "Verify listings against live web; expire sold/off-market"
           }
         }
       }
@@ -29,7 +30,7 @@
       "trigger_type": "scheduled",
       "events": [],
       "schedule_mode": "recurring",
-      "cron_expression": "0 2,14 * * *",
+      "cron_expression": "0 5 * * *",
       "one_time_date": null,
       "timezone": "America/New_York",
       "interval_value": null,
@@ -39,6 +40,5 @@
       "ends_on_date": null,
       "ends_after_count": null
     }
-  },
-  "name": "Daily Scrape Pipeline"
+  }
 }

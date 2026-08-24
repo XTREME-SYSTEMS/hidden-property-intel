@@ -1,23 +1,24 @@
 {
-  "description": "Twice-daily autonomous scraping of active Florida distressed-property data sources (20 sources per run, cycles through all 126)",
+  "name": "Draft Property Processor",
+  "description": "Nightly batch: fetches real images for draft properties, promotes to active, and scores them",
   "definition": {
     "document": {
       "dsl": "1.0.0",
-      "name": "daily_scrape_pipeline",
+      "name": "draft_property_processor",
       "version": "1.0",
       "namespace": "base44"
     },
     "do": [
       {
-        "run_pipeline": {
+        "process_drafts": {
           "call": "invoke_backend_function",
           "with": {
-            "function_name": "runDailyScrapePipeline"
+            "function_name": "processDraftProperties"
           },
           "then": "end",
           "x-base44": {
-            "title": "Run scrape pipeline",
-            "description": "Scrape 20 FL sources + create draft properties"
+            "title": "Process draft properties",
+            "description": "Fetch images, promote to active, score"
           }
         }
       }
@@ -29,7 +30,7 @@
       "trigger_type": "scheduled",
       "events": [],
       "schedule_mode": "recurring",
-      "cron_expression": "0 2,14 * * *",
+      "cron_expression": "0 3 * * *",
       "one_time_date": null,
       "timezone": "America/New_York",
       "interval_value": null,
@@ -39,6 +40,5 @@
       "ends_on_date": null,
       "ends_after_count": null
     }
-  },
-  "name": "Daily Scrape Pipeline"
+  }
 }

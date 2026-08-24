@@ -172,6 +172,7 @@ export async function scrapeSource(base44, { source, url, distress_type, state }
       updated++;
     } else {
       // mandate images: new properties start as 'draft' until real photos are fetched
+      // Image fetching is decoupled from scraping (done in a separate batch) to avoid timeouts
       const created = await base44.asServiceRole.entities.Property.create({ ...payload, status: 'draft' });
       if (p.owner_name) {
         await base44.asServiceRole.entities.Owner.create({
@@ -181,18 +182,7 @@ export async function scrapeSource(base44, { source, url, distress_type, state }
           source: sourceName
         });
       }
-      // auto-fetch real listing images; promote to 'active' only if images are found
-      try {
-        const imgResult = await fetchPropertyImages(base44, created);
-        if (imgResult.found > 0) {
-          await base44.asServiceRole.entities.Property.update(created.id, { status: 'active' });
-        }
-      } catch (e) {
-        console.error('image fetch failed for', created.id, e?.message);
-      }
-      // re-read to reflect any image update
-      const refreshed = await base44.asServiceRole.entities.Property.get(created.id);
-      newRecords.push(refreshed);
+      newRecords.push(created);
       isNew++;
     }
   }
