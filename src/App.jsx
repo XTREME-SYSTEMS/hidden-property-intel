@@ -15,6 +15,8 @@ import Calculators from '@/pages/Calculators';
 import Bidding from '@/pages/Bidding';
 import InvestorSignup from '@/pages/InvestorSignup';
 import InvestorDashboard from '@/pages/InvestorDashboard';
+import InvestorPipeline from '@/pages/InvestorPipeline';
+import Alerts from '@/pages/Alerts';
 import SellerDashboard from '@/pages/SellerDashboard';
 import SellerPostProperty from '@/pages/SellerPostProperty';
 import NegotiationAssistant from '@/pages/NegotiationAssistant';
@@ -68,6 +70,8 @@ const AuthenticatedApp = () => {
         <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
           <Route path="/investor/signup" element={<InvestorSignup />} />
           <Route path="/investor/dashboard" element={<InvestorDashboard />} />
+          <Route path="/investor/pipeline" element={<InvestorPipeline />} />
+          <Route path="/alerts" element={<Alerts />} />
           <Route path="/seller/dashboard" element={<SellerDashboard />} />
           <Route path="/seller/post-property" element={<SellerPostProperty />} />
           <Route path="/seller/negotiation/:propertyId" element={<NegotiationChat />} />

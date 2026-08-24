@@ -6,8 +6,11 @@ import DistressBadge, { labelFor } from "@/components/DistressBadge";
 import ScoreGauge from "@/components/ScoreGauge";
 import OwnershipTimeline from "@/components/OwnershipTimeline";
 import ROICalculator from "@/components/ROICalculator";
+import ExitStrategyModel from "@/components/ExitStrategyModel";
+import PropertyBrief from "@/components/PropertyBrief";
+import WatchButton from "@/components/WatchButton";
 import { money, num, pct } from "@/lib/format";
-import { Lock, MapPin, Phone, Mail, ArrowLeft } from "lucide-react";
+import { Lock, MapPin, Phone, Mail, ArrowLeft, ShieldAlert } from "lucide-react";
 
 function Card({ title, children, className = "" }) {
   return (
@@ -39,6 +42,7 @@ export default function PropertyDetail() {
   const [chain, setChain] = useState(null);
   const [owners, setOwners] = useState([]);
   const [bids, setBids] = useState([]);
+  const [titleRisk, setTitleRisk] = useState(null);
   const [active, setActive] = useState(0);
   const [unlocked, setUnlocked] = useState(false);
 
@@ -49,14 +53,15 @@ export default function PropertyDetail() {
       const p = await base44.entities.Property.get(id);
       if (!alive) return;
       setProperty(p);
-      const [sc, ch, ow, bd] = await Promise.all([
+      const [sc, ch, ow, bd, tr] = await Promise.all([
         base44.entities.PropertyScore.filter({ property_id: id }),
         base44.entities.OwnershipChain.filter({ property_id: id }),
         base44.entities.Owner.filter({ property_id: id }),
         base44.entities.Bid.filter({ property_id: id }, "-bid_amount", 20),
+        base44.entities.TitleRisk.filter({ property_id: id }),
       ]);
       if (!alive) return;
-      setScore(sc[0] || null); setChain(ch[0] || null); setOwners(ow); setBids(bd);
+      setScore(sc[0] || null); setChain(ch[0] || null); setOwners(ow); setBids(bd); setTitleRisk(tr[0] || null);
     })();
     return () => { alive = false; };
   }, [id]);
@@ -116,10 +121,15 @@ export default function PropertyDetail() {
             <MapPin className="h-4 w-4" />{unlocked ? `${property.city}, ${property.state} ${property.zip_code}` : "Full address revealed with a Pro subscription"}
           </p>
         </div>
-        <div className="flex items-center gap-5">
+        <div className="flex flex-wrap items-center gap-3">
           <ScoreGauge score={property.property_score || 0} size={72} label="AI score" />
           <Link to="/listings" className="rounded-full bg-emerald-500 px-6 py-3.5 text-sm font-medium text-white hover:bg-emerald-600">
             Place a bid
+          </Link>
+          <WatchButton propertyId={property.id} />
+          <PropertyBrief property={property} score={score} owners={owners} chain={chain} bids={bids} titleRisk={titleRisk} />
+          <Link to={`/investor/pipeline?propertyId=${property.id}`} className="rounded-full bg-[#0F2A1D] px-5 py-2.5 text-sm text-white hover:bg-[#1A2B22]">
+            Add to pipeline
           </Link>
         </div>
       </div>
@@ -224,6 +234,42 @@ export default function PropertyDetail() {
               defaultRepairs={score?.repair_cost_estimate || 40000}
               defaultArv={score?.after_repair_value || property.estimated_value || 380000}
             />
+          </Card>
+
+          <Card title="Exit-strategy model">
+            <ExitStrategyModel
+              defaultPrice={property.proposed_asking_price || 250000}
+              defaultRepairs={score?.repair_cost_estimate || 40000}
+              defaultArv={score?.after_repair_value || property.estimated_value || 380000}
+            />
+          </Card>
+
+          <Card title="Title & lien risk">
+            {titleRisk ? (
+              <div className="space-y-4">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${
+                    titleRisk.risk_level === "critical" ? "bg-red-100 text-red-700" :
+                    titleRisk.risk_level === "high" ? "bg-orange-100 text-orange-700" :
+                    titleRisk.risk_level === "medium" ? "bg-amber-100 text-amber-700" :
+                    "bg-emerald-100 text-emerald-700"
+                  }`}>{titleRisk.risk_level || "unknown"} risk</span>
+                  <span className="text-sm text-[#6B7B72]">Liens {money(titleRisk.lien_total)} · Mortgage {money(titleRisk.mortgage_balance)}</span>
+                </div>
+                <div className="grid gap-2 text-sm sm:grid-cols-2">
+                  <p>Judgments: <span className="font-medium">{titleRisk.has_judgments ? "Yes" : "No"}</span></p>
+                  <p>Tax delinquent: <span className="font-medium">{titleRisk.tax_delinquent ? "Yes" : "No"}</span></p>
+                  <p>HOA delinquent: <span className="font-medium">{titleRisk.hoa_delinquent ? "Yes" : "No"}</span></p>
+                  <p>Code liens: <span className="font-medium">{titleRisk.code_liens?.length || 0}</span></p>
+                </div>
+                {titleRisk.ai_analysis && <p className="border-t border-[#E5EDEA] pt-4 leading-relaxed text-[#6B7B72]">{titleRisk.ai_analysis}</p>}
+              </div>
+            ) : (
+              <div className="flex items-center gap-3 rounded-2xl bg-[#F8FAF9] p-6 ring-1 ring-[#E5EDEA]">
+                <ShieldAlert className="h-5 w-5 text-[#6B7B72]" />
+                <p className="text-sm text-[#6B7B72]">No title-risk assessment yet — generated automatically during nightly scoring.</p>
+              </div>
+            )}
           </Card>
         </div>
 

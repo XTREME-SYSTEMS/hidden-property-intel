@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Logo from "@/components/luxury/Logo";
 import PWAInstall from "@/components/PWAInstall";
+import AlertsBell from "@/components/AlertsBell";
 import { base44 } from "@/api/base44Client";
 
 export default function LuxNav() {
@@ -15,6 +16,7 @@ export default function LuxNav() {
     { label: "For Investors", href: "/#investors" },
     { label: "For Sellers", href: "/#sellers" },
     { label: "Calculators", to: "/calculators" },
+    { label: "Pipeline", to: "/investor/pipeline" },
   ];
   const adminLinks = [
     { label: "Scrape Sources", to: "/admin/sources" },
@@ -47,6 +49,7 @@ export default function LuxNav() {
         </nav>
 
         <div className="flex items-center gap-4">
+          <AlertsBell user={user} />
           <PWAInstall variant="nav" />
           <Link to="/listings" className="hidden rounded-sm bg-black px-5 py-2.5 text-[11px] uppercase tracking-[0.25em] text-white transition-colors hover:bg-black/80 sm:inline-block">
             List your property

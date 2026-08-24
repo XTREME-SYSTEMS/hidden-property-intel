@@ -34,6 +34,56 @@ const SCHEMA = {
   }
 };
 
+const TITLE_SCHEMA = {
+  type: 'object',
+  properties: {
+    lien_total: { type: 'number' },
+    mortgage_balance: { type: 'number' },
+    has_judgments: { type: 'boolean' },
+    code_liens: { type: 'array', items: { type: 'string' } },
+    hoa_delinquent: { type: 'boolean' },
+    tax_delinquent: { type: 'boolean' },
+    risk_level: { type: 'string', enum: ['low', 'medium', 'high', 'critical'] },
+    details: { type: 'string' },
+    ai_analysis: { type: 'string' }
+  }
+};
+
+/**
+ * Generate a title / lien risk assessment for a property via LLM web-search.
+ * Creates a TitleRisk record. Idempotent per call (latest wins).
+ */
+export async function generateTitleRisk(base44, property) {
+  const property_id = property.id;
+  const prompt = `You are a title-risk analyst for a real estate investment platform. Research public records for this property and return JSON only.
+Address: ${property.address}, ${property.city}, ${property.state} ${property.zip_code}
+Distress type: ${property.distress_type}
+
+Estimate: total outstanding lien amount (USD), mortgage balance (USD), whether there are open judgments, any code-violation liens (list them), HOA delinquency, property-tax delinquency, and an overall title risk level. Write a 1-2 paragraph ai_analysis explaining encumbrances that affect acquisition cost. If data is unavailable, estimate conservatively and note the uncertainty.`;
+
+  const r = await base44.asServiceRole.integrations.Core.InvokeLLM({
+    prompt,
+    add_context_from_internet: true,
+    model: 'gemini_3_flash',
+    response_json_schema: TITLE_SCHEMA
+  });
+
+  await base44.asServiceRole.entities.TitleRisk.create({
+    property_id,
+    lien_total: r.lien_total,
+    mortgage_balance: r.mortgage_balance,
+    has_judgments: r.has_judgments,
+    code_liens: r.code_liens,
+    hoa_delinquent: r.hoa_delinquent,
+    tax_delinquent: r.tax_delinquent,
+    risk_level: r.risk_level,
+    details: r.details,
+    ai_analysis: r.ai_analysis,
+    checked_at: new Date().toISOString()
+  });
+  return r;
+}
+
 /**
  * Score a single property via LLM web-search: comparable sales, ARV, repair costs,
  * ROI, distress severity, 0-100 score. Creates a PropertyScore record and writes the
@@ -91,6 +141,13 @@ Find comparable sales within 1 mile in the last 12 months, estimate current mark
     } catch (e) {
       console.error('image gen failed', property_id, e?.message);
     }
+  }
+
+  // title / lien risk assessment
+  try {
+    await generateTitleRisk(base44, property);
+  } catch (e) {
+    console.error('title risk failed', property_id, e?.message);
   }
 
   return r;

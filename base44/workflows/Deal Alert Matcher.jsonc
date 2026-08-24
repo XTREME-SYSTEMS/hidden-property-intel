@@ -1,0 +1,40 @@
+{
+  "name": "Deal Alert Matcher",
+  "description": "When a new scraped property is created, match it to investor saved searches and create alerts + send emails.",
+  "trigger": {
+    "config": {
+      "trigger_type": "entity",
+      "entity_name": "Property",
+      "events": [
+        "create"
+      ]
+    },
+    "condition": "${ .trigger.data.source == \"scraped\" }"
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "deal_alert_matcher",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "match_alerts": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "matchAndNotifyAlerts",
+            "args": {
+              "property_id": "${ .trigger.entity_id }"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Match property to saved searches",
+            "description": "Create alerts and send emails"
+          }
+        }
+      }
+    ]
+  }
+}

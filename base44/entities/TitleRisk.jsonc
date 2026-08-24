@@ -1,0 +1,70 @@
+{
+  "name": "TitleRisk",
+  "type": "object",
+  "properties": {
+    "property_id": {
+      "type": "string"
+    },
+    "lien_total": {
+      "type": "number"
+    },
+    "mortgage_balance": {
+      "type": "number"
+    },
+    "has_judgments": {
+      "type": "boolean"
+    },
+    "code_liens": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "hoa_delinquent": {
+      "type": "boolean"
+    },
+    "tax_delinquent": {
+      "type": "boolean"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ]
+    },
+    "details": {
+      "type": "string"
+    },
+    "ai_analysis": {
+      "type": "string"
+    },
+    "checked_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "property_id"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
