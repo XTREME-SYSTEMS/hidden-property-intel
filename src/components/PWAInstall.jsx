@@ -52,7 +52,7 @@ export default function PWAInstall({ variant = "nav" }) {
       <button
         onClick={install}
         disabled={!deferred}
-        title="Install PropertyIntel app"
+        title="Install Hidden Property Intel app"
         className="inline-flex items-center gap-2 rounded-sm border border-black/15 px-3.5 py-2.5 text-[10px] uppercase tracking-[0.25em] text-black transition-colors hover:bg-black hover:text-white disabled:hidden"
       >
         <Download className="h-3.5 w-3.5" /> Install
@@ -66,7 +66,7 @@ export default function PWAInstall({ variant = "nav" }) {
       <div className="flex items-center gap-3">
         <Logo variant="dark" />
       </div>
-      <h3 className="mt-5 font-display text-2xl font-light">Get the PropertyIntel app.</h3>
+      <h3 className="mt-5 font-display text-2xl font-light">Get the Hidden Property Intel app.</h3>
       <p className="mt-2 max-w-md text-sm leading-relaxed text-black/60">
         Install on your phone or desktop for a full-screen, app-like experience —
         offline-ready inventory browsing, no app store required.

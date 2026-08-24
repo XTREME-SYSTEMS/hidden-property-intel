@@ -37,7 +37,7 @@ export default function LuxNav() {
   return (
     <header className="fixed top-0 z-50 w-full border-b border-black/10 bg-white/80 backdrop-blur-xl">
       <div className="mx-auto flex h-20 max-w-[1400px] items-center justify-between px-6 lg:px-12">
-        <Link to="/" aria-label="PropertyIntel"><Logo variant="dark" /></Link>
+        <Link to="/" aria-label="Hidden Property Intel"><Logo variant="dark" /></Link>
 
         <nav className="hidden items-center gap-10 lg:flex">
           {links.map((l) => renderLink(l))}

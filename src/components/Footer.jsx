@@ -6,7 +6,7 @@ export default function Footer() {
     <footer className="bg-[#0F2A1D] text-white/70 mt-24">
       <div className="mx-auto max-w-7xl px-6 py-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <p className="font-display text-lg font-semibold text-white">PropertyIntel</p>
+          <p className="font-display text-lg font-semibold text-white">Hidden Property Intel</p>
           <p className="mt-2 text-sm leading-relaxed">
             AI-powered discovery of distressed and inherited real estate.
           </p>
@@ -26,7 +26,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="border-t border-white/10 py-6 text-center text-xs">
-        © {new Date().getFullYear()} PropertyIntel. All rights reserved.
+        © {new Date().getFullYear()} Hidden Property Intel. All rights reserved.
       </div>
     </footer>
   );

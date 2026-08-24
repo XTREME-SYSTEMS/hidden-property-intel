@@ -141,7 +141,7 @@ export default function Listings() {
 
       {/* Concierge strip */}
       <section className="bg-black px-6 py-20 text-center text-white lg:px-12">
-        <p className="text-[11px] uppercase tracking-[0.4em] text-white/40">PropertyIntel Concierge</p>
+        <p className="text-[11px] uppercase tracking-[0.4em] text-white/40">Hidden Property Intel Concierge</p>
         <h2 className="mx-auto mt-5 max-w-2xl font-display text-3xl font-light tracking-tight sm:text-4xl">Selling a distressed property? List free and get a cash offer.</h2>
         <p className="mx-auto mt-5 max-w-md text-sm leading-relaxed text-white/60">No commissions. AI pricing and negotiation assistant included. Close on your timeline.</p>
       </section>

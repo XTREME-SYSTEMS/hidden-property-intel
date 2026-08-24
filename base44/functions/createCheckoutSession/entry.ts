@@ -2,9 +2,9 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { secrets } from 'base44:runtime';
 
 const PLAN_PRODUCTS = {
-  starter: 'PropertyIntel Starter',
-  pro: 'PropertyIntel Pro',
-  elite: 'PropertyIntel Elite'
+  starter: 'Hidden Property Intel Starter',
+  pro: 'Hidden Property Intel Pro',
+  elite: 'Hidden Property Intel Elite'
 };
 
 export default async function(req) {

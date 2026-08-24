@@ -64,9 +64,9 @@ export default function PropertyBrief({ property, score, owners = [], chain, bid
     } else { p("No bids yet."); }
 
     doc.setFontSize(8); doc.setTextColor(120, 120, 120);
-    doc.text(`Generated ${new Date().toLocaleString()} · PropertyIntel`, left, 760);
+    doc.text(`Generated ${new Date().toLocaleString()} · Hidden Property Intel`, left, 760);
 
-    doc.save(`PropertyIntel-Brief-${property.city}-${property.state}.pdf`);
+    doc.save(`Hidden-Property-Intel-Brief-${property.city}-${property.state}.pdf`);
   };
 
   return (

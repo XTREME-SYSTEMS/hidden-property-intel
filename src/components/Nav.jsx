@@ -16,7 +16,7 @@ export default function Nav() {
           <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#0F2A1D]">
             <Building2 className="h-4 w-4 text-emerald-400" />
           </span>
-          <span className="font-display text-base font-semibold tracking-tight text-[#0F2A1D]">PropertyIntel</span>
+          <span className="font-display text-base font-semibold tracking-tight text-[#0F2A1D]">Hidden Property Intel</span>
         </Link>
         <nav className="flex items-center gap-1">
           {links.map((l) => (

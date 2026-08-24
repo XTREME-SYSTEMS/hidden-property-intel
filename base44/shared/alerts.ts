@@ -64,7 +64,7 @@ export async function matchPropertyToAlerts(base44, property) {
           await base44.asServiceRole.integrations.Core.SendEmail({
             to: u.email,
             subject: title,
-            body: `${message}\n\nView property: /properties/${property.id}\n\n— PropertyIntel`
+            body: `${message}\n\nView property: /properties/${property.id}\n\n— Hidden Property Intel`
           });
         }
       } catch (e) {

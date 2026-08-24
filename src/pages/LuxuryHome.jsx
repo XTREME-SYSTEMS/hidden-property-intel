@@ -52,10 +52,10 @@ export default function LuxuryHome() {
     <div className="font-body">
       {/* Hero */}
       <section className="relative h-[94vh] min-h-[660px] w-full overflow-hidden bg-black">
-        <Image src={IMAGES.estate} alt="PropertyIntel" fittingType="fill" className="absolute inset-0 h-full w-full object-cover opacity-80" />
+        <Image src={IMAGES.estate} alt="Hidden Property Intel" fittingType="fill" className="absolute inset-0 h-full w-full object-cover opacity-80" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/80" />
         <div className="relative mx-auto flex h-full max-w-[1400px] flex-col justify-center px-6 pt-24 pb-20 lg:px-12">
-          <p className="text-[11px] uppercase tracking-[0.4em] text-white/60">PropertyIntel · The distressed property marketplace</p>
+          <p className="text-[11px] uppercase tracking-[0.4em] text-white/60">Hidden Property Intel · The distressed property marketplace</p>
           <h1 className="mt-6 max-w-3xl font-display text-4xl font-light leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl">
             Distressed properties,<br />serious investors.
           </h1>
@@ -93,7 +93,7 @@ export default function LuxuryHome() {
           <div className="flex flex-col justify-center">
             <p className="text-[11px] uppercase tracking-[0.4em] text-black/40">Two sides. One marketplace.</p>
             <p className="mt-6 font-display text-2xl font-light leading-snug tracking-tight text-black sm:text-3xl">
-              Most platforms serve one side of the deal. PropertyIntel serves both — giving sellers a free, AI-guided
+              Most platforms serve one side of the deal. Hidden Property Intel serves both — giving sellers a free, AI-guided
               path to a fair cash offer, and investors a daily-refreshed pipeline of off-market distressed inventory
               with the underwriting already done.
             </p>
@@ -217,7 +217,7 @@ export default function LuxuryHome() {
             <h2 className="mt-3 font-display text-4xl font-light leading-tight tracking-tight sm:text-5xl">List free.<br />Sell on your terms.</h2>
             <p className="mt-6 max-w-md leading-relaxed text-black/60">
               Whether you're dealing with a probate inheritance, a pre-foreclosure, or a property that's become a
-              burden — PropertyIntel gets you a fair cash offer from a verified investor, with an AI assistant in
+              burden — Hidden Property Intel gets you a fair cash offer from a verified investor, with an AI assistant in
               your corner. No commissions. No fees.
             </p>
             <Link to="/listings" className="mt-8 inline-flex items-center gap-3 rounded-sm bg-black px-7 py-4 text-[11px] uppercase tracking-[0.3em] text-white transition-colors hover:bg-black/80">
@@ -239,7 +239,7 @@ export default function LuxuryHome() {
       {/* Differentiators */}
       <section className="border-t border-black/10 bg-white">
         <div className="mx-auto max-w-[1400px] px-6 py-24 lg:px-12 lg:py-32">
-          <p className="text-[11px] uppercase tracking-[0.4em] text-black/40">Why PropertyIntel</p>
+          <p className="text-[11px] uppercase tracking-[0.4em] text-black/40">Why Hidden Property Intel</p>
           <h2 className="mt-3 max-w-2xl font-display text-4xl font-light tracking-tight sm:text-5xl">Four things no competitor does.</h2>
           <div className="mt-14 grid gap-px overflow-hidden rounded-sm border border-black/10 bg-black/10 sm:grid-cols-2">
             {DIFFERENTIATORS.map((d) => (
@@ -264,10 +264,10 @@ export default function LuxuryHome() {
       <section className="mx-auto max-w-[1400px] px-6 py-24 lg:px-12 lg:py-32">
         <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.4em] text-black/40">PropertyIntel app</p>
+            <p className="text-[11px] uppercase tracking-[0.4em] text-black/40">Hidden Property Intel app</p>
             <h2 className="mt-3 font-display text-4xl font-light tracking-tight sm:text-5xl">Your deal pipeline, in your pocket.</h2>
             <p className="mt-6 max-w-md leading-relaxed text-black/60">
-              Install PropertyIntel on your phone or desktop for a full-screen, app-like experience.
+              Install Hidden Property Intel on your phone or desktop for a full-screen, app-like experience.
               Browse distressed inventory, place bids, negotiate, and close on-chain — no app store, always up to date.
             </p>
           </div>

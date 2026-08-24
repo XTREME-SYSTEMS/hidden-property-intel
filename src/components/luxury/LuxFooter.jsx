@@ -32,7 +32,7 @@ export default function LuxFooter() {
           ))}
         </div>
         <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 text-[11px] uppercase tracking-[0.2em] text-white/40 sm:flex-row">
-          <span>© {new Date().getFullYear()} PropertyIntel. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} Hidden Property Intel. All rights reserved.</span>
           <span>Black · White · Silver</span>
         </div>
       </div>

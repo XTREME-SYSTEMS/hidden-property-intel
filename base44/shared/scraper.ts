@@ -1,5 +1,5 @@
 /**
- * PropertyIntel self-contained data acquisition engine.
+ * Hidden Property Intel self-contained data acquisition engine.
  *
  * Two acquisition methods, no external aggregator dependency:
  *  - "ai" (default): uses the built-in LLM web-search (Gemini + live web) to harvest

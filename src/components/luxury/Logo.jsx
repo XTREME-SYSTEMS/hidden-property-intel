@@ -27,9 +27,11 @@ export default function Logo({ variant = "dark", className = "" }) {
   return (
     <div className={`flex items-center gap-3 ${ink} ${className}`}>
       <Mark className="h-8 w-8 shrink-0" />
-      <div className="w-[6.75rem] text-[12px] font-medium uppercase leading-none">
+      <div className="w-[7.5rem] text-[11px] font-medium uppercase leading-none">
+        <Spread word="Hidden" />
+        <div className="h-[2px]" />
         <Spread word="Property" />
-        <div className="h-[3px]" />
+        <div className="h-[2px]" />
         <Spread word="Intel" />
       </div>
     </div>

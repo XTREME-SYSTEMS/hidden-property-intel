@@ -69,8 +69,9 @@ export async function emailNewInvestorLeads(base44, limit = 50) {
     try {
       await base44.asServiceRole.integrations.Core.SendEmail({
         to: lead.email,
-        subject: 'Off-market distressed Florida properties — PropertyIntel',
-        body: `Hi ${lead.name || 'there'},\n\nI'm reaching out from PropertyIntel, a marketplace for off-market distressed, probate, and foreclosure properties in Florida. We scrape county records daily and surface deals with AI underwriting — 0-100 scores, ARV, repair estimates, full ownership chains — and close with smart-contract escrow on Polygon.\n\nWe're building our investor network and thought you'd be a fit. Browse inventory and subscribe at https://my-property-intel.base44.app/listings.\n\nReply to learn more.\n\n— The PropertyIntel team`
+        from_name: 'Hidden Property Intel',
+        subject: 'Off-market distressed Florida properties — Hidden Property Intel',
+        body: `Hi ${lead.name || 'there'},\n\nI'm reaching out from Hidden Property Intel, a marketplace for off-market distressed, probate, and foreclosure properties in Florida. We scrape county records daily and surface deals with AI underwriting — 0-100 scores, ARV, repair estimates, full ownership chains — and close with smart-contract escrow on Polygon.\n\nWe're building our investor network and thought you'd be a fit. Browse inventory and subscribe at https://hiddenpropertyintel.com/listings.\n\nReply to learn more.\n\n— The Hidden Property Intel team`
       });
       await base44.asServiceRole.entities.InvestorLead.update(lead.id, {
         outreach_status: 'contacted',
@@ -97,8 +98,9 @@ export async function emailSellerLeads(base44, limit = 50) {
     try {
       await base44.asServiceRole.integrations.Core.SendEmail({
         to: owner.contact_email,
-        subject: 'A cash offer for your Florida property — PropertyIntel',
-        body: `Hi ${owner.name || 'there'},\n\nPropertyIntel connects property owners with verified investors who buy distressed, inherited, or under-stress properties for cash — no commissions, no fees, close on your timeline. If you'd consider a cash offer, list your property free at https://my-property-intel.base44.app/listings and our AI will price it and surface it to 1,200+ investors.\n\nReply if you'd like to learn more.\n\n— The PropertyIntel team`
+        from_name: 'Hidden Property Intel',
+        subject: 'A cash offer for your Florida property — Hidden Property Intel',
+        body: `Hi ${owner.name || 'there'},\n\nHidden Property Intel connects property owners with verified investors who buy distressed, inherited, or under-stress properties for cash — no commissions, no fees, close on your timeline. If you'd consider a cash offer, list your property free at https://hiddenpropertyintel.com/listings and our AI will price it and surface it to 1,200+ investors.\n\nReply if you'd like to learn more.\n\n— The Hidden Property Intel team`
       });
       await base44.asServiceRole.entities.Owner.update(owner.id, {
         outreach_status: 'contacted',

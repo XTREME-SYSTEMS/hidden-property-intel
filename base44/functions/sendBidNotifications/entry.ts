@@ -43,7 +43,7 @@ export default async function(req) {
         sellerEmail,
         `New bid on ${propLabel}`,
         `A new bid of $${(bid?.bid_amount ?? 0).toLocaleString()} was placed on your property at ${propLabel}. ` +
-          `Log in to PropertyIntel to review all bids and use the AI negotiation assistant.`
+          `Log in to Hidden Property Intel to review all bids and use the AI negotiation assistant.`
       );
     } else if (notification_type === 'outbid') {
       const target = investor_id || bid?.investor_id;
@@ -51,7 +51,7 @@ export default async function(req) {
       await send(
         email,
         `You've been outbid on ${propLabel}`,
-        `You've been outbid on ${propLabel}. Log in to PropertyIntel to place a new bid.`
+        `You've been outbid on ${propLabel}. Log in to Hidden Property Intel to place a new bid.`
       );
     } else if (notification_type === 'bid_accepted') {
       const email = await emailFor(bid?.investor_id);

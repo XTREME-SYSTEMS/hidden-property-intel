@@ -42,7 +42,7 @@ export default function NegotiationChat() {
       </Link>
       <p className="mt-4 text-[11px] uppercase tracking-[0.4em] text-black/40">In-platform negotiation</p>
       <h1 className="mt-2 font-display text-3xl font-light">{property ? `${property.city}, ${property.state}` : "Negotiation"}</h1>
-      <p className="mt-1 text-xs text-black/50">All communication stays on PropertyIntel — no contact info is exchanged until a deal closes.</p>
+      <p className="mt-1 text-xs text-black/50">All communication stays on Hidden Property Intel — no contact info is exchanged until a deal closes.</p>
 
       <div className="mt-6 flex-1 overflow-y-auto rounded-sm border border-black/10 p-5">
         {(!thread?.messages || thread.messages.length === 0) ? (

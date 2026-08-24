@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Plus } from "lucide-react";
 
 const ITEMS = [
-  ["What types of distressed properties does PropertyIntel find?", "We track all distress types: pre-foreclosure, foreclosure, probate/inherited, tax-delinquent, code-violation, divorce, bankruptcy, auction, and short-sale properties. Both commercial and residential."],
+  ["What types of distressed properties does Hidden Property Intel find?", "We track all distress types: pre-foreclosure, foreclosure, probate/inherited, tax-delinquent, code-violation, divorce, bankruptcy, auction, and short-sale properties. Both commercial and residential."],
   ["How does the property scoring work?", "Our AI engine analyzes distress severity, repair cost estimates, after-repair value, comparable sales, location desirability, and market trends to generate a 0-100 score with a proposed asking price and ROI projection."],
   ["How do I access the property database?", "Investors subscribe to one of three plans: Starter ($49/mo), Pro ($149/mo), or Elite ($499/mo). Each plan includes different levels of access to property data, bidding, smart contracts, and analytics."],
   ["Can sellers list properties for free?", "Yes. Sellers can post properties for free on our seller portal. You get AI listing optimization, bid management tools, and an AI negotiation assistant to help you get the best deal."],
