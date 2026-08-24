@@ -1,0 +1,44 @@
+{
+  "name": "Property Image Ingestion",
+  "description": "Every 2 hours: scans all properties missing real photos, fetches real listing images from the web using the property address, validates they are real reachable images, and stores them in property.images. No AI images.",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "property_image_ingestion",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "ingest_images": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "ingestPropertyImages"
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Ingest property images",
+            "description": "Scan properties missing photos, fetch and validate real listing images"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "30 */2 * * *",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  }
+}
