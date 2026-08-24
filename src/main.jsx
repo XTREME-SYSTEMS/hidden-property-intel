@@ -8,20 +8,18 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 )
 
 if ('serviceWorker' in navigator) {
-  if (import.meta.env.DEV) {
-    // In dev, unregister any stale service workers that cache old JS chunks
-    // (stale React copies cause "Cannot read properties of null (reading 'useState')")
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.getRegistrations().then((regs) => {
-        regs.forEach((r) => r.unregister());
-      });
-      caches.keys().then((keys) => {
-        keys.forEach((k) => caches.delete(k));
-      });
+  // Always purge stale service workers + caches — old v1 worker served stale
+  // JS chunks (old React copies) causing "Cannot read properties of null (reading 'useState')".
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.getRegistrations().then((regs) => {
+      regs.forEach((r) => r.unregister());
     });
-  } else {
-    window.addEventListener('load', () => {
+    caches.keys().then((keys) => {
+      keys.forEach((k) => caches.delete(k));
+    });
+    // Only register the fixed service worker (v2, no JS chunk caching) in production.
+    if (!import.meta.env.DEV) {
       navigator.serviceWorker.register('/sw.js').catch(() => {});
-    });
-  }
+    }
+  });
 }
