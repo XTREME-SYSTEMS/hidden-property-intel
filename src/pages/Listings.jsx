@@ -31,8 +31,8 @@ export default function Listings() {
           <p className="text-[11px] uppercase tracking-[0.4em] text-white/50">The Portfolio</p>
           <h1 className="mt-5 font-display text-5xl font-light tracking-tight sm:text-6xl">The full collection</h1>
           <p className="mt-6 max-w-lg leading-relaxed text-white/60">
-            {ESTATES.length} residences currently held by Maison. Filter by location, refine by price, and request
-            a private viewing of any that meet your criteria.
+            {ESTATES.length} residences currently held by PropertyIntel. Filter by location, refine by price, and
+            request a private viewing of any that meet your criteria.
           </p>
         </div>
       </section>
@@ -102,7 +102,7 @@ export default function Listings() {
 
       {/* Concierge strip */}
       <section className="bg-black px-6 py-20 text-center text-white lg:px-12">
-        <p className="text-[11px] uppercase tracking-[0.4em] text-white/40">Maison Concierge</p>
+        <p className="text-[11px] uppercase tracking-[0.4em] text-white/40">PropertyIntel Concierge</p>
         <h2 className="mx-auto mt-5 max-w-2xl font-display text-3xl font-light tracking-tight sm:text-4xl">
           Can't find what you're seeking? We source off-market.
         </h2>

@@ -8,8 +8,8 @@ export default function LuxFooter() {
         <div className="grid gap-12 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
           <div>
             <div className="flex items-center gap-3">
-              <span className="grid h-9 w-9 place-items-center rounded-sm bg-white text-xs font-semibold tracking-widest text-black">M</span>
-              <span className="text-sm font-medium uppercase tracking-[0.3em]">Maison</span>
+              <span className="grid h-9 w-9 place-items-center rounded-sm bg-white text-xs font-semibold tracking-widest text-black">P</span>
+              <span className="text-sm font-medium uppercase tracking-[0.3em]">PropertyIntel</span>
             </div>
             <p className="mt-6 max-w-xs text-sm leading-relaxed text-white/50">
               A private collection of the world's most extraordinary residences, curated for the discerning few.
@@ -31,7 +31,7 @@ export default function LuxFooter() {
           ))}
         </div>
         <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 text-[11px] uppercase tracking-[0.2em] text-white/40 sm:flex-row">
-          <span>© {new Date().getFullYear()} Maison. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} PropertyIntel. All rights reserved.</span>
           <span>Black · White · Silver</span>
         </div>
       </div>

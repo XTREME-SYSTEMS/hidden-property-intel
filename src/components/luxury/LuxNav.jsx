@@ -14,8 +14,8 @@ export default function LuxNav() {
     <header className="fixed top-0 z-50 w-full border-b border-black/10 bg-white/80 backdrop-blur-xl">
       <div className="mx-auto flex h-20 max-w-[1400px] items-center justify-between px-6 lg:px-12">
         <Link to="/" className="flex items-center gap-3">
-          <span className="grid h-9 w-9 place-items-center rounded-sm bg-black text-xs font-semibold tracking-widest text-white">M</span>
-          <span className="text-sm font-medium uppercase tracking-[0.3em] text-black">Maison</span>
+          <span className="grid h-9 w-9 place-items-center rounded-sm bg-black text-xs font-semibold tracking-widest text-white">P</span>
+          <span className="text-sm font-medium uppercase tracking-[0.3em] text-black">PropertyIntel</span>
         </Link>
 
         <nav className="hidden items-center gap-10 lg:flex">

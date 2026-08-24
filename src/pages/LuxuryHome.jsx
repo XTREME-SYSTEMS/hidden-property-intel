@@ -14,13 +14,13 @@ export default function LuxuryHome() {
         <Image src={IMAGES.hero} alt="Villa Noir at dusk" fittingType="fill" className="absolute inset-0 h-full w-full object-cover opacity-90" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/70" />
         <div className="relative mx-auto flex h-full max-w-[1400px] flex-col justify-end px-6 pb-20 lg:px-12">
-          <p className="text-[11px] uppercase tracking-[0.4em] text-white/60">A private collection · 2026</p>
+          <p className="text-[11px] uppercase tracking-[0.4em] text-white/60">PropertyIntel · A private collection · 2026</p>
           <h1 className="mt-6 max-w-3xl font-display text-5xl font-light leading-[1.02] tracking-tight text-white sm:text-7xl lg:text-8xl">
             Residences of<br />extraordinary distinction.
           </h1>
           <p className="mt-7 max-w-md text-base leading-relaxed text-white/70">
-            Maison curates the world's most exceptional homes — architectural masterpieces, private estates, and
-            unseen sanctuaries — for a clientele that accepts nothing less.
+            PropertyIntel curates the world's most exceptional homes — architectural masterpieces, private estates,
+            and unseen sanctuaries — for a clientele that accepts nothing less.
           </p>
           <div className="mt-10 flex flex-wrap gap-4">
             <Link to="/listings" className="group inline-flex items-center gap-3 rounded-sm bg-white px-7 py-4 text-[11px] uppercase tracking-[0.3em] text-black transition-colors hover:bg-black hover:text-white">
@@ -37,7 +37,7 @@ export default function LuxuryHome() {
       {/* Intro statement */}
       <section className="mx-auto max-w-[1400px] px-6 py-24 lg:px-12 lg:py-32">
         <div className="grid gap-12 lg:grid-cols-[1fr_1.4fr]">
-          <p className="text-[11px] uppercase tracking-[0.4em] text-black/40">The Maison standard</p>
+          <p className="text-[11px] uppercase tracking-[0.4em] text-black/40">The PropertyIntel standard</p>
           <p className="font-display text-2xl font-light leading-snug tracking-tight text-black sm:text-3xl">
             We represent fewer than one in a thousand properties we review. Each residence is selected for its
             architectural integrity, provenance, and the singular life it makes possible — then presented with
