@@ -6,6 +6,9 @@ import { IMAGES } from "@/lib/luxury";
 import LuxuryListingCard from "@/components/luxury/LuxuryListingCard";
 import FAQ from "@/components/FAQ";
 import PWAInstall from "@/components/PWAInstall";
+import SellerFreeCTA from "@/components/luxury/SellerFreeCTA";
+import PortalShowcase from "@/components/luxury/PortalShowcase";
+import SmartContractShowcase from "@/components/luxury/SmartContractShowcase";
 import { ArrowRight, Radar, Brain, FileSignature, Building2, Users, Scale, BadgeCheck, Search, Sparkles, Plus } from "lucide-react";
 
 const INVESTOR_STEPS = [
@@ -83,6 +86,11 @@ export default function LuxuryHome() {
             <Link to="/seller/post-property" className="inline-flex items-center gap-2.5 rounded-md border border-white/30 px-6 py-3.5 font-brand text-[11px] font-semibold uppercase tracking-[0.22em] text-white backdrop-blur-sm transition-all duration-200 hover:border-white/60 hover:bg-white/10 sm:px-7 sm:py-4 sm:tracking-[0.25em]">
               List — it's free
             </Link>
+          </div>
+          <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-[10px] uppercase tracking-[0.2em] text-white/45">
+            <span className="flex items-center gap-1.5"><Scale className="h-3.5 w-3.5 text-gold-warm" /> Proxy bidding</span>
+            <span className="flex items-center gap-1.5"><FileSignature className="h-3.5 w-3.5 text-gold-warm" /> On-chain escrow</span>
+            <span className="flex items-center gap-1.5"><Brain className="h-3.5 w-3.5 text-gold-warm" /> AI negotiation</span>
           </div>
           <dl className="mt-10 grid max-w-3xl grid-cols-2 gap-6 border-t border-white/10 pt-6 sm:mt-14 sm:grid-cols-4 sm:gap-8 sm:pt-8">
             {[["12,847", "Properties tracked"], ["$340M", "In property value"], ["1,200+", "Active investors"], ["1,400+", "Deals closed"]].map(([v, l]) => (
@@ -176,6 +184,9 @@ export default function LuxuryHome() {
         </div>
       </section>
 
+      {/* Seller free signup CTA */}
+      <SellerFreeCTA />
+
       {/* Featured distressed listings */}
       <section className="mx-auto max-w-[1400px] px-6 py-24 lg:px-12 lg:py-32">
         <div className="flex items-end justify-between border-b border-black/10 pb-6">
@@ -237,6 +248,9 @@ export default function LuxuryHome() {
         </div>
       </section>
 
+      {/* Client portals & bidding */}
+      <PortalShowcase />
+
       {/* For sellers */}
       <section id="sellers" className="mx-auto max-w-[1400px] px-6 py-24 lg:px-12 lg:py-32">
         <div className="grid gap-12 lg:grid-cols-[1fr_1.2fr]">
@@ -266,6 +280,9 @@ export default function LuxuryHome() {
           </div>
         </div>
       </section>
+
+      {/* Smart contract showcase */}
+      <SmartContractShowcase />
 
       {/* Differentiators */}
       <section className="border-t border-black/10 bg-white">
@@ -314,12 +331,13 @@ export default function LuxuryHome() {
           <h2 className="mx-auto max-w-2xl font-display text-4xl font-light leading-tight tracking-tight sm:text-5xl">
             Join the marketplace built for both sides of the deal.
           </h2>
-          <div className="mt-10 flex flex-wrap justify-center gap-4">
-            <Link to="/listings" className="inline-flex items-center gap-3 rounded-sm bg-white px-7 py-4 text-[11px] uppercase tracking-[0.3em] text-black transition-colors hover:bg-black hover:text-white">
-              Browse inventory <ArrowRight className="h-4 w-4" />
+          <p className="mt-6 text-[11px] uppercase tracking-[0.3em] text-gold-warm">Free for sellers · Always</p>
+          <div className="mt-8 flex flex-wrap justify-center gap-4">
+            <Link to="/register" className="group inline-flex items-center gap-3 rounded-md bg-gold-warm px-7 py-4 font-brand text-[11px] font-semibold uppercase tracking-[0.25em] text-black transition-all duration-200 hover:bg-white">
+              Create free account <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
-            <Link to="/seller/post-property" className="inline-flex items-center gap-3 rounded-sm border border-white/40 px-7 py-4 text-[11px] uppercase tracking-[0.3em] text-white transition-colors hover:bg-white/10">
-              List your property
+            <Link to="/seller/post-property" className="inline-flex items-center gap-3 rounded-md border border-white/30 px-7 py-4 font-brand text-[11px] font-semibold uppercase tracking-[0.25em] text-white transition-all duration-200 hover:border-white/60 hover:bg-white/10">
+              List your property — free
             </Link>
           </div>
         </div>
