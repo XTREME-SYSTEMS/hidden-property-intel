@@ -142,6 +142,7 @@ export async function scrapeSource(base44, { source, url, distress_type, state }
   let found = props.length;
   let isNew = 0;
   let updated = 0;
+  const newRecords = [];
   for (const p of props) {
     if (!p.address) continue;
     const existing = await base44.asServiceRole.entities.Property.filter({
@@ -177,8 +178,9 @@ export async function scrapeSource(base44, { source, url, distress_type, state }
           source: sourceName
         });
       }
+      newRecords.push(created);
       isNew++;
     }
   }
-  return { found, isNew, updated, error: null };
+  return { found, isNew, updated, newRecords, error: null };
 }

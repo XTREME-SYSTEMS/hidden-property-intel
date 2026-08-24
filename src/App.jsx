@@ -18,6 +18,7 @@ import InvestorDashboard from '@/pages/InvestorDashboard';
 import SellerDashboard from '@/pages/SellerDashboard';
 import SellerPostProperty from '@/pages/SellerPostProperty';
 import NegotiationAssistant from '@/pages/NegotiationAssistant';
+import AdminSources from '@/pages/AdminSources';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
@@ -67,6 +68,7 @@ const AuthenticatedApp = () => {
           <Route path="/seller/dashboard" element={<SellerDashboard />} />
           <Route path="/seller/post-property" element={<SellerPostProperty />} />
           <Route path="/seller/negotiation/:propertyId" element={<NegotiationAssistant />} />
+          <Route path="/admin/sources" element={<AdminSources />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
