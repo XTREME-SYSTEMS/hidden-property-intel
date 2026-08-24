@@ -13,7 +13,8 @@ import { fetchPropertyImages, hasRealImages } from '../../shared/propertyImages.
  * Runs nightly after the scrape pipeline.
  */
 
-const BATCH_SIZE = 8;
+const BATCH_SIZE = 3;
+const TIME_LIMIT_MS = 250000; // stop before the 300s serverless timeout
 
 export default async function(req) {
   try {
@@ -30,8 +31,14 @@ export default async function(req) {
     let promoted = 0;
     let scored = 0;
     let stillDraft = 0;
+    const startedAt = Date.now();
 
     for (const p of drafts) {
+      // Safety valve: stop if we're approaching the timeout
+      if (Date.now() - startedAt > TIME_LIMIT_MS) {
+        results.push({ id: p.id, address: p.address, action: 'skipped', note: 'time limit reached' });
+        continue;
+      }
       try {
         // Step 1: fetch real listing images
         const imgResult = await fetchPropertyImages(base44, p);

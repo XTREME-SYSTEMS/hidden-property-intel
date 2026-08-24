@@ -1,6 +1,6 @@
 {
   "name": "Draft Property Processor",
-  "description": "Nightly batch: fetches real images for draft properties, promotes to active, and scores them",
+  "description": "Every hour: fetches real images for 3 draft properties, promotes to active, and scores them. Clears the draft backlog over ~2 days.",
   "definition": {
     "document": {
       "dsl": "1.0.0",
@@ -18,7 +18,7 @@
           "then": "end",
           "x-base44": {
             "title": "Process draft properties",
-            "description": "Fetch images, promote to active, score"
+            "description": "Fetch images for 3 drafts, promote to active, score"
           }
         }
       }
@@ -30,7 +30,7 @@
       "trigger_type": "scheduled",
       "events": [],
       "schedule_mode": "recurring",
-      "cron_expression": "0 3 * * *",
+      "cron_expression": "0 * * * *",
       "one_time_date": null,
       "timezone": "America/New_York",
       "interval_value": null,
