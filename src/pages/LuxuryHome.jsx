@@ -53,10 +53,10 @@ export default function LuxuryHome() {
       <section className="relative h-[94vh] min-h-[660px] w-full overflow-hidden bg-black">
         <Image src={IMAGES.hero} alt="PropertyIntel" fittingType="fill" className="absolute inset-0 h-full w-full object-cover opacity-80" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/80" />
-        <div className="relative mx-auto flex h-full max-w-[1400px] flex-col justify-between px-6 pt-28 pb-20 lg:px-12">
+        <div className="relative mx-auto flex h-full max-w-[1400px] flex-col justify-center px-6 pt-24 pb-20 lg:px-12">
           <p className="text-[11px] uppercase tracking-[0.4em] text-white/60">PropertyIntel · The distressed property marketplace</p>
-          <h1 className="mt-6 max-w-4xl font-display text-5xl font-light leading-[1.02] tracking-tight text-white sm:text-7xl lg:text-8xl">
-            Where distressed sellers<br />meet serious investors.
+          <h1 className="mt-6 max-w-3xl font-display text-4xl font-light leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl">
+            Distressed properties,<br />serious investors.
           </h1>
           <p className="mt-7 max-w-xl text-base leading-relaxed text-white/70">
             We scrape county records daily to surface off-market distressed, inherited, and under-stress properties —
