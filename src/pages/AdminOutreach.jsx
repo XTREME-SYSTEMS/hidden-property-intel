@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Users, Mail, Search, Building2 } from "lucide-react";
+import { Search, Mail, Building2, ShieldCheck } from "lucide-react";
 
 export default function AdminOutreach() {
   const [user, setUser] = useState(null);
   const [leads, setLeads] = useState([]);
+  const [health, setHealth] = useState(null);
   const [loading, setLoading] = useState(true);
   const [region, setRegion] = useState("Florida");
   const [busy, setBusy] = useState("");
@@ -17,6 +18,8 @@ export default function AdminOutreach() {
       if (u.role !== "admin") { setLoading(false); return; }
       const l = await base44.entities.InvestorLead.list("-created_date", 100);
       setLeads(l);
+      const h = await base44.entities.SystemHealth.list("-run_at", 1);
+      setHealth(h[0] || null);
     } catch (e) { setMsg(e.message); }
     setLoading(false);
   };
@@ -47,6 +50,16 @@ export default function AdminOutreach() {
     try {
       const res = await base44.functions.invoke("outreachSellers", { limit: 50 });
       setMsg(res.data?.error ? `Error: ${res.data.error}` : `Sent ${res.data.sent} seller outreach emails.`);
+    } catch (e) { setMsg(e.response?.data?.error || e.message); }
+    setBusy("");
+  };
+
+  const validate = async () => {
+    setMsg(""); setBusy("validate");
+    try {
+      const res = await base44.functions.invoke("validateSystem", {});
+      if (res.data?.error) setMsg(`Error: ${res.data.error}`);
+      else { setMsg(`System ${res.data.overall_status.toUpperCase()} — ${res.data.actions_taken?.length || 0} auto-heal actions taken.`); await load(); }
     } catch (e) { setMsg(e.response?.data?.error || e.message); }
     setBusy("");
   };
@@ -111,6 +124,57 @@ export default function AdminOutreach() {
       </div>
 
       {msg && <p className="mt-6 rounded-sm bg-black/5 px-4 py-3 text-sm text-black/70">{msg}</p>}
+
+      <div className="mt-12 rounded-sm border border-black/10 p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-black/60" />
+              <h2 className="font-display text-2xl font-light">System validation & auto-heal</h2>
+            </div>
+            <p className="mt-1 text-sm text-black/50">Runs nightly at 4 AM ET. Inspects all subsystems, logs health, re-runs failed sources.</p>
+          </div>
+          <button onClick={validate} disabled={busy === "validate"} className="rounded-sm bg-black px-5 py-3 text-[11px] uppercase tracking-[0.3em] text-white disabled:opacity-50">
+            {busy === "validate" ? "Validating…" : "Run validation"}
+          </button>
+        </div>
+
+        {health && (
+          <div className="mt-6">
+            <div className="flex items-center gap-3">
+              <span className={`rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] ${health.overall_status === "healthy" ? "bg-emerald-600 text-white" : health.overall_status === "degraded" ? "bg-amber-500 text-white" : "bg-red-600 text-white"}`}>{health.overall_status}</span>
+              <span className="text-xs text-black/50">Last run {new Date(health.run_at).toLocaleString()}</span>
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {Object.entries(health.metrics || {}).map(([k, v]) => (
+                <div key={k} className="rounded-sm bg-black/5 p-3">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-black/40">{k.replace(/_/g, " ")}</p>
+                  <p className="mt-1 font-display text-xl tabular-nums">{v}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 space-y-2">
+              {(health.checks || []).map((c, i) => (
+                <div key={i} className="flex items-center justify-between text-sm">
+                  <span className="text-black/60">{c.name.replace(/_/g, " ")}</span>
+                  <span className="flex items-center gap-2">
+                    <span className={`h-2 w-2 rounded-full ${c.status === "healthy" ? "bg-emerald-500" : c.status === "degraded" ? "bg-amber-500" : "bg-red-500"}`} />
+                    <span className="text-black/50">{c.detail}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+            {(health.actions_taken || []).length > 0 && (
+              <div className="mt-4 rounded-sm bg-black p-4">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-white/50">Auto-heal actions</p>
+                <ul className="mt-2 space-y-1 text-xs text-white/80">
+                  {health.actions_taken.map((a, i) => <li key={i}>· {a}</li>)}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       <div className="mt-12">
         <h2 className="font-display text-2xl font-light">Investor leads</h2>

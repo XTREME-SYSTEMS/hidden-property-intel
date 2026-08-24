@@ -2,24 +2,54 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { money } from "@/lib/format";
+import LuxuryListingCard from "@/components/luxury/LuxuryListingCard";
+import { Trash2, Plus } from "lucide-react";
+
+const DISTRESS = ["pre-foreclosure", "foreclosure", "probate_inherited", "tax_delinquent", "code_violation", "divorce", "bankruptcy", "auction", "short_sale", "bank_owned"];
 
 export default function InvestorDashboard() {
   const [investor, setInvestor] = useState(null);
   const [bids, setBids] = useState([]);
+  const [savedSearches, setSavedSearches] = useState([]);
+  const [recommended, setRecommended] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [newSearch, setNewSearch] = useState({ name: "", state: "", distress_type: "" });
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const u = await base44.auth.me();
-        const inv = await base44.entities.Investor.filter({ user_id: u.id });
-        setInvestor(inv[0] || null);
-        const b = await base44.entities.Bid.filter({ investor_id: u.id });
-        setBids(b);
-      } catch (e) { /* not logged in */ }
-      setLoading(false);
-    })();
-  }, []);
+  const load = async () => {
+    try {
+      const u = await base44.auth.me();
+      const inv = await base44.entities.Investor.filter({ user_id: u.id });
+      const investor = inv[0] || null;
+      setInvestor(investor);
+      const [b, ss, props] = await Promise.all([
+        base44.entities.Bid.filter({ investor_id: u.id }),
+        base44.entities.SavedSearch.filter({ user_id: u.id }),
+        base44.entities.Property.filter({ status: "active" }, "-property_score", 60)
+      ]);
+      setBids(b);
+      setSavedSearches(ss);
+      const markets = (investor?.target_markets || []).map((m) => (m || "").toLowerCase());
+      let rec = props;
+      if (markets.length) {
+        const matched = props.filter((p) => markets.some((m) => (p.city || "").toLowerCase().includes(m) || (p.state || "").toLowerCase() === m || (p.state || "").toLowerCase().includes(m)));
+        rec = matched.length >= 3 ? matched : props;
+      }
+      setRecommended(rec.slice(0, 3));
+    } catch (e) { /* not logged in */ }
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const saveSearch = async () => {
+    if (!newSearch.name) return;
+    try {
+      await base44.entities.SavedSearch.create({ name: newSearch.name, filters: { state: newSearch.state, distress_type: newSearch.distress_type } });
+      setNewSearch({ name: "", state: "", distress_type: "" });
+      load();
+    } catch (e) { /* ignore */ }
+  };
+  const deleteSearch = async (id) => { await base44.entities.SavedSearch.delete(id); load(); };
 
   if (loading) return <div className="px-6 py-32 text-center text-sm text-black/50">Loading…</div>;
 
@@ -72,6 +102,43 @@ export default function InvestorDashboard() {
             ))}
           </div>
         )}
+      </div>
+
+      <div className="mt-12">
+        <h2 className="font-display text-2xl font-light">Recommended for you</h2>
+        <p className="mt-1 text-sm text-black/50">Top-scored properties matching your target markets: {(investor.target_markets || []).join(", ") || "all markets"}</p>
+        <div className="mt-6 grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
+          {recommended.map((p) => <LuxuryListingCard key={p.id} property={p} />)}
+          {!recommended.length && <p className="text-sm text-black/50">No properties available yet.</p>}
+        </div>
+      </div>
+
+      <div className="mt-12">
+        <h2 className="font-display text-2xl font-light">Saved searches</h2>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <input value={newSearch.name} onChange={(e) => setNewSearch({ ...newSearch, name: e.target.value })} placeholder="Search name" className="flex-1 min-w-[160px] rounded-sm border border-black/15 px-3 py-2.5 text-sm outline-none focus:border-black" />
+          <input value={newSearch.state} onChange={(e) => setNewSearch({ ...newSearch, state: e.target.value })} placeholder="State (e.g. FL)" className="w-40 rounded-sm border border-black/15 px-3 py-2.5 text-sm outline-none focus:border-black" />
+          <select value={newSearch.distress_type} onChange={(e) => setNewSearch({ ...newSearch, distress_type: e.target.value })} className="rounded-sm border border-black/15 px-3 py-2.5 text-sm outline-none">
+            <option value="">Any distress</option>
+            {DISTRESS.map((d) => <option key={d} value={d}>{d}</option>)}
+          </select>
+          <button onClick={saveSearch} className="inline-flex items-center gap-2 rounded-sm bg-black px-4 py-2.5 text-[11px] uppercase tracking-[0.3em] text-white"><Plus className="h-3.5 w-3.5" /> Save</button>
+        </div>
+        <div className="mt-5 divide-y divide-black/10 border-y border-black/10">
+          {savedSearches.length === 0 && <p className="py-6 text-sm text-black/50">No saved searches yet.</p>}
+          {savedSearches.map((s) => (
+            <div key={s.id} className="flex items-center justify-between py-4">
+              <div>
+                <p className="font-display text-base">{s.name}</p>
+                <p className="text-xs text-black/50">{[s.filters?.state, s.filters?.distress_type].filter(Boolean).join(" · ") || "All properties"}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Link to="/listings" className="text-[11px] uppercase tracking-[0.3em] hover:text-black/60">Run</Link>
+                <button onClick={() => deleteSearch(s.id)} className="rounded-sm border border-black/15 p-2 text-red-600" aria-label="Delete"><Trash2 className="h-3.5 w-3.5" /></button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { money } from "@/lib/format";
+import { FileSignature } from "lucide-react";
 
 export default function Bidding() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [property, setProperty] = useState(null);
   const [bids, setBids] = useState([]);
   const [amount, setAmount] = useState("");
@@ -12,6 +14,8 @@ export default function Bidding() {
   const [maxProxy, setMaxProxy] = useState("");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
+  const [genBusy, setGenBusy] = useState(false);
+  const [genMsg, setGenMsg] = useState("");
 
   const load = async () => {
     try {
@@ -42,13 +46,37 @@ export default function Bidding() {
     setBusy(false);
   };
 
+  const generateContract = async () => {
+    const topBid = bids.filter((b) => b.status === "active").sort((a, b) => b.bid_amount - a.bid_amount)[0];
+    if (!topBid) { setGenMsg("Place a bid first — a contract is generated for the top active bid."); return; }
+    setGenBusy(true);
+    setGenMsg("");
+    try {
+      const res = await base44.functions.invoke("generateSmartContract", {
+        property_id: id,
+        investor_id: topBid.investor_id || topBid.id,
+        seller_id: property.seller_id || "seller",
+        contract_type: "escrow",
+        terms: {
+          price: topBid.bid_amount,
+          earnest_money: Math.round(topBid.bid_amount * 0.03),
+          closing_date: "",
+          contingencies: ["inspection", "financing", "clear_title"]
+        }
+      });
+      if (res.data?.smart_contract_id) navigate(`/contracts/${res.data.smart_contract_id}`);
+      else setGenMsg(res.data?.error || "Contract generation failed.");
+    } catch (e) { setGenMsg(e.response?.data?.error || e.message); }
+    setGenBusy(false);
+  };
+
   if (!property) return <div className="px-6 py-32 text-center text-sm text-black/50">Loading…</div>;
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-16 lg:px-12">
       <Link to={`/properties/${id}`} className="text-[11px] uppercase tracking-[0.3em] text-black/50 hover:text-black">← Back to property</Link>
-      <h1 className="mt-4 font-display text-4xl font-light tracking-tight">{property.address}</h1>
-      <p className="mt-1 text-sm text-black/50">{property.city}, {property.state}</p>
+      <h1 className="mt-4 font-display text-4xl font-light tracking-tight">{property.city}, {property.state}</h1>
+      <p className="mt-1 text-sm text-black/50">{property.distress_type} · Score {Math.round(property.property_score || 0)}</p>
 
       <div className="mt-10 rounded-sm border border-black/10 p-6">
         <p className="text-[10px] uppercase tracking-[0.3em] text-black/40">Current highest bid</p>
@@ -78,6 +106,18 @@ export default function Bidding() {
         )}
         <button onClick={place} disabled={busy} className="mt-4 w-full rounded-sm bg-black py-3.5 text-[11px] uppercase tracking-[0.3em] text-white disabled:opacity-50">Place bid</button>
         {msg && <p className="mt-3 text-sm text-red-600">{msg}</p>}
+      </div>
+
+      <div className="mt-6 rounded-sm border border-black/10 p-6">
+        <div className="flex items-center gap-2">
+          <FileSignature className="h-4 w-4 text-black/60" />
+          <p className="text-[10px] uppercase tracking-[0.3em] text-black/40">Smart contract</p>
+        </div>
+        <p className="mt-2 text-sm text-black/60">Auto-generate a Polygon escrow contract from the top bid's terms — Solidity code, ABI, and on-platform signing.</p>
+        <button onClick={generateContract} disabled={genBusy} className="mt-4 rounded-sm bg-black px-5 py-3 text-[11px] uppercase tracking-[0.3em] text-white disabled:opacity-50">
+          {genBusy ? "Generating…" : "Generate escrow contract"}
+        </button>
+        {genMsg && <p className="mt-3 text-sm text-black/70">{genMsg}</p>}
       </div>
 
       <div className="mt-10">
