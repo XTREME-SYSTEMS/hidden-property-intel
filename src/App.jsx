@@ -7,11 +7,9 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
 // Add page imports here
-import Layout from '@/components/Layout';
-import Home from '@/pages/Home';
-import Properties from '@/pages/Properties';
-import PropertyDetail from '@/pages/PropertyDetail';
-import Calculators from '@/pages/Calculators';
+import LuxLayout from '@/components/luxury/LuxLayout';
+import LuxuryHome from '@/pages/LuxuryHome';
+import Listings from '@/pages/Listings';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -39,11 +37,9 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
-      <Route element={<Layout />}>
-        <Route path="/" element={<Home />} />
-        <Route path="/properties" element={<Properties />} />
-        <Route path="/properties/:id" element={<PropertyDetail />} />
-        <Route path="/calculators" element={<Calculators />} />
+      <Route element={<LuxLayout />}>
+        <Route path="/" element={<LuxuryHome />} />
+        <Route path="/listings" element={<Listings />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
