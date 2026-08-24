@@ -64,7 +64,7 @@ export default function PWAInstall({ variant = "nav" }) {
   return (
     <div className="relative rounded-sm border border-black/10 bg-white p-6 sm:p-8">
       <div className="flex items-center gap-3">
-        <Logo variant="dark" />
+        <Logo variant="dark" className="h-10 w-auto" />
       </div>
       <h3 className="mt-5 font-display text-2xl font-light">Get the Hidden Property Intel app.</h3>
       <p className="mt-2 max-w-md text-sm leading-relaxed text-black/60">
