@@ -35,6 +35,15 @@ export default function SellerPostProperty() {
     setBusy(true);
     try {
       const u = await base44.auth.me();
+      // Deduplication: check for existing property with same address + zip
+      if (f.address && f.zip_code) {
+        const existing = await base44.entities.Property.filter({ address: f.address, zip_code: f.zip_code });
+        if (existing.length > 0) {
+          alert("A property with this address and ZIP code already exists. Redirecting you to it.");
+          nav(`/properties/${existing[0].id}`);
+          return;
+        }
+      }
       const payload = {
         ...f,
         bedrooms: f.bedrooms ? Number(f.bedrooms) : undefined,

@@ -24,6 +24,18 @@ export async function processProxyBids(base44, { property_id, new_bid_amount, ex
   if (!proxies.length) return { applied: false };
 
   const topProxy = proxies.sort((a, b) => b.max_proxy_amount - a.max_proxy_amount)[0];
+
+  // Subscription re-validation: don't execute proxy bids for lapsed subscriptions
+  const investor = await base44.asServiceRole.entities.Investor.filter({ user_id: topProxy.investor_id });
+  const inv = investor[0];
+  if (inv && !['active', 'trial'].includes(inv.subscription_status)) {
+    // expire the stale proxy bid
+    await base44.asServiceRole.entities.Bid.update(topProxy.id, { status: 'withdrawn' });
+    return { applied: false, reason: 'subscription_lapsed' };
+  }
+  if (inv && inv.subscription_plan !== 'elite') {
+    return { applied: false, reason: 'proxy_requires_elite' };
+  }
   const proxyBidAmount = Math.min(topProxy.max_proxy_amount, new_bid_amount + MIN_INCREMENT);
 
   await base44.asServiceRole.entities.Bid.create({

@@ -10,6 +10,7 @@ const DISTRESS = ["pre-foreclosure", "foreclosure", "probate_inherited", "tax_de
 export default function InvestorDashboard() {
   const [investor, setInvestor] = useState(null);
   const [bids, setBids] = useState([]);
+  const [bidProperties, setBidProperties] = useState({});
   const [savedSearches, setSavedSearches] = useState([]);
   const [recommended, setRecommended] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,6 +29,17 @@ export default function InvestorDashboard() {
       ]);
       setBids(b);
       setSavedSearches(ss);
+      // Fetch property details for bids to show address instead of raw ID
+      const propMap = {};
+      await Promise.all(b.map(async (bid) => {
+        if (!propMap[bid.property_id]) {
+          try {
+            const p = await base44.entities.Property.get(bid.property_id);
+            propMap[bid.property_id] = p;
+          } catch (e) { /* ignore */ }
+        }
+      }));
+      setBidProperties(propMap);
       const markets = (investor?.target_markets || []).map((m) => (m || "").toLowerCase());
       let rec = props;
       if (markets.length) {
@@ -91,7 +103,9 @@ export default function InvestorDashboard() {
             {activeBids.map((b) => (
               <div key={b.id} className="flex items-center justify-between py-4">
                 <div>
-                  <Link to={`/properties/${b.property_id}`} className="font-display text-base hover:underline">{b.property_id}</Link>
+                  <Link to={`/properties/${b.property_id}`} className="font-display text-base hover:underline">
+                    {bidProperties[b.property_id] ? `${bidProperties[b.property_id].address}, ${bidProperties[b.property_id].city}` : b.property_id}
+                  </Link>
                   <p className="text-xs text-black/50">{b.is_proxy_bid ? "Proxy bid" : "Standard bid"}</p>
                 </div>
                 <div className="text-right">

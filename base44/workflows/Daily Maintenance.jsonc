@@ -1,0 +1,96 @@
+{
+  "name": "Daily Maintenance",
+  "description": "Daily maintenance pipeline: expires old bids, geocodes properties missing coordinates, populates ownership chains, syncs market analytics with real trend data, and batch-scores active properties missing AI scores.",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "daily_maintenance",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "expire_bids": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "expireOldBids"
+          },
+          "then": "geocode",
+          "x-base44": {
+            "title": "Expire old bids",
+            "description": "Withdraw bids past their expires_at timestamp"
+          }
+        }
+      },
+      {
+        "geocode": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "geocodeProperties"
+          },
+          "then": "ownership_chains",
+          "x-base44": {
+            "title": "Geocode properties",
+            "description": "Add lat/lng to properties missing coordinates"
+          }
+        }
+      },
+      {
+        "ownership_chains": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "populateOwnershipChains"
+          },
+          "then": "market_analytics",
+          "x-base44": {
+            "title": "Populate ownership chains",
+            "description": "Research property transfer history from public records"
+          }
+        }
+      },
+      {
+        "market_analytics": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "syncMarketAnalytics"
+          },
+          "then": "score_active",
+          "x-base44": {
+            "title": "Sync market analytics",
+            "description": "Update market trends with LLM-powered real data"
+          }
+        }
+      },
+      {
+        "score_active": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "scoreAllActiveProperties"
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Score active properties",
+            "description": "Batch-score active properties missing AI scores"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 6 * * *",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  }
+}

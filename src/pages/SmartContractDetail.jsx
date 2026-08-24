@@ -27,6 +27,14 @@ export default function SmartContractDetail() {
   useEffect(() => { load(); }, [id]);
 
   const sign = async () => {
+    // Verify the user is authorized to sign (must be the buyer/investor or seller)
+    const isBuyer = contract.investor_id === user?.id;
+    const isSeller = contract.seller_id === user?.id;
+    const isAdmin = user?.role === "admin";
+    if (!isBuyer && !isSeller && !isAdmin) {
+      setMsg("You are not a party to this contract and cannot sign it.");
+      return;
+    }
     setBusy(true);
     try {
       const signedBy = contract.signed_by || [];

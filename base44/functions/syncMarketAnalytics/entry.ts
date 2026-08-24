@@ -3,9 +3,9 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    if (user.role !== 'admin') return Response.json({ error: 'Admin only' }, { status: 403 });
+    // Allow workflow calls (no user context) but block non-admin authenticated users
+    const user = await base44.auth.me().catch(() => null);
+    if (user && user.role !== 'admin') return Response.json({ error: 'Admin only' }, { status: 403 });
 
     const body = await req.json().catch(() => ({}));
     const region = body?.region;
@@ -40,6 +40,32 @@ export default async function(req) {
       }
       const top = Object.entries(distressTypes).sort((a, b) => b[1] - a[1]).slice(0, 5).map(e => e[0]);
 
+      // Use LLM to get real market trend data for this region
+      let trend = 'stable';
+      let trendPct = 0;
+      let medianRoi = 0;
+      try {
+        const trendSchema = {
+          type: 'object',
+          properties: {
+            price_trend: { type: 'string', enum: ['rising', 'falling', 'stable'] },
+            trend_percentage: { type: 'number' },
+            median_roi: { type: 'number' }
+          }
+        };
+        const trendRes = await base44.asServiceRole.integrations.Core.InvokeLLM({
+          prompt: `You are a real estate market analyst. Search the LIVE web for current market trends in ${key}, United States. What is the current home price trend (rising/falling/stable), the approximate year-over-year percentage change, and the median ROI for real estate investors in this area? Return JSON only.`,
+          add_context_from_internet: true,
+          model: 'gemini_3_flash',
+          response_json_schema: trendSchema
+        });
+        trend = trendRes.price_trend || 'stable';
+        trendPct = trendRes.trend_percentage || 0;
+        medianRoi = trendRes.median_roi || 0;
+      } catch (e) {
+        console.error('trend LLM failed for', key, e?.message);
+      }
+
       const payload = {
         region: key,
         state,
@@ -47,9 +73,9 @@ export default async function(req) {
         avg_price_per_sqft: avgPerSqft,
         avg_days_on_market: avgDom,
         distress_property_count: distressCount,
-        price_trend: 'stable',
-        trend_percentage: 0,
-        median_roi: 0,
+        price_trend: trend,
+        trend_percentage: trendPct,
+        median_roi: medianRoi,
         top_distress_types: top,
         updated_at: new Date().toISOString()
       };

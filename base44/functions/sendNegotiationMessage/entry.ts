@@ -25,7 +25,12 @@ export default async function(req) {
         status: 'active'
       });
     } else if (!thread.investor_id && !isSeller && user.role !== 'admin') {
-      // first investor to message claims an unassigned thread
+      // first investor to message claims an unassigned thread — require active subscription
+      const inv = await base44.asServiceRole.entities.Investor.filter({ user_id: user.id });
+      const investor = inv[0];
+      if (!investor || !['active', 'trial'].includes(investor.subscription_status)) {
+        return Response.json({ error: 'Active subscription required to start a negotiation' }, { status: 403 });
+      }
       await base44.asServiceRole.entities.NegotiationThread.update(thread.id, { investor_id: user.id });
       thread.investor_id = user.id;
     }

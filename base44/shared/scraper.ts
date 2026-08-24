@@ -56,6 +56,8 @@ const AI_SCHEMA = {
           bathrooms: { type: 'number' },
           square_footage: { type: 'number' },
           owner_name: { type: 'string' },
+          owner_email: { type: 'string' },
+          owner_phone: { type: 'string' },
           source_url: { type: 'string' },
           listing_notes: { type: 'string' }
         }
@@ -82,6 +84,8 @@ Return up to ${max} REAL, currently-available properties as JSON. For each prope
 - estimated_value: estimated market value in USD (number)
 - bedrooms, bathrooms, square_footage (numbers; use 0 if unknown)
 - owner_name: current owner name from public records if findable, else empty string
+- owner_email: owner's publicly listed contact email if findable (from property appraiser, business listing, or public records), else empty string
+- owner_phone: owner's publicly listed phone number if findable, else empty string
 - source_url: the exact URL where you found this listing
 - listing_notes: one short note about the situation (e.g. "auction 2025-09-15", "tax deed sale", "lis pendens filed")
 
@@ -179,6 +183,8 @@ export async function scrapeSource(base44, { source, url, distress_type, state }
           property_id: created.id,
           name: p.owner_name,
           owner_type: 'current',
+          contact_email: p.owner_email || undefined,
+          contact_phone: p.owner_phone || undefined,
           source: sourceName
         });
       }

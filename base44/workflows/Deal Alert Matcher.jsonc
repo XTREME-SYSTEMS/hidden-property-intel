@@ -1,15 +1,15 @@
 {
   "name": "Deal Alert Matcher",
-  "description": "When a new scraped property is created, match it to investor saved searches and create alerts + send emails.",
+  "description": "When a property is updated to active status (promoted from draft or newly listed), match it to investor saved searches and create alerts + send emails. Deduped per property+user.",
   "trigger": {
     "config": {
       "trigger_type": "entity",
       "entity_name": "Property",
       "events": [
-        "create"
+        "update"
       ]
     },
-    "condition": "${ .trigger.data.source == \"scraped\" }"
+    "condition": "${ .trigger.data.status == \"active\" }"
   },
   "definition": {
     "document": {
@@ -31,7 +31,7 @@
           "then": "end",
           "x-base44": {
             "title": "Match property to saved searches",
-            "description": "Create alerts and send emails"
+            "description": "Create alerts and send emails for newly-visible properties"
           }
         }
       }

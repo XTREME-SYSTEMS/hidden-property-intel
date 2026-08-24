@@ -48,6 +48,8 @@ export default async function(req) {
         const r = await fetchPropertyImages(base44, p);
         if (r.found > 0) {
           ingested++;
+          // Reset attempt counter on success
+          await base44.asServiceRole.entities.Property.update(p.id, { image_fetch_attempts: 0 });
           results.push({
             id: p.id,
             address: `${p.address}, ${p.city}, ${p.state}`,
@@ -58,10 +60,14 @@ export default async function(req) {
           });
         } else {
           failed++;
+          // Increment attempt counter — processDraftProperties will promote after 3
+          const attempts = (p.image_fetch_attempts || 0) + 1;
+          await base44.asServiceRole.entities.Property.update(p.id, { image_fetch_attempts: attempts });
           results.push({
             id: p.id,
             address: `${p.address}, ${p.city}, ${p.state}`,
             action: 'no_images',
+            attempts,
             note: r.note || r.error || 'no images found'
           });
         }

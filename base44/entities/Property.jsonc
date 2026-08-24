@@ -103,6 +103,14 @@
       "type": "string",
       "format": "date-time"
     },
+    "last_verified_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "image_fetch_attempts": {
+      "type": "number",
+      "default": 0
+    },
     "days_on_market": {
       "type": "number"
     },

@@ -33,12 +33,11 @@ export default async function(req) {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Fetch active + draft properties, oldest-scraped first (most stale = highest priority)
-    // Using scraped_at as the last-cross-referenced timestamp; after checking we update it,
-    // cycling properties to the back of the queue so all get re-checked over time.
+    // Fetch active + draft properties, oldest-verified first (most stale = highest priority)
+    // Uses last_verified_at (separate from scraped_at) so original scrape time is preserved
     const properties = await base44.asServiceRole.entities.Property.filter(
       { status: { $in: ['active', 'draft'] } },
-      'scraped_at',
+      'last_verified_at',
       200
     );
 
@@ -71,7 +70,7 @@ Return JSON with: still_available (boolean), status (active/sold/off_market/expi
         });
 
         const status = (r.status || 'unknown').toLowerCase();
-        const update: any = { scraped_at: new Date().toISOString() };
+        const update: any = { last_verified_at: new Date().toISOString() };
 
         if (status === 'sold' || status === 'off_market' || status === 'expired' || r.still_available === false) {
           update.status = 'expired';

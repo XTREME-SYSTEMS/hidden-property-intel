@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { scorePropertyRecord } from '../../shared/scoring.ts';
 import { fetchPropertyImages, hasRealImages } from '../../shared/propertyImages.ts';
+import { matchPropertyToAlerts } from '../../shared/alerts.ts';
 
 /**
  * Batch processor for draft properties (scraped but not yet image-verified/scored).
@@ -45,7 +46,7 @@ export default async function(req) {
 
         if (imgResult.found > 0) {
           // Step 2: promote to active
-          await base44.asServiceRole.entities.Property.update(p.id, { status: 'active' });
+          await base44.asServiceRole.entities.Property.update(p.id, { status: 'active', image_fetch_attempts: 0 });
           promoted++;
 
           // Step 3: score the property (scoring also generates title risk)
@@ -57,10 +58,37 @@ export default async function(req) {
             console.error('scoring failed for', p.id, e?.message);
           }
 
+          // Step 4: trigger deal alerts for the newly-visible property
+          try {
+            const refreshed = await base44.asServiceRole.entities.Property.get(p.id);
+            await matchPropertyToAlerts(base44, refreshed);
+          } catch (e) {
+            console.error('alert match failed for', p.id, e?.message);
+          }
+
           results.push({ id: p.id, address: p.address, action: 'promoted+scored', images: imgResult.found });
         } else {
+          // No images found — increment attempt counter
+          const attempts = (p.image_fetch_attempts || 0) + 1;
           stillDraft++;
-          results.push({ id: p.id, address: p.address, action: 'still_draft', note: imgResult.note || imgResult.error || 'no images found' });
+
+          // After 3 failed attempts, promote to active anyway (visible > invisible)
+          if (attempts >= 3) {
+            await base44.asServiceRole.entities.Property.update(p.id, { status: 'active', image_fetch_attempts: attempts });
+            promoted++;
+            try {
+              const refreshed = await base44.asServiceRole.entities.Property.get(p.id);
+              await scorePropertyRecord(base44, refreshed);
+              scored++;
+              await matchPropertyToAlerts(base44, refreshed);
+            } catch (e) {
+              console.error('scoring/alerts failed for', p.id, e?.message);
+            }
+            results.push({ id: p.id, address: p.address, action: 'promoted_no_images', attempts, note: 'max attempts reached — promoted without images' });
+          } else {
+            await base44.asServiceRole.entities.Property.update(p.id, { image_fetch_attempts: attempts });
+            results.push({ id: p.id, address: p.address, action: 'still_draft', attempts, note: imgResult.note || imgResult.error || 'no images found' });
+          }
         }
       } catch (e) {
         console.error('process draft failed for', p.id, e?.message);

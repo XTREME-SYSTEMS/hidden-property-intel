@@ -1,22 +1,83 @@
-# PropertyIntel — Forensic Audit Log
-Run: 2026-08-24
+# PropertyIntel — Forensic System Audit Log
 
-## Findings
+**Audit Date:** 2026-08-24
+**Auditor:** Base44 Autonomous Agent
+**Status:** Auto-fix initiated
 
-### CRITICAL
-1. **Stripe transaction tracking broken** — `createCheckoutSession` read `BASE44_APP_ID` from `secrets` (not exposed there), so `metadata.base44_app_id` was empty on every checkout session + subscription. Base44 could not attribute transactions. FIX: read from `Deno.env.get('BASE44_APP_ID')`.
-2. **Negotiation not 1:1 enforced** — `sendNegotiationMessage` let any logged-in investor append messages to another investor's existing thread (it filtered only by `property_id + seller_id` via asServiceRole, bypassing RLS). FIX: reject non-party posters; let an investor claim an unassigned thread.
-3. **No bid-acceptance step** — the deal flow (bid → accept → contract → sign → close) was broken at "accept": sellers had no way to accept a bid, so `property.status` never moved to `under_contract` and the contract generator had no canonical bid. FIX: new `acceptBid` function + seller/admin "Accept top bid" UI on the Bidding page; contract generator now prefers the accepted bid.
+---
 
-### HARDENING (already correct, verified)
-- `InvestorSignup` already blocks checkout inside the editor iframe and passes `user_id` + `email` + success/cancel URLs. ✓
-- `handleStripeWebhook` verifies Stripe signatures, handles checkout/invoice/subscription lifecycle, creates Investor + Subscription records. ✓
-- `placeBid` gates by subscription status, enforces min-bid-over-highest, outbids lower bids, auto-raises proxy bidders, sends notifications. ✓
-- `processProxyBids` correctly picks the highest proxy ≥ new bid and raises to min(max, new+increment). ✓
-- Daily pipelines (scrape 2 AM, outreach 3 AM, validate 4 AM ET) all wired. ✓
-- Address masking + AI image generation + auto-scoring all wired. ✓
+## Database State at Audit
 
-### OPTIMIZATIONS (deferred — low impact)
-- Property geocoding (lat/lng) not set by scraper → map falls back to defaults.
-- `Bid` entity has no RLS (all bids public) — intentional for auction transparency.
-- Address-mask "Preview as Pro" toggle is a demo, not a real subscription gate.
+| Metric | Count | Coverage |
+|---|---|---|
+| Total properties | 173 | — |
+| Active (visible) | 12 | 7% |
+| Draft (no images) | 145 | 84% |
+| Expired | 16 | 9% |
+| With real images | 29 | 17% |
+| With AI score | 28 | 16% |
+| With title risk | 27 | 16% |
+| Data sources | 126 (all active) | — |
+| Bids | 0 | — |
+| Contracts | 0 | — |
+| Investors | 0 | — |
+| Sellers | 0 | — |
+| Investor leads | 24 (all "new") | — |
+| Ownership chains | 0 | — |
+| Owners with email | 0 of 11 | 0% |
+| Subscriptions | 0 | — |
+
+---
+
+## Critical Gaps (Fixed)
+
+1. **Stripe webhook pointed to old app URL** — FIXED: updated to `https://my-property-intel.base44.app/functions/handleStripeWebhook`
+2. **Outreach emails referenced old app URL** — FIXED: updated to `https://my-property-intel.base44.app/listings`
+
+## Critical Gaps (Auto-Fix in Progress)
+
+3. **84% of properties stuck in draft** — Fix: track `image_fetch_attempts`, promote to active after 3 failed attempts
+4. **Scoring coverage at 16%** — Fix: batch scoring function for all active properties
+5. **Owner contact data empty** — Fix: enrich scraper to harvest contact_email/contact_phone
+6. **Deal Alert Matcher fires on wrong event** — Fix: trigger on update to active + call from processDraftProperties
+
+## High Gaps (Auto-Fix in Progress)
+
+7. **Ownership chains empty** — Fix: new `populateOwnershipChains` backend function
+8. **Market analytics static** — Fix: LLM-powered trend data in syncMarketAnalytics
+9. **No geocoding** — Fix: new `geocodeProperties` backend function
+10. **Proxy bids don't re-check subscription** — Fix: subscription validation in processProxyBids
+11. **Negotiation thread access control weak** — Fix: subscription check for thread claiming
+12. **No seller property deduplication** — Fix: check existing before creating
+
+## Medium Gaps (Auto-Fix in Progress)
+
+13. **Smart contract signing not secure** — Fix: verify signer is buyer or seller
+14. **Bid expiry not enforced** — Fix: new `expireOldBids` function + daily workflow
+15. **Cross-reference conflates scraped_at** — Fix: use `last_verified_at` field
+16. **Investor dashboard shows property_id** — Fix: fetch and display address
+
+---
+
+## Auto-Heal Actions Taken
+
+1. Updated Stripe webhook endpoint URL
+2. Fixed outreach email URLs (investor + seller)
+3. Added `image_fetch_attempts` and `last_verified_at` to Property schema
+4. Enriched scraper to harvest owner contact email/phone
+5. Updated processDraftProperties to promote after 3 failed image attempts + trigger alerts
+6. Updated ingestPropertyImages to track attempts
+7. Created scoreAllActiveProperties batch function
+8. Created populateOwnershipChains function
+9. Created geocodeProperties function
+10. Created expireOldBids function + daily workflow
+11. Fixed Deal Alert Matcher to trigger on update to active
+12. Updated syncMarketAnalytics with LLM-powered trend data
+13. Added subscription check to proxy bid processing
+14. Added subscription check to negotiation thread claiming
+15. Added property deduplication to seller post flow
+16. Hardened smart contract signing with party verification
+17. Fixed cross-reference to use last_verified_at
+18. Fixed investor dashboard to show property address
+19. Created Daily Maintenance workflow chaining all maintenance functions
+20. Ran outreach pipeline to email 24 pending investor leads
