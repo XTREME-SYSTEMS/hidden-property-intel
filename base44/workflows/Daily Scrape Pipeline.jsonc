@@ -1,5 +1,5 @@
 {
-  "description": "Twice-daily autonomous scraping of active Florida distressed-property data sources (20 sources per run, cycles through all 126)",
+  "description": "Scrapes 5 Florida distressed-property sources per run, every 3 hours, cycling through all 126 sources over ~3 days",
   "definition": {
     "document": {
       "dsl": "1.0.0",
@@ -17,7 +17,7 @@
           "then": "end",
           "x-base44": {
             "title": "Run scrape pipeline",
-            "description": "Scrape 20 FL sources + create draft properties"
+            "description": "Scrape 5 FL sources + create draft properties"
           }
         }
       }
@@ -29,7 +29,7 @@
       "trigger_type": "scheduled",
       "events": [],
       "schedule_mode": "recurring",
-      "cron_expression": "0 2,14 * * *",
+      "cron_expression": "0 */3 * * *",
       "one_time_date": null,
       "timezone": "America/New_York",
       "interval_value": null,
