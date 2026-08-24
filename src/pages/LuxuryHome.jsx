@@ -66,7 +66,7 @@ export default function LuxuryHome() {
       <section className="relative h-[94vh] min-h-[660px] w-full overflow-hidden bg-black">
         <Image src={IMAGES.estate} alt="Hidden Property Intel" fittingType="fill" className="absolute inset-0 h-full w-full object-cover opacity-80" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/85" />
-        <div className="relative mx-auto flex h-full max-w-[1400px] flex-col justify-end px-6 pb-24 pt-32 lg:justify-center lg:px-12 lg:pb-20 lg:pt-24">
+        <div className="relative mx-auto flex h-full max-w-[1400px] flex-col justify-center px-6 pb-28 pt-36 lg:px-12 lg:pb-20 lg:pt-24">
           <p className="text-[10px] uppercase tracking-[0.45em] text-gold-warm sm:text-[11px]">Hidden Property Intel · Find what others miss.</p>
           <h1 className="mt-5 max-w-3xl font-display text-[2.6rem] font-normal leading-[1.02] tracking-[-0.02em] text-white sm:mt-6 sm:text-5xl lg:text-6xl lg:font-light">
             Distressed properties,<br />
@@ -84,7 +84,7 @@ export default function LuxuryHome() {
               List — it's free
             </Link>
           </div>
-          <dl className="mt-14 grid max-w-3xl grid-cols-2 gap-8 border-t border-white/10 pt-8 sm:grid-cols-4">
+          <dl className="mt-10 grid max-w-3xl grid-cols-2 gap-6 border-t border-white/10 pt-6 sm:mt-14 sm:grid-cols-4 sm:gap-8 sm:pt-8">
             {[["12,847", "Properties tracked"], ["$340M", "In property value"], ["1,200+", "Active investors"], ["1,400+", "Deals closed"]].map(([v, l]) => (
               <div key={l}>
                 <dd className="font-display text-2xl font-light tabular-nums sm:text-3xl">{v}</dd>
