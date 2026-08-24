@@ -3,7 +3,7 @@ import { secrets } from 'base44:runtime';
 import { scrapeSource } from '../../shared/scraper.ts';
 import { scorePropertyRecord } from '../../shared/scoring.ts';
 
-const SOURCES_PER_RUN = 20; // scraping is fast (images decoupled); cycles through all 126 sources over ~3 days
+const SOURCES_PER_RUN = 5; // each source = 1 LLM web-search call (~4s); 5 per run stays within time limits
 
 export default async function(req) {
   try {
