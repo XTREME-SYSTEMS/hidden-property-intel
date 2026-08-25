@@ -105,7 +105,7 @@ export default function Bidding() {
         </div>
       )}
 
-      {!acceptedBid && (
+      {!acceptedBid && !isSellerOrAdmin && (
         <div className="mt-6 rounded-sm border border-black/10 p-6">
           <p className="text-[10px] uppercase tracking-[0.3em] text-black/40">Place a bid</p>
           <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder={highest ? `Min $${(highest + 1000).toLocaleString()}` : "Bid amount"} className="mt-3 w-full rounded-sm border border-black/15 px-4 py-3 text-sm outline-none focus:border-black" />
