@@ -20,6 +20,12 @@ export default function LuxFooter() {
               The marketplace where distressed sellers meet serious investors — backed by AI pricing, ownership-chain
               intelligence, and on-chain escrow.
             </p>
+            <div className="mt-6 border-t border-white/10 pt-5 text-sm leading-relaxed text-white/60">
+              <p className="font-medium text-white">Steve Giordano</p>
+              <p>Giordano Customs — Licensed Real Estate Broker</p>
+              <a href="tel:+17728123930" className="mt-1 inline-block text-white/70 transition-colors hover:text-gold-warm">772-812-3930</a>
+              <p className="mt-1 text-white/50">951 SW Country Club Dr, Suite 102<br />Port St. Lucie, Florida</p>
+            </div>
           </div>
           {cols.map((c) => (
             <div key={c.h}>
