@@ -13,6 +13,11 @@ import Listings from '@/pages/Listings';
 import PropertyDetail from '@/pages/PropertyDetail';
 import Calculators from '@/pages/Calculators';
 import MapSearch from '@/pages/MapSearch';
+import HpiHome from '@/pages/hpi/Home';
+import HpiMarketplace from '@/pages/hpi/Marketplace';
+import HpiPropertyDetail from '@/pages/hpi/PropertyDetail';
+import HpiInvestorDashboard from '@/pages/hpi/InvestorDashboard';
+import HpiDealAnalyzer from '@/pages/hpi/DealAnalyzer';
 import SavedProperties from '@/pages/SavedProperties';
 import Bidding from '@/pages/Bidding';
 import InvestorSignup from '@/pages/InvestorSignup';
@@ -65,7 +70,10 @@ const AuthenticatedApp = () => {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route element={<LuxLayout />}>
-        <Route path="/" element={<LuxuryHome />} />
+        <Route path="/" element={<HpiHome />} />
+        <Route path="/marketplace" element={<HpiMarketplace />} />
+        <Route path="/property/:id" element={<HpiPropertyDetail />} />
+        <Route path="/deal-analyzer" element={<HpiDealAnalyzer />} />
         <Route path="/listings" element={<Listings />} />
         <Route path="/properties/:id" element={<PropertyDetail />} />
         <Route path="/properties/:id/bid" element={<Bidding />} />
@@ -73,7 +81,7 @@ const AuthenticatedApp = () => {
         <Route path="/map" element={<MapSearch />} />
         <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
           <Route path="/investor/signup" element={<InvestorSignup />} />
-          <Route path="/investor/dashboard" element={<InvestorDashboard />} />
+          <Route path="/investor/dashboard" element={<HpiInvestorDashboard />} />
           <Route path="/investor/pipeline" element={<InvestorPipeline />} />
           <Route path="/alerts" element={<Alerts />} />
           <Route path="/saved" element={<SavedProperties />} />
