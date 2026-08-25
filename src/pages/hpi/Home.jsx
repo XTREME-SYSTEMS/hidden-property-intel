@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Brain, FileSignature, MapPin, Radar, ShieldCheck, Users } from 'lucide-react';
-import Layout from '@/components/hpi/Layout';
 import { PropertyCard, TrustStrip } from '@/components/hpi/UI';
 import { backend } from '@/api/hpiBackend';
 
@@ -10,7 +9,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   useEffect(() => { backend.listProperties().then(p => { setProps(p.slice(0, 8)); setLoading(false); }).catch(() => setLoading(false)); }, []);
 
-  return <Layout>
+  return <>
     <section className="hero">
       <div className="hero-copy">
         <span className="eyebrow">Hidden Property Intel</span>
@@ -99,5 +98,5 @@ export default function Home() {
     <section className="content-section">
       <TrustStrip />
     </section>
-  </Layout>;
+  </>;
 }

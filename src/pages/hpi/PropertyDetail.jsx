@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, Brain, FileSignature, Heart, MapPin, ShieldCheck, TrendingUp } from 'lucide-react';
-import Layout from '@/components/hpi/Layout';
 import { OpportunityScore, money } from '@/components/hpi/UI';
 import { backend } from '@/api/hpiBackend';
 
@@ -17,12 +16,12 @@ export default function PropertyDetail() {
     backend.getProperty(id).then(data => { setP(data); setLoading(false); }).catch(() => setLoading(false));
   }, [id]);
 
-  if (loading) return <Layout><div className="route-loader">Loading property…</div></Layout>;
-  if (!p) return <Layout><div className="route-loader">Property not found.</div></Layout>;
+  if (loading) return <div className="route-loader">Loading property…</div>;
+  if (!p) return <div className="route-loader">Property not found.</div>;
 
   const equity = (p.arv || p._raw?.estimated_value || 0) - p.price;
 
-  return <Layout>
+  return <>
     <div className="property-page">
       <Link to="/marketplace" className="back-link"><ArrowLeft size={16} /> Back to marketplace</Link>
       <div className="property-detail-grid">
@@ -93,5 +92,5 @@ export default function PropertyDetail() {
         </aside>
       </div>
     </div>
-  </Layout>;
+  </>;
 }

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Calculator, TrendingUp } from 'lucide-react';
-import Layout from '@/components/hpi/Layout';
+
 
 export default function DealAnalyzer() {
   const [form, setForm] = useState({ arv: 280000, price: 145000, repairs: 35000, holding: 8000, closing: 4000, selling: 14000 });
@@ -21,7 +21,7 @@ export default function DealAnalyzer() {
   ];
   const maxBar = Math.max(...bars.map(b => b.val), 1);
 
-  return <Layout>
+  return <>
     <div className="analyzer-page">
       <div className="section-head">
         <div>
@@ -59,5 +59,5 @@ export default function DealAnalyzer() {
         </div>
       </div>
     </div>
-  </Layout>;
+  </>;
 }

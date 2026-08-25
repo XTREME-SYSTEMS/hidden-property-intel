@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { LayoutGrid, Map as MapIcon, Search, SlidersHorizontal } from 'lucide-react';
-import Layout from '@/components/hpi/Layout';
 import { PropertyCard } from '@/components/hpi/UI';
 import { backend } from '@/api/hpiBackend';
 
@@ -38,7 +37,7 @@ export default function Marketplace() {
 
   const toggle = (arr, set, v) => set(arr.includes(v) ? arr.filter(x => x !== v) : [...arr, v]);
 
-  return <Layout>
+  return <>
     <div className="market-head">
       <div>
         <span className="eyebrow">Distressed Property Marketplace</span>
@@ -92,5 +91,5 @@ export default function Marketplace() {
         </div>
       </div>
     </div>
-  </Layout>;
+  </>;
 }
