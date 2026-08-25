@@ -4,7 +4,7 @@ import Logo from "@/components/luxury/Logo";
 
 export default function LuxFooter() {
   const cols = [
-    { h: "Explore", items: [["Inventory", "/listings"], ["Map search", "/map"], ["Deal analyzer", "/calculators"], ["Saved properties", "/saved"]] },
+    { h: "Explore", items: [["Inventory", "/listings"], ["How it works", "/"], ["ROI calculators", "/calculators"], ["Market data", "/listings"]] },
     { h: "For Investors", items: [["Browse inventory", "/listings"], ["Pricing", "/#investors"], ["Smart contracts", "/listings"], ["Ownership chains", "/listings"]] },
     { h: "For Sellers", items: [["List your property", "/seller/post-property"], ["AI pricing", "/#sellers"], ["Negotiation assistant", "/#sellers"], ["No commissions", "/#sellers"]] },
     { h: "Company", items: [["About", "/"], ["Concierge", "/"], ["Press", "/"], ["Contact", "/"]] },
