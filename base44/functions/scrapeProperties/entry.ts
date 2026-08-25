@@ -1,5 +1,4 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
-import { secrets } from 'base44:runtime';
 import { scrapeSource } from '../../shared/scraper.ts';
 
 export default async function(req) {
@@ -27,7 +26,7 @@ export default async function(req) {
       scrape_config: source?.scrape_config || {}
     });
 
-    const result = await scrapeSource(base44, { secrets, source, url, distress_type, state });
+    const result = await scrapeSource(base44, { source, url, distress_type, state });
 
     await base44.asServiceRole.entities.ScrapeJob.update(job.id, {
       status: result.error ? 'failed' : 'complete',

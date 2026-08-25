@@ -25,13 +25,13 @@ export default async function(req) {
     const results = [];
     for (const [key, props] of Object.entries(groups)) {
       const [city, state] = key.split(', ');
-      const values = props.map(p => p.estimated_value).filter(v => v != null);
-      const sqfts = props.map(p => p.square_footage).filter(v => v > 0);
       const doms = props.map(p => p.days_on_market).filter(v => v != null);
+      const perSqft = props
+        .map(p => (p.estimated_value != null && p.square_footage > 0) ? p.estimated_value / p.square_footage : null)
+        .filter(v => v != null);
+      const values = props.map(p => p.estimated_value).filter(v => v != null);
       const avg = values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0;
-      const avgPerSqft = values.length && sqfts.length
-        ? values.reduce((a, b, i) => a + (b / (sqfts[i] || 1)), 0) / values.length
-        : 0;
+      const avgPerSqft = perSqft.length ? perSqft.reduce((a, b) => a + b, 0) / perSqft.length : 0;
       const avgDom = doms.length ? doms.reduce((a, b) => a + b, 0) / doms.length : 0;
       const distressCount = props.filter(p => p.distress_type).length;
       const distressTypes = {};

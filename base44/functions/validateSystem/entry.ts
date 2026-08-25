@@ -1,5 +1,4 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
-import { secrets } from 'base44:runtime';
 import { scrapeSource } from '../../shared/scraper.ts';
 
 export default async function(req) {
@@ -52,7 +51,7 @@ export default async function(req) {
       const src = sources.find(s => s.id === sid);
       if (!src) continue;
       try {
-        await scrapeSource(base44, { secrets, source: src });
+        await scrapeSource(base44, { source: src });
         const healed = recentFailed.filter(j => j.source_id === sid);
         for (const j of healed) {
           await base44.asServiceRole.entities.ScrapeJob.update(j.id, { status: 'complete', error: null, completed_at: new Date().toISOString() });

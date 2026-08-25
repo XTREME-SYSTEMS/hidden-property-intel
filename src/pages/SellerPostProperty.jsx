@@ -30,6 +30,10 @@ export default function SellerPostProperty() {
   };
 
   const publish = async () => {
+    if (!f.address.trim() || !f.city.trim() || !f.state.trim() || !f.zip_code.trim()) {
+      alert("Please fill in the street address, city, state, and ZIP code before publishing.");
+      return;
+    }
     setBusy(true);
     try {
       const u = await base44.auth.me();

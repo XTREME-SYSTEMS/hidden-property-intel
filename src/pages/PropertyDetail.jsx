@@ -58,10 +58,18 @@ export default function PropertyDetail() {
       if (!alive) return;
       setProperty(p); setUser(u);
       const isAdmin = u?.role === 'admin';
+      let isPro = isAdmin;
+      if (u && !isAdmin) {
+        const inv = await base44.entities.Investor.filter({ user_id: u.id }).catch(() => []);
+        const plan = inv[0]?.subscription_plan;
+        const status = inv[0]?.subscription_status;
+        isPro = (plan === 'pro' || plan === 'elite') && status === 'active';
+      }
+      setUnlocked(isPro);
       const [sc, ch, ow, bd, tr] = await Promise.all([
         base44.entities.PropertyScore.filter({ property_id: id }),
         base44.entities.OwnershipChain.filter({ property_id: id }),
-        isAdmin ? base44.entities.Owner.filter({ property_id: id }) : Promise.resolve([]),
+        isPro ? base44.entities.Owner.filter({ property_id: id }) : Promise.resolve([]),
         base44.entities.Bid.filter({ property_id: id }, "-bid_amount", 20),
         base44.entities.TitleRisk.filter({ property_id: id }),
       ]);

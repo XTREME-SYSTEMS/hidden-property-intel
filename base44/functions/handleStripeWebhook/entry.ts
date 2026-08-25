@@ -95,6 +95,14 @@ export default async function(req) {
             ? new Date(periodEnd * 1000).toISOString()
             : subs[0].current_period_end
         });
+        const invs = await base44.asServiceRole.entities.Investor.filter({
+          user_id: subs[0].investor_id
+        });
+        if (invs[0]) {
+          await base44.asServiceRole.entities.Investor.update(invs[0].id, {
+            subscription_status: 'active'
+          });
+        }
       }
     } else if (event.type === 'invoice.payment_failed') {
       const inv = event.data.object;
@@ -105,6 +113,14 @@ export default async function(req) {
         await base44.asServiceRole.entities.Subscription.update(subs[0].id, {
           status: 'past_due'
         });
+        const invs = await base44.asServiceRole.entities.Investor.filter({
+          user_id: subs[0].investor_id
+        });
+        if (invs[0]) {
+          await base44.asServiceRole.entities.Investor.update(invs[0].id, {
+            subscription_status: 'past_due'
+          });
+        }
       }
     } else if (event.type === 'customer.subscription.deleted') {
       const sub = event.data.object;

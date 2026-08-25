@@ -16,11 +16,6 @@ export default function LuxNav() {
     { label: "For Investors", href: "/#investors" },
     { label: "For Sellers", href: "/#sellers" },
     { label: "Calculators", to: "/calculators" },
-    { label: "Pipeline", to: "/investor/pipeline" },
-  ];
-  const adminLinks = [
-    { label: "Scrape Sources", to: "/admin/sources" },
-    { label: "Outreach", to: "/admin/outreach" },
   ];
 
   const linkClass = "font-brand text-[11px] font-medium uppercase tracking-[0.3em] text-black/70 transition-colors hover:text-black";
@@ -44,11 +39,6 @@ export default function LuxNav() {
 
         <nav className="hidden items-center gap-10 lg:flex">
           {links.map((l) => renderLink(l))}
-          {user?.role === "admin" && (
-            <div className="flex items-center gap-5 border-l border-black/10 pl-6">
-              {adminLinks.map((l) => renderLink(l))}
-            </div>
-          )}
         </nav>
 
         <div className="flex items-center gap-4">
@@ -66,7 +56,6 @@ export default function LuxNav() {
       {open && (
         <div className="border-t border-black/10 bg-white px-6 py-4 lg:hidden">
           {links.map((l) => renderLink(l, () => setOpen(false)))}
-          {user?.role === "admin" && adminLinks.map((l) => renderLink(l, () => setOpen(false)))}
         </div>
       )}
     </header>

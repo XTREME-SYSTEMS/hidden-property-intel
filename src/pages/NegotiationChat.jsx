@@ -14,10 +14,14 @@ export default function NegotiationChat() {
 
   const load = async () => {
     try {
-      const p = await base44.entities.Property.get(propertyId);
+      const [p, u] = await Promise.all([
+        base44.entities.Property.get(propertyId),
+        base44.auth.me().catch(() => null)
+      ]);
       setProperty(p);
-      const t = await base44.entities.NegotiationThread.filter({ property_id: propertyId });
-      setThread(t[0] || null);
+      const threads = await base44.entities.NegotiationThread.filter({ property_id: propertyId });
+      const mine = u ? threads.find(t => t.investor_id === u.id || t.seller_id === u.id) : null;
+      setThread(mine || threads[0] || null);
       setTimeout(() => endRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
     } catch (e) { /* ignore */ }
   };
