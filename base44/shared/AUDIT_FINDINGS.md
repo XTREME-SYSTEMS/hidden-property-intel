@@ -1,76 +1,65 @@
-# Forensic Audit Findings — Hidden Property Intel
-**Audit Date:** 2026-08-24
-**Status:** 24 FIXED · 13 NOTED/DEFERRED
+# Forensic Audit Findings — 2026-08-25
 
-## 🔴 CRITICAL: Security Vulnerabilities
+## CRITICAL
 
-| # | Finding | Status |
-|---|---------|--------|
-| 1 | RLS on Property — update/delete restricted to seller/admin | ✅ FIXED |
-| 2 | RLS on Bid — read restricted to investor/seller/admin + added seller_id field | ✅ FIXED |
-| 3 | RLS on Owner — admin-only (PII protected) | ✅ FIXED |
-| 4 | RLS on PropertyScore — admin-only writes | ✅ FIXED |
-| 5 | RLS on OwnershipChain — admin-only writes | ✅ FIXED |
-| 6 | RLS on MarketAnalytics — admin-only writes | ✅ FIXED |
-| 7 | Property address masking client-side only | ⚠️ NOTED — needs backend function for field-level masking |
-| 8 | Smart contract signature_hash uses random UUID | ✅ FIXED — now SHA-256 hash of user+contract+timestamp |
-| 9 | No Polygon blockchain deployment | ⚠️ NOTED — requires wallet integration (future phase) |
-| 10 | Shill bidding possible | ✅ FIXED — seller cannot bid on own property |
+### C1. Bid entity — open create RLS (privilege escalation / impersonation)
+- **File:** `base44/entities/Bid.jsonc`
+- **Root cause:** `rls.create: {}` allows ANY authenticated user to create a Bid with an arbitrary `investor_id` and `seller_id`. A direct SDK call (`base44.entities.Bid.create({ investor_id: "<other user>", ... })`) bypasses the `placeBid` function entirely, letting a user impersonate another investor or route bids to themselves.
+- **Fix:** Restrict `create` to `data.investor_id == user.id` OR admin.
 
-## 🟠 HIGH: Functional Bugs
+### C2. Property entity — open create RLS (seller_id spoofing → hijack)
+- **File:** `base44/entities/Property.jsonc`
+- **Root cause:** `rls.create: {}` allows any user to create a Property with `seller_id` set to another user's ID. Since `update`/`delete` allow `data.seller_id == user.id`, the spoofed user would gain edit/delete access to a property they never posted.
+- **Fix:** Restrict `create` to `data.seller_id == user.id` OR admin.
 
-| # | Finding | Status |
-|---|---------|--------|
-| 11 | "List your property" links → /listings | ✅ FIXED — all 5 links now point to /seller/post-property |
-| 12 | "Place a bid" on PropertyDetail → /listings | ✅ FIXED — now /properties/:id/bid |
-| 13 | SavedSearch.create omits user_id | ✅ FIXED |
-| 14 | Bidding page passes wrong IDs to contract gen | ✅ FIXED — uses investor_id, not bid ID; no "seller" string |
-| 15 | NegotiationChat shows wrong thread | ✅ FIXED — backend creates separate threads per investor |
-| 16 | AlertPreference toggle logic broken | ✅ FIXED — simplified to clear logic |
-| 17 | "Choose plan" links → /listings | ✅ FIXED — now /investor/signup |
+### C3. Stripe webhook doesn't sync Investor.subscription_status
+- **File:** `base44/functions/handleStripeWebhook/entry.ts`
+- **Root cause:** On `invoice.paid` and `invoice.payment_failed`, the Subscription record is updated but the **Investor** record's `subscription_status` is not. The bidding gate (`placeBid`) checks `investor.subscription_status`, so after a payment fails and is later paid, the investor stays locked out (or stays "active" after a real failure).
+- **Fix:** Update `Investor.subscription_status` in both handlers.
 
-## 🟡 MEDIUM: Performance Issues
+### C4. PropertyDetail `unlocked` is never set to true — Pro feature completely broken
+- **File:** `src/pages/PropertyDetail.jsx`
+- **Root cause:** `const [unlocked, setUnlocked] = useState(false)` — `setUnlocked(true)` is never called. Full address reveal and ownership-chain access (the core Pro/Elite value proposition) are never shown to any user, including paying subscribers.
+- **Fix:** Set `unlocked` based on the user's Investor subscription plan (Pro/Elite) or admin role.
 
-| # | Finding | Status |
-|---|---------|--------|
-| 18 | N+1 queries in InvestorDashboard | ✅ FIXED — single bulk fetch |
-| 19 | InvestorPipeline fetches properties individually | ✅ FIXED — single bulk fetch |
-| 20 | Listings loads 300 properties client-side | ⚠️ NOTED — needs server-side pagination (backend function) |
-| 21 | syncMarketAnalytics LLM call per city | ⚠️ NOTED — needs batching optimization |
-| 22 | validateSystem loads 5000+ records | ⚠️ NOTED — needs query optimization |
+## HIGH
 
-## 🟡 MEDIUM: Data Integrity Issues
+### H1. syncMarketAnalytics — avg_price_per_sqft index misalignment
+- **File:** `base44/functions/syncMarketAnalytics/entry.ts`
+- **Root cause:** `values` and `sqfts` are built with separate `.filter()` calls, so their indices don't align. Dividing `values[i] / sqfts[i]` pairs the wrong property's price with the wrong square footage.
+- **Fix:** Compute price/sqft per-property, then average.
 
-| # | Finding | Status |
-|---|---------|--------|
-| 23 | Scoring creates duplicate PropertyScore/TitleRisk | ✅ FIXED — upsert pattern (update if exists) |
-| 24 | OwnershipChain can create duplicates | ⚠️ NOTED — low risk, existing check is sufficient |
-| 25 | Cross-reference only 10 properties/day | ⚠️ NOTED — needs batch size increase |
+### H2. NegotiationChat loads first thread for property without user filter
+- **File:** `src/pages/NegotiationChat.jsx`
+- **Root cause:** `NegotiationThread.filter({ property_id })` returns the first thread, which may belong to a different investor. RLS protects reads, but the UX shows the wrong conversation.
+- **Fix:** Filter by `investor_id` or `seller_id` matching the current user.
 
-## 🔵 Design & UX Inconsistencies
+### H3. Dead `secrets` param passed to scrapeSource
+- **Files:** `runDailyScrapePipeline`, `scrapeProperties`, `validateSystem`
+- **Root cause:** All pass `{ secrets, source }` to `scrapeSource`, whose signature is `({ source, url, distress_type, state })` — `secrets` is unused. Confusing dead code.
+- **Fix:** Remove the `secrets` argument.
 
-| # | Finding | Status |
-|---|---------|--------|
-| 26 | Two competing design systems | ⚠️ NOTED — needs token migration across app pages |
-| 27 | PropertyBrief PDF says "PROPERTYINTEL" | ✅ FIXED — now "HIDDEN PROPERTY INTEL" |
-| 28 | InvestorPipeline manual UUID entry | ⚠️ NOTED — needs property search UI |
-| 29 | Mobile nav minimal | ⚠️ NOTED — minor UX improvement |
+### H4. SellerPostProperty — no required-field validation
+- **File:** `src/pages/SellerPostProperty.jsx`
+- **Root cause:** `publish()` doesn't validate `address/city/state/zip_code` before calling `Property.create`. Empty fields produce a generic API error.
+- **Fix:** Validate required fields and show a clear message.
 
-## ⚪ Code Quality & Maintenance
+## MEDIUM
 
-| # | Finding | Status |
-|---|---------|--------|
-| 30 | 10+ dead/legacy files | ⚠️ NOTED — needs careful import analysis before deletion |
-| 31 | Duplicate distress type arrays | ✅ FIXED — centralized in src/lib/constants.js |
-| 32 | Two overlapping negotiation functions | ⚠️ NOTED — needs consolidation refactor |
-| 33 | Deal Alert Matcher triggers on every update | ⚠️ NOTED — dedup logic prevents duplicate alerts |
+### M1. createCheckoutSession accepts user_id from request body unverified
+- Public-app design, but a user could pay for another user's subscription. Low impact (they're spending money, not stealing), but should bind to the authenticated user when available.
 
-## 📋 Business Logic Gaps
+### M2. Bidding page doesn't hide the bid form for the property's seller
+- Server blocks it, but the UI is confusing — seller sees a form that will always error.
 
-| # | Finding | Status |
-|---|---------|--------|
-| 34 | No closing flow | ✅ FIXED — admin can close signed contracts → property status "closed" |
-| 35 | No Seller entity creation | ✅ FIXED — created on property post, incremented on subsequent posts |
-| 36 | No investor verification | ⚠️ NOTED — needs verification flow |
-| 37 | Outreach emails no unsubscribe | ✅ FIXED — unsubscribe note added to all outreach emails |
-| 38 | No earnest money payment | ⚠️ NOTED — needs Stripe payment integration |
+### M3. Dead CSS — ~700 lines of HPI class definitions in index.css unused by current Tailwind pages
+- Bundle bloat. The current pages use Tailwind utilities, not `.hero`, `.market-head`, etc.
+
+### M4. Orphaned pages — Home.jsx, Properties.jsx, NegotiationAssistant.jsx exist but aren't routed
+- Dead code, potential confusion.
+
+## LOW
+
+### L1. MobileNav has no Account/Alerts/Dashboard tab
+### L2. LuxNav has no login/logout link
+### L3. InvestorDashboard fetches 500 properties to map bid property IDs (workaround for lack of `$in` filter)
