@@ -8,7 +8,8 @@ export default async function(req) {
     if (user && user.role !== 'admin') return Response.json({ error: 'Admin only' }, { status: 403 });
     const body = await req.json().catch(() => ({}));
     const limit = body?.limit || 50;
-    const r = await emailNewInvestorLeads(base44, limit);
+    const testEmail = body?.test_email || null;
+    const r = await emailNewInvestorLeads(base44, limit, testEmail);
     return Response.json(r);
   } catch (error) {
     console.error('outreachInvestors error', error);

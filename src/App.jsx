@@ -22,6 +22,8 @@ import SellerPostProperty from '@/pages/SellerPostProperty';
 import NegotiationAssistant from '@/pages/NegotiationAssistant';
 import AdminSources from '@/pages/AdminSources';
 import AdminOutreach from '@/pages/AdminOutreach';
+import AdminTestLab from '@/pages/AdminTestLab';
+import SystemDNA from '@/pages/SystemDNA';
 import NegotiationChat from '@/pages/NegotiationChat';
 import SmartContractDetail from '@/pages/SmartContractDetail';
 import Login from '@/pages/Login';
@@ -80,6 +82,8 @@ const AuthenticatedApp = () => {
           <Route path="/contracts/:id" element={<SmartContractDetail />} />
           <Route path="/admin/sources" element={<AdminSources />} />
           <Route path="/admin/outreach" element={<AdminOutreach />} />
+          <Route path="/admin/test-lab" element={<AdminTestLab />} />
+          <Route path="/system-dna" element={<SystemDNA />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Search, Mail, Building2, ShieldCheck } from "lucide-react";
+import { Search, Mail, Building2, ShieldCheck, FlaskConical, Dna } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function AdminOutreach() {
   const [user, setUser] = useState(null);
@@ -85,6 +86,15 @@ export default function AdminOutreach() {
         The system auto-scrapes investor contacts, emails them invitations, and emails distressed-property owners
         inviting them to list. This runs nightly at 3 AM ET — trigger any stage manually below.
       </p>
+
+      <div className="mt-6 flex flex-wrap gap-3">
+        <Link to="/admin/test-lab" className="inline-flex items-center gap-2 rounded-sm border border-black/15 px-4 py-2.5 text-[11px] uppercase tracking-[0.3em] text-black/70 hover:bg-black hover:text-white">
+          <FlaskConical className="h-4 w-4" /> Test lab
+        </Link>
+        <Link to="/system-dna" className="inline-flex items-center gap-2 rounded-sm border border-black/15 px-4 py-2.5 text-[11px] uppercase tracking-[0.3em] text-black/70 hover:bg-black hover:text-white">
+          <Dna className="h-4 w-4" /> System DNA
+        </Link>
+      </div>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-4">
         {[["Total leads", leads.length], ["New", newCount], ["Contacted", contactedCount], ["Last run", "3 AM ET daily"]].map(([l, v]) => (
