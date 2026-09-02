@@ -67,6 +67,8 @@ const AI_SCHEMA = {
 };
 
 const BROWSER_SCHEMA = AI_SCHEMA;
+// Per-property item schema for cloudbrowser extract_table (engine returns an array of these)
+const PROPERTY_ITEM_SCHEMA = AI_SCHEMA.properties.items;
 
 function buildHarvestPrompt(source, cfg, overrides) {
   const state = cfg.state || overrides.state || 'FL';
@@ -146,8 +148,8 @@ async function harvestViaCloudBrowser(source, url, cfg) {
     body: JSON.stringify({ viewport: { width: 1280, height: 800 }, locale: 'en-US', timezone: 'America/New_York' })
   });
   const sess = await sessRes.json().catch(() => ({}));
-  if (!sessRes.ok || !sess.id) throw new Error(sess.error?.message || 'Failed to create cloudbrowser session');
-  const sessionId = sess.id;
+  if (!sessRes.ok || !(sess.sessionId || sess.id)) throw new Error(sess.error?.message || 'Failed to create cloudbrowser session');
+  const sessionId = sess.sessionId || sess.id;
 
   try {
     // 2. Navigate to the target listing URL
@@ -157,18 +159,18 @@ async function harvestViaCloudBrowser(source, url, cfg) {
     });
     if (!gotoRes.ok) { const e = await gotoRes.json().catch(() => ({})); throw new Error(e.error?.message || 'cloudbrowser goto failed'); }
 
-    // 3. Extract structured listing data against the property schema
+    // 3. Extract structured listing data — engine returns { data: [ ...records ] }
     const extractRes = await fetch(`${engineUrl}/sessions/${sessionId}/execute`, {
       method: 'POST', headers,
-      body: JSON.stringify({ action_type: 'extract', selector: cfg.extract_selector || 'body', options: { output_schema: BROWSER_SCHEMA } })
+      body: JSON.stringify({ action_type: 'extract_table', selector: cfg.extract_selector || 'body', options: { output_schema: PROPERTY_ITEM_SCHEMA } })
     });
     const extractJson = await extractRes.json().catch(() => ({}));
     if (!extractRes.ok) throw new Error(extractJson.error?.message || 'cloudbrowser extract failed');
 
-    let content = extractJson.data || extractJson.result || extractJson.output || extractJson;
-    if (typeof content === 'string') { try { content = JSON.parse(content); } catch (e) {} }
-    if (content && Array.isArray(content.properties)) return content.properties;
-    if (Array.isArray(content)) return content;
+    const data = extractJson.data;
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data.properties)) return data.properties;
+    if (typeof data === 'string') { try { const p = JSON.parse(data); return Array.isArray(p) ? p : (p.properties || []); } catch (e) {} }
 
     // Fall back to reading the session status for extraction results
     const statusRes = await fetch(`${engineUrl}/sessions/${sessionId}`, { headers });
