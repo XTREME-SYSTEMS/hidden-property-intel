@@ -1,0 +1,12 @@
+[build]
+provider = "node"
+
+[build.steps.install]
+cmd = "npm install"
+
+[build.steps.build]
+cmd = "npm run build"
+
+[deploy]
+startCommand = "npm start"
+cronSchedule = "0 6 * * *"
