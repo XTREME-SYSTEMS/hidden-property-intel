@@ -10,6 +10,7 @@ import SellerFreeCTA from "@/components/luxury/SellerFreeCTA";
 import PortalShowcase from "@/components/luxury/PortalShowcase";
 import SmartContractShowcase from "@/components/luxury/SmartContractShowcase";
 import { ArrowRight, Radar, Brain, FileSignature, Building2, Users, Scale, BadgeCheck, Search, Sparkles, Plus } from "lucide-react";
+import Seo from "@/components/Seo";
 
 const INVESTOR_STEPS = [
   { n: "01", t: "Browse off-market inventory", d: "Distressed, probate, tax-delinquent, and foreclosure properties scraped daily from county records — none of it on the MLS." },
@@ -65,6 +66,37 @@ export default function LuxuryHome() {
 
   return (
     <div className="font-body">
+      <Seo
+        title="Hidden Property Intel — Find What Others Miss"
+        description="AI-powered distressed property intelligence. Find off-market pre-foreclosures, probate, tax-delinquent, and auction properties before they hit the MLS. AI deal scoring 0-100, ownership chain tracing, skip trace, ROI calculators, and Polygon smart-contract escrow for real estate investors."
+        keywords="distressed property, off-market real estate, pre-foreclosure, foreclosure, probate property, tax delinquent homes, real estate investing, property intelligence, skip trace, ownership chain, distressed sellers, real estate investors, Florida foreclosures, auction properties, REO, smart contract escrow, AI property scoring, real estate investment platform, off-market deals, motivated seller leads, cash offer, we buy houses, sell house fast, investment property, real estate marketplace, property intelligence platform"
+        path="/"
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": "Hidden Property Intel — Find What Others Miss",
+            "description": "AI-powered distressed property intelligence platform for off-market real estate investing.",
+            "url": "https://hiddenpropertyintel.com/",
+            "isPartOf": { "@id": "https://hiddenpropertyintel.com/#website" },
+            "about": { "@id": "https://hiddenpropertyintel.com/#organization" }
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "Service",
+            "name": "Distressed Property Intelligence & Smart-Contract Escrow",
+            "serviceType": "Real Estate Intelligence Platform",
+            "provider": { "@id": "https://hiddenpropertyintel.com/#organization" },
+            "areaServed": { "@type": "Country", "name": "United States" },
+            "description": "AI-powered platform that finds off-market distressed properties, scores them for investment quality, traces ownership chains, and enables smart-contract escrow closings on Polygon.",
+            "offers": [
+              { "@type": "Offer", "name": "Starter", "price": "49", "priceCurrency": "USD", "description": "Basic property access and search" },
+              { "@type": "Offer", "name": "Pro", "price": "149", "priceCurrency": "USD", "description": "Full property data, bidding, and ownership chain access" },
+              { "@type": "Offer", "name": "Elite", "price": "499", "priceCurrency": "USD", "description": "Unlimited access with proxy bidding and priority alerts" }
+            ]
+          }
+        ]}
+      />
       {/* Hero */}
       <section className="relative h-[94vh] min-h-[660px] w-full overflow-hidden bg-black">
         <Image src={IMAGES.estate} alt="Hidden Property Intel" fittingType="fill" className="absolute inset-0 h-full w-full object-cover opacity-80" />

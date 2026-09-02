@@ -10,6 +10,7 @@ import ExitStrategyModel from "@/components/ExitStrategyModel";
 import PropertyBrief from "@/components/PropertyBrief";
 import WatchButton from "@/components/WatchButton";
 import { money, num, pct } from "@/lib/format";
+import Seo from "@/components/Seo";
 import { Lock, MapPin, Phone, Mail, ArrowLeft, ShieldAlert } from "lucide-react";
 
 function Card({ title, children, className = "" }) {
@@ -103,6 +104,51 @@ export default function PropertyDetail() {
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-10">
+      <Seo
+        title={`${property.city}, ${property.state} — ${labelFor(property.distress_type)} Property`}
+        description={`${labelFor(property.distress_type)} property in ${property.city}, ${property.state} ${property.zip_code}. ${property.bedrooms || 0} bed, ${property.bathrooms || 0} bath, ${num(property.square_footage)} sqft. AI investment score ${Math.round(property.property_score || 0)}/100. Estimated value ${money(property.estimated_value)}.`}
+        keywords={`${property.distress_type} property ${property.city} ${property.state}, off-market ${property.city} ${property.state}, distressed property ${property.zip_code}, ${property.property_type} ${property.city}, ${property.distress_type} ${property.state}, real estate investment ${property.city}, cash offer ${property.city} ${property.state}, ${property.zip_code} real estate, ${property.distress_type} homes ${property.state}, investment property ${property.city}, ${labelFor(property.distress_type).toLowerCase()} ${property.city}`}
+        path={`/properties/${property.id}`}
+        image={images[0]?.url}
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": ["Product", "Place"],
+            "name": unlocked ? property.address : `${property.city}, ${property.state} ${property.zip_code}`,
+            "description": property.description || `${labelFor(property.distress_type)} property in ${property.city}, ${property.state}. AI-scored ${Math.round(property.property_score || 0)}/100 for investment quality with estimated value of ${money(property.estimated_value)}.`,
+            "url": `https://hiddenpropertyintel.com/properties/${property.id}`,
+            "image": images.map((im) => im.url).filter(Boolean),
+            "sku": property.id,
+            "category": labelFor(property.distress_type),
+            "offers": {
+              "@type": "Offer",
+              "price": String(property.proposed_asking_price || property.estimated_value || 0),
+              "priceCurrency": "USD",
+              "availability": property.status === "active" ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+              "url": `https://hiddenpropertyintel.com/properties/${property.id}/bid`
+            },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": unlocked ? property.address || "" : "",
+              "addressLocality": property.city,
+              "addressRegion": property.state,
+              "postalCode": property.zip_code,
+              "addressCountry": "US"
+            },
+            ...(property.square_footage ? { "floorSize": { "@type": "QuantitativeValue", "value": property.square_footage, "unitCode": "FTK" } } : {}),
+            ...(property.bedrooms ? { "numberOfRooms": property.bedrooms } : {})
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://hiddenpropertyintel.com/" },
+              { "@type": "ListItem", "position": 2, "name": "Distressed Property Listings", "item": "https://hiddenpropertyintel.com/listings" },
+              { "@type": "ListItem", "position": 3, "name": `${property.city}, ${property.state}`, "item": `https://hiddenpropertyintel.com/properties/${property.id}` }
+            ]
+          }
+        ]}
+      />
       <Link to="/listings" className="inline-flex items-center gap-1.5 text-sm text-[#6B7B72] hover:text-[#1A2B22]">
         <ArrowLeft className="h-4 w-4" /> Back to search
       </Link>

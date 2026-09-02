@@ -29,10 +29,26 @@
             "function_name": "submitSitemap",
             "args": {}
           },
+          "then": "submit_dynamic_sitemap",
+          "x-base44": {
+            "title": "Submit static sitemap",
+            "description": "Auto-submit sitemap.xml if missing"
+          }
+        }
+      },
+      {
+        "submit_dynamic_sitemap": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "submitSitemap",
+            "args": {
+              "sitemap_path": "https://hiddenpropertyintel.com/functions/dynamicSitemap"
+            }
+          },
           "then": "end",
           "x-base44": {
-            "title": "Submit sitemap",
-            "description": "Auto-submit sitemap.xml if missing"
+            "title": "Submit dynamic sitemap",
+            "description": "Auto-submit dynamic sitemap with all property URLs"
           }
         }
       }

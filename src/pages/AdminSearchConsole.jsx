@@ -22,6 +22,18 @@ export default function AdminSearchConsole() {
     setSubmitting(false);
   };
 
+  const submitDynamicSitemap = async () => {
+    setSubmitting(true); setSubmitMsg(null);
+    try {
+      const res = await base44.functions.invoke("submitSitemap", { sitemap_path: "https://hiddenpropertyintel.com/functions/dynamicSitemap" });
+      if (res.data?.error) setSubmitMsg({ site: "dynamic", error: res.data.error });
+      else { setSubmitMsg({ site: "dynamic", ok: true, path: res.data.sitemap_path, status: res.data.status }); await load(); }
+    } catch (e) {
+      setSubmitMsg({ site: "dynamic", error: e.response?.data?.error || e.message });
+    }
+    setSubmitting(false);
+  };
+
   const load = async () => {
     setLoading(true); setError(null);
     try {
@@ -46,9 +58,14 @@ export default function AdminSearchConsole() {
           <p className="text-[11px] uppercase tracking-[0.4em] text-black/40">Google Search Console</p>
           <h1 className="mt-2 font-display text-4xl font-light tracking-tight sm:text-5xl">Search performance & indexing</h1>
         </div>
-        <button onClick={load} disabled={loading} className="inline-flex items-center gap-2 rounded-sm border border-black/15 px-4 py-2.5 text-[11px] uppercase tracking-[0.3em] hover:bg-black hover:text-white disabled:opacity-50">
-          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /> Refresh
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={submitDynamicSitemap} disabled={submitting} className="inline-flex items-center gap-2 rounded-sm bg-black px-4 py-2.5 text-[11px] uppercase tracking-[0.3em] text-white disabled:opacity-50">
+            <UploadCloud className="h-4 w-4" /> {submitting ? "Submitting…" : "Submit dynamic sitemap"}
+          </button>
+          <button onClick={load} disabled={loading} className="inline-flex items-center gap-2 rounded-sm border border-black/15 px-4 py-2.5 text-[11px] uppercase tracking-[0.3em] hover:bg-black hover:text-white disabled:opacity-50">
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /> Refresh
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -56,6 +73,12 @@ export default function AdminSearchConsole() {
           <p className="font-medium">Couldn't pull Search Console data</p>
           <p className="mt-1 text-xs">{error}</p>
           <p className="mt-3 text-xs">Make sure you've added <code className="bg-red-100 px-1.5 py-0.5 rounded">https://my-property-intel.base44.app</code> as a property in Google Search Console and verified it.</p>
+        </div>
+      )}
+
+      {submitMsg && submitMsg.site === "dynamic" && (
+        <div className={`mt-6 rounded-sm border p-4 text-xs ${submitMsg.error ? "border-red-200 bg-red-50 text-red-700" : "border-emerald-200 bg-emerald-50 text-emerald-700"}`}>
+          {submitMsg.error ? submitMsg.error : `Dynamic sitemap ${submitMsg.status === "already_submitted" ? "already registered" : "submitted"}: ${submitMsg.path} — includes all active property URLs for maximum indexation.`}
         </div>
       )}
 

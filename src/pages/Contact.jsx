@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Phone, Mail, MapPin, ShieldCheck } from "lucide-react";
+import Seo from "@/components/Seo";
 
 export default function Contact() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
@@ -15,6 +16,49 @@ export default function Contact() {
 
   return (
     <div className="mx-auto max-w-[1100px] px-6 py-20 lg:px-12">
+      <Seo
+        title="Contact — Licensed Florida Real Estate Broker"
+        description="Contact Hidden Property Intel and Steve Giordano, licensed Florida real estate broker. Whether you're an investor looking for off-market inventory or a property owner facing a distressed situation, we respond within one business day."
+        keywords="contact distressed property buyer, sell distressed house Florida, real estate investor contact, cash offer contact, Florida real estate broker, Steve Giordano, Giordano Customs, Port St. Lucie real estate broker, Treasure Coast real estate, sell house fast Florida, foreclosure help contact, probate property contact"
+        path="/contact"
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "ContactPage",
+            "name": "Contact Hidden Property Intel",
+            "description": "Contact a licensed Florida real estate broker for off-market property deals and distressed property sales.",
+            "url": "https://hiddenpropertyintel.com/contact"
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "LocalBusiness",
+            "@id": "https://hiddenpropertyintel.com/#broker",
+            "name": "Giordano Customs — Hidden Property Intel",
+            "image": "https://base44.app/api/apps/6a8ba268665196e93b7d57f7/files/mp/public/6a8ba268665196e93b7d57f7/42dfc033a_og-image.png",
+            "telephone": "+1-772-812-3930",
+            "email": "steve@giordanocustoms.com",
+            "url": "https://hiddenpropertyintel.com/contact",
+            "priceRange": "$$$",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "951 SW Country Club Dr, Suite 102",
+              "addressLocality": "Port St. Lucie",
+              "addressRegion": "FL",
+              "postalCode": "34986",
+              "addressCountry": "US"
+            },
+            "geo": { "@type": "GeoCoordinates", "latitude": 27.2730, "longitude": -80.3580 },
+            "areaServed": { "@type": "State", "name": "Florida" },
+            "openingHoursSpecification": {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+              "opens": "09:00",
+              "closes": "17:00"
+            },
+            "knowsAbout": ["Distressed Property", "Pre-Foreclosure", "Probate Real Estate", "Real Estate Investment", "Property Valuation", "Cash Offers", "Smart Contract Escrow"]
+          }
+        ]}
+      />
       <p className="text-[11px] uppercase tracking-[0.4em] text-black/40">Contact</p>
       <h1 className="mt-3 font-display text-4xl font-light tracking-tight sm:text-5xl">
         Talk to a licensed broker.

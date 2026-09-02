@@ -1,10 +1,32 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Radar, Brain, FileSignature, Users, ShieldCheck } from "lucide-react";
+import Seo from "@/components/Seo";
 
 export default function About() {
   return (
     <div className="mx-auto max-w-[1100px] px-6 py-20 lg:px-12">
+      <Seo
+        title="About — AI-Powered Distressed Property Intelligence"
+        description="Hidden Property Intel is an AI-powered real estate intelligence platform that surfaces distressed and off-market properties before they reach the MLS. Daily county-record scraping, AI deal scoring, ownership chain tracing, and Polygon smart-contract escrow."
+        keywords="about hidden property intel, AI real estate platform, distressed property intelligence, real estate data platform, property intelligence company, off-market real estate technology, AI property valuation, real estate AI, property data engineering, smart contract real estate, Polygon escrow real estate"
+        path="/about"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "AboutPage",
+          "name": "About Hidden Property Intel",
+          "description": "AI-powered distressed property intelligence platform surfacing off-market properties before they reach the MLS.",
+          "url": "https://hiddenpropertyintel.com/about",
+          "mainEntity": {
+            "@type": "Organization",
+            "name": "Hidden Property Intel",
+            "url": "https://hiddenpropertyintel.com/",
+            "description": "AI-powered distressed property intelligence platform connecting off-market sellers with serious real estate investors.",
+            "foundingDate": "2024",
+            "knowsAbout": ["Distressed Property", "Pre-Foreclosure", "Probate Real Estate", "Real Estate Investment", "Property Valuation", "Skip Tracing", "Smart Contract Escrow", "AI Property Scoring"]
+          }
+        }}
+      />
       <p className="text-[11px] uppercase tracking-[0.4em] text-black/40">About</p>
       <h1 className="mt-3 font-display text-4xl font-light tracking-tight sm:text-5xl">
         Hidden Property Intel finds what others miss.

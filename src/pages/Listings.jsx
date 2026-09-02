@@ -5,6 +5,7 @@ import { Image } from "@/components/ui/image";
 import LuxuryListingCard from "@/components/luxury/LuxuryListingCard";
 import { DISTRESS_TYPES, labelFor } from "@/components/DistressBadge";
 import { Search, SlidersHorizontal } from "lucide-react";
+import Seo from "@/components/Seo";
 
 const PER_PAGE = 9;
 
@@ -48,6 +49,42 @@ export default function Listings() {
 
   return (
     <div>
+      <Seo
+        title="Distressed Property Listings — Off-Market Real Estate Inventory"
+        description="Browse off-market distressed properties: pre-foreclosures, probate, tax-delinquent, code-violation, and auction properties. AI-scored 0-100 for investment quality with ROI calculators and ownership chain data. Updated daily from county records."
+        keywords="distressed property listings, off-market properties for sale, pre-foreclosure listings, foreclosure listings, probate property, tax delinquent homes, auction properties, REO properties, short sale listings, real estate marketplace, investment properties, cash buyers, distressed homes for sale, off-market deals, motivated seller properties, Florida distressed real estate, real estate inventory, property investment opportunities, non-MLS listings"
+        path="/listings"
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            "name": "Distressed Property Listings",
+            "description": "Off-market distressed properties refreshed daily from county records.",
+            "url": "https://hiddenpropertyintel.com/listings",
+            "isPartOf": { "@id": "https://hiddenpropertyintel.com/#website" }
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://hiddenpropertyintel.com/" },
+              { "@type": "ListItem", "position": 2, "name": "Distressed Property Listings", "item": "https://hiddenpropertyintel.com/listings" }
+            ]
+          },
+          ...(all ? [{
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            "name": "Distressed Properties",
+            "numberOfItems": all.length,
+            "itemListElement": all.slice(0, 20).map((p, i) => ({
+              "@type": "ListItem",
+              "position": i + 1,
+              "url": `https://hiddenpropertyintel.com/properties/${p.id}`,
+              "name": `${p.city}, ${p.state} — ${p.distress_type} property`
+            }))
+          }] : [])
+        ]}
+      />
       <section className="relative overflow-hidden border-b border-black/10 bg-black px-6 py-20 text-white lg:px-12 lg:py-28">
         <Image src={IMAGES.aerial} alt="" fittingType="fill" className="absolute inset-0 h-full w-full object-cover opacity-25" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/85" />

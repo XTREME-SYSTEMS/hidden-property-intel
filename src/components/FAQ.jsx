@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
 
 const ITEMS = [
@@ -14,6 +14,28 @@ const ITEMS = [
 
 export default function FAQ() {
   const [open, setOpen] = useState(0);
+
+  useEffect(() => {
+    const schema = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": ITEMS.map(([q, a]) => ({
+        "@type": "Question",
+        "name": q,
+        "acceptedAnswer": { "@type": "Answer", "text": a }
+      }))
+    };
+    let el = document.getElementById("faq-jsonld");
+    if (!el) {
+      el = document.createElement("script");
+      el.type = "application/ld+json";
+      el.id = "faq-jsonld";
+      document.head.appendChild(el);
+    }
+    el.textContent = JSON.stringify(schema);
+    return () => { document.getElementById("faq-jsonld")?.remove(); };
+  }, []);
+
   return (
     <div className="divide-y divide-[#E5EDEA] rounded-3xl bg-white ring-1 ring-[#E5EDEA]">
       {ITEMS.map(([q, a], i) => (
