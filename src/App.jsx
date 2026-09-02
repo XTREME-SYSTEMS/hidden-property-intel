@@ -23,6 +23,7 @@ import NegotiationAssistant from '@/pages/NegotiationAssistant';
 import AdminSources from '@/pages/AdminSources';
 import AdminOutreach from '@/pages/AdminOutreach';
 import AdminTestLab from '@/pages/AdminTestLab';
+import AdminArchitecture from '@/pages/AdminArchitecture';
 import SystemDNA from '@/pages/SystemDNA';
 import SmartContractMarketing from '@/pages/SmartContractMarketing';
 import NegotiationChat from '@/pages/NegotiationChat';
@@ -84,6 +85,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/sources" element={<AdminSources />} />
           <Route path="/admin/outreach" element={<AdminOutreach />} />
           <Route path="/admin/test-lab" element={<AdminTestLab />} />
+          <Route path="/admin/architecture" element={<AdminArchitecture />} />
           <Route path="/system-dna" element={<SystemDNA />} />
           <Route path="/smart-contracts" element={<SmartContractMarketing />} />
         </Route>
