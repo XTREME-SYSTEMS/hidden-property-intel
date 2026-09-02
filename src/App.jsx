@@ -24,6 +24,7 @@ import AdminSources from '@/pages/AdminSources';
 import AdminOutreach from '@/pages/AdminOutreach';
 import AdminTestLab from '@/pages/AdminTestLab';
 import SystemDNA from '@/pages/SystemDNA';
+import SmartContractMarketing from '@/pages/SmartContractMarketing';
 import NegotiationChat from '@/pages/NegotiationChat';
 import SmartContractDetail from '@/pages/SmartContractDetail';
 import Login from '@/pages/Login';
@@ -84,6 +85,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/outreach" element={<AdminOutreach />} />
           <Route path="/admin/test-lab" element={<AdminTestLab />} />
           <Route path="/system-dna" element={<SystemDNA />} />
+          <Route path="/smart-contracts" element={<SmartContractMarketing />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
