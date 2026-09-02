@@ -123,6 +123,66 @@ async function harvestViaBrowser(source, url, cfg) {
   return [];
 }
 
+/**
+ * Scraper via the owner's self-hosted cloudbrowser-control engine (browser-engine).
+ * HTTP API: POST /sessions, POST /sessions/:id/execute, GET /sessions/:id, DELETE /sessions/:id.
+ * Auth: x-api-key header. Requires BROWSER_ENGINE_URL + BROWSER_ENGINE_API_KEY secrets.
+ */
+async function harvestViaCloudBrowser(source, url, cfg) {
+  const runtime = await import('base44:runtime');
+  const engineUrl = (runtime.secrets.get('BROWSER_ENGINE_URL') || '').replace(/\/$/, '');
+  const apiKey = runtime.secrets.get('BROWSER_ENGINE_API_KEY');
+  if (!engineUrl || !apiKey) {
+    throw new Error('Cloudbrowser engine not configured — set BROWSER_ENGINE_URL and BROWSER_ENGINE_API_KEY');
+  }
+  const targetUrl = url || source?.url;
+  if (!targetUrl) throw new Error('No URL to scrape for this source');
+
+  const headers = { 'Content-Type': 'application/json', 'x-api-key': apiKey };
+
+  // 1. Create a browser session
+  const sessRes = await fetch(`${engineUrl}/sessions`, {
+    method: 'POST', headers,
+    body: JSON.stringify({ viewport: { width: 1280, height: 800 }, locale: 'en-US', timezone: 'America/New_York' })
+  });
+  const sess = await sessRes.json().catch(() => ({}));
+  if (!sessRes.ok || !sess.id) throw new Error(sess.error?.message || 'Failed to create cloudbrowser session');
+  const sessionId = sess.id;
+
+  try {
+    // 2. Navigate to the target listing URL
+    const gotoRes = await fetch(`${engineUrl}/sessions/${sessionId}/execute`, {
+      method: 'POST', headers,
+      body: JSON.stringify({ action_type: 'goto', value: targetUrl })
+    });
+    if (!gotoRes.ok) { const e = await gotoRes.json().catch(() => ({})); throw new Error(e.error?.message || 'cloudbrowser goto failed'); }
+
+    // 3. Extract structured listing data against the property schema
+    const extractRes = await fetch(`${engineUrl}/sessions/${sessionId}/execute`, {
+      method: 'POST', headers,
+      body: JSON.stringify({ action_type: 'extract', selector: cfg.extract_selector || 'body', options: { output_schema: BROWSER_SCHEMA } })
+    });
+    const extractJson = await extractRes.json().catch(() => ({}));
+    if (!extractRes.ok) throw new Error(extractJson.error?.message || 'cloudbrowser extract failed');
+
+    let content = extractJson.data || extractJson.result || extractJson.output || extractJson;
+    if (typeof content === 'string') { try { content = JSON.parse(content); } catch (e) {} }
+    if (content && Array.isArray(content.properties)) return content.properties;
+    if (Array.isArray(content)) return content;
+
+    // Fall back to reading the session status for extraction results
+    const statusRes = await fetch(`${engineUrl}/sessions/${sessionId}`, { headers });
+    const status = await statusRes.json().catch(() => ({}));
+    let s = status.extraction || status.data || status.result;
+    if (typeof s === 'string') { try { s = JSON.parse(s); } catch (e) {} }
+    if (s && Array.isArray(s.properties)) return s.properties;
+    if (Array.isArray(s)) return s;
+    return [];
+  } finally {
+    await fetch(`${engineUrl}/sessions/${sessionId}`, { method: 'DELETE', headers }).catch(() => {});
+  }
+}
+
 export async function scrapeSource(base44, { source, url, distress_type, state }) {
   const cfg = source?.scrape_config || {};
   const method = cfg.method || 'ai';
@@ -132,7 +192,9 @@ export async function scrapeSource(base44, { source, url, distress_type, state }
   let props = [];
   let acquisitionError = null;
   try {
-    if (method === 'browser') {
+    if (method === 'cloudbrowser') {
+      props = await harvestViaCloudBrowser(source, url, cfg);
+    } else if (method === 'browser') {
       props = await harvestViaBrowser(source, url, cfg);
     } else {
       props = await harvestViaAI(base44, source, cfg, { distress_type, state });
