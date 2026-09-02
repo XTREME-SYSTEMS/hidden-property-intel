@@ -26,6 +26,8 @@ import AdminTestLab from '@/pages/AdminTestLab';
 import AdminArchitecture from '@/pages/AdminArchitecture';
 import SystemDNA from '@/pages/SystemDNA';
 import SmartContractMarketing from '@/pages/SmartContractMarketing';
+import About from '@/pages/About';
+import Contact from '@/pages/Contact';
 import NegotiationChat from '@/pages/NegotiationChat';
 import SmartContractDetail from '@/pages/SmartContractDetail';
 import Login from '@/pages/Login';
@@ -72,6 +74,8 @@ const AuthenticatedApp = () => {
         <Route path="/properties/:id" element={<PropertyDetail />} />
         <Route path="/properties/:id/bid" element={<Bidding />} />
         <Route path="/calculators" element={<Calculators />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
         <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
           <Route path="/investor/signup" element={<InvestorSignup />} />
           <Route path="/investor/dashboard" element={<InvestorDashboard />} />

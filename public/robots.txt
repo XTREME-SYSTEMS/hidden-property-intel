@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /investor/dashboard
+Disallow: /investor/pipeline
+Disallow: /seller/dashboard
+Disallow: /alerts
+
+Sitemap: https://my-property-intel.base44.app/sitemap.xml
