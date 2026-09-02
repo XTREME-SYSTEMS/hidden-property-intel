@@ -30,6 +30,8 @@ import SystemDNA from '@/pages/SystemDNA';
 import SmartContractMarketing from '@/pages/SmartContractMarketing';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
+import Pricing from '@/pages/Pricing';
+import Blog from '@/pages/Blog';
 import NegotiationChat from '@/pages/NegotiationChat';
 import SmartContractDetail from '@/pages/SmartContractDetail';
 import Login from '@/pages/Login';
@@ -77,6 +79,8 @@ const AuthenticatedApp = () => {
         <Route path="/properties/:id/bid" element={<Bidding />} />
         <Route path="/calculators" element={<Calculators />} />
         <Route path="/about" element={<About />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/blog" element={<Blog />} />
         <Route path="/contact" element={<Contact />} />
         <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
           <Route path="/investor/signup" element={<InvestorSignup />} />

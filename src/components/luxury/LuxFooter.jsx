@@ -5,9 +5,9 @@ import Logo from "@/components/luxury/Logo";
 export default function LuxFooter() {
   const cols = [
     { h: "Explore", items: [["Inventory", "/listings"], ["How it works", "/"], ["ROI calculators", "/calculators"], ["Market data", "/listings"]] },
-    { h: "For Investors", items: [["Browse inventory", "/listings"], ["Pricing", "/#investors"], ["Smart contracts", "/listings"], ["Ownership chains", "/listings"]] },
+    { h: "For Investors", items: [["Browse inventory", "/listings"], ["Pricing", "/pricing"], ["Smart contracts", "/smart-contracts"], ["Ownership chains", "/listings"]] },
     { h: "For Sellers", items: [["List your property", "/seller/post-property"], ["AI pricing", "/#sellers"], ["Negotiation assistant", "/#sellers"], ["No commissions", "/#sellers"]] },
-    { h: "Company", items: [["About", "/about"], ["Concierge", "/contact"], ["Press", "/about"], ["Contact", "/contact"]] },
+    { h: "Company", items: [["About", "/about"], ["Blog", "/blog"], ["Pricing", "/pricing"], ["Contact", "/contact"]] },
   ];
   return (
     <footer className="bg-black text-white">
