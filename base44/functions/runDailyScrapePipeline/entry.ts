@@ -7,11 +7,19 @@ const SOURCES_PER_RUN = 5; // each source = 1 LLM web-search call (~4s); 5 per r
 export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
-    const allSources = await base44.asServiceRole.entities.DataSource.filter({ status: 'active' });
+    const now = new Date();
+    const allSources = await base44.asServiceRole.entities.DataSource.filter({ status: { $in: ['active', 'error'] } });
+
+    // Filter out paused sources (auto-paused after consecutive failures)
+    const eligible = allSources.filter((s) => {
+      if (s.status === 'paused') return false;
+      if (s.paused_until && new Date(s.paused_until) > now) return false;
+      return true;
+    });
 
     // Prioritize sources that haven't been scraped recently (oldest last_run_at first)
     // null last_run_at = never run = highest priority
-    const sources = allSources
+    const sources = eligible
       .sort((a, b) => {
         const aTime = a.last_run_at ? new Date(a.last_run_at).getTime() : 0;
         const bTime = b.last_run_at ? new Date(b.last_run_at).getTime() : 0;
@@ -44,9 +52,26 @@ export default async function(req) {
       if (!result.error) {
         await base44.asServiceRole.entities.DataSource.update(source.id, {
           last_run_at: new Date().toISOString(),
-          properties_yielded: (source.properties_yielded || 0) + (result.isNew || 0)
+          properties_yielded: (source.properties_yielded || 0) + (result.isNew || 0),
+          consecutive_failures: 0,
+          status: 'active',
+          last_error: null
         });
         totalNew += (result.isNew || 0);
+      } else {
+        // Failure tracking — auto-pause after 3 consecutive failures
+        const failures = (source.consecutive_failures || 0) + 1;
+        const update: any = {
+          consecutive_failures: failures,
+          last_error: result.error,
+        };
+        if (failures >= 3) {
+          update.status = 'paused';
+          update.paused_until = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+        } else if (source.status !== 'error') {
+          update.status = 'error';
+        }
+        await base44.asServiceRole.entities.DataSource.update(source.id, update);
       }
 
       results.push({

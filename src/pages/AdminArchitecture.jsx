@@ -141,14 +141,14 @@ const CAPABILITY_MATRIX = [
   { cap: "Autonomous outreach engines", us: 8, best: "DealMachine (7)", gap: "In-app skip trace", status: "Strong" },
   { cap: "Market analytics + trends", us: 7, best: "ATTOM (9)", gap: "Predictive trends", status: "Strong" },
   { cap: "Mobile / D4$ field acquisition", us: 4, best: "DealMachine (10)", gap: "D4$ map mode, native app", status: "Gap" },
-  { cap: "Skip-trace integration", us: 2, best: "DealMachine (9)", gap: "No skip-trace API wired", status: "Critical gap" },
+  { cap: "Skip-trace integration", us: 5, best: "DealMachine (9)", gap: "InvokeLLM fallback live; needs real API", status: "Gap" },
   { cap: "Live auction events", us: 3, best: "Auction.com (10)", gap: "No live auction engine", status: "Gap" },
-  { cap: "Address normalization + dedupe", us: 4, best: "PropStream (9)", gap: "No normalization, weak dedupe", status: "Gap" },
+  { cap: "Address normalization + dedupe", us: 8, best: "PropStream (9)", gap: "Live with geohash proximity dedupe", status: "Strong" },
   { cap: "Anti-detection (stealth/proxy)", us: 2, best: "BatchData (8)", gap: "No stealth/proxy layer", status: "Critical gap" },
   { cap: "Image acquisition pipeline", us: 4, best: "PropStream (9)", gap: "No GIS/Street View wiring", status: "Gap" },
-  { cap: "Sold-detection re-verify", us: 2, best: "ATTOM (9)", gap: "No re-verify job", status: "Critical gap" },
+  { cap: "Sold-detection re-verify", us: 7, best: "ATTOM (9)", gap: "crossReferenceProperties live + daily workflow", status: "Strong" },
   { cap: "Data freshness SLA", us: 7, best: "BatchData (10)", gap: "No formal SLA", status: "Strong" },
-  { cap: "SEO / AEO optimization", us: 3, best: "PropStream (8)", gap: "No schema, sitemap, AEO", status: "Gap" },
+  { cap: "SEO / AEO optimization", us: 8, best: "PropStream (8)", gap: "JSON-LD, sitemap, Search Console live", status: "Strong" },
 ];
 
 const STATUS_COLOR = {
@@ -158,20 +158,20 @@ const STATUS_COLOR = {
 
 const ROADMAP = [
   { icon: Eye, t: "Stealth + proxy layer for engine", d: "Add playwright-stealth + residential proxy rotation to cloudbrowser engine. Unlocks realforeclose + Auction.com.", priority: "P0", area: "Shadow mode", status: "Blocked" },
-  { icon: Phone, t: "Skip-trace API integration", d: "Wire TLO or IRBsearch to enrich Owner records with phone/email/relatives. Backend function + property-detail button.", priority: "P0", area: "Contact enrichment", status: "Not started" },
-  { icon: Copy, t: "Address normalization + geohash dedupe", d: "USPS validation or libpostal → normalized_address field. Geohash proximity dedupe. Merge-on-duplicate.", priority: "P0", area: "Data quality", status: "Not started" },
-  { icon: Activity, t: "verifyActiveProperties job", d: "Scheduled re-verify: re-scrape source_url, mark closed/expired if listing gone. Tiered by auction proximity.", priority: "P1", area: "Monitoring", status: "Not started" },
+  { icon: Phone, t: "Skip-trace API integration", d: "InvokeLLM web-search skip-trace live (fallback). Wire TLO or IRBsearch API for production-grade enrichment.", priority: "P0", area: "Contact enrichment", status: "Partial" },
+  { icon: Copy, t: "Address normalization + geohash dedupe", d: "normalizeAddress + dedupeKey + proximityKey live. normalizeAddresses batch function merges duplicates.", priority: "P0", area: "Data quality", status: "Live" },
+  { icon: Activity, t: "verifyActiveProperties job", d: "crossReferenceProperties function + daily workflow live. Re-verifies via LLM web search, marks expired.", priority: "P1", area: "Monitoring", status: "Live" },
   { icon: Image, t: "County GIS + Street View image pipeline", d: "Wire fetchPropertyImages to assessor GIS imagery + Google Street View Static API. Store in PropertyImage.", priority: "P1", area: "Images", status: "Partial" },
   { icon: Radar, t: "Driving-for-Dollars map mode", d: "Mobile map to tag off-market properties in the field, auto-create draft records with geocode.", priority: "P2", area: "Mobile", status: "Not started" },
   { icon: TrendingUp, t: "Live auction events", d: "Real-time bidding engine with countdown + bidder verification (Auction.com parity).", priority: "P2", area: "Auction", status: "Not started" },
-  { icon: Target, t: "List-stacking UI", d: "Surface cross-referenced distress indicators per property in marketplace (PropertyRadar parity).", priority: "P2", area: "Marketplace", status: "Function exists" },
-  { icon: Gauge, t: "SEO + AEO + schema", d: "Add JSON-LD schema, sitemap.xml, robots.txt, OpenGraph, AEO-optimized content. Google Search Console verification.", priority: "P1", area: "SEO/AEO", status: "Not started" },
-  { icon: Bug, t: "Failure counter + auto-pause", d: "Track consecutive DataSource failures; auto-pause after N, alert admin, recover next cycle.", priority: "P2", area: "Error handling", status: "Not started" },
+  { icon: Target, t: "List-stacking UI", d: "DistressStack component live on property detail. Shows all stacked distress signals (liens, tax, code, DOM, severity).", priority: "P2", area: "Marketplace", status: "Live" },
+  { icon: Gauge, t: "SEO + AEO + schema", d: "JSON-LD schema, sitemap.xml, robots.txt, dynamic sitemap, Search Console sync — all live.", priority: "P1", area: "SEO/AEO", status: "Live" },
+  { icon: Bug, t: "Failure counter + auto-pause", d: "consecutive_failures + paused_until on DataSource. Auto-pauses after 3 failures, recovers next cycle.", priority: "P2", area: "Error handling", status: "Live" },
 ];
 
 const PRIORITY_COLOR = { "P0": "bg-red-600", "P1": "bg-amber-500", "P2": "bg-black/60" };
 const ROADMAP_STATUS = {
-  "Blocked": "text-red-600", "Not started": "text-black/40", "Partial": "text-amber-600", "Function exists": "text-emerald-600",
+  "Blocked": "text-red-600", "Not started": "text-black/40", "Partial": "text-amber-600", "Function exists": "text-emerald-600", "Live": "text-emerald-600",
 };
 
 export default function AdminArchitecture() {

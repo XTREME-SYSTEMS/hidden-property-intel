@@ -5,6 +5,9 @@
     "address": {
       "type": "string"
     },
+    "normalized_address": {
+      "type": "string"
+    },
     "city": {
       "type": "string"
     },

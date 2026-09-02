@@ -1,11 +1,11 @@
 {
   "name": "Daily Maintenance",
-  "description": "Daily maintenance pipeline: expires old bids, geocodes properties missing coordinates, populates ownership chains, syncs market analytics with real trend data, batch-scores active properties missing AI scores, and expires stale properties to keep inventory current.",
+  "description": "Daily maintenance pipeline: expires old bids, geocodes properties missing coordinates, populates ownership chains, syncs market analytics with real trend data, batch-scores active properties missing AI scores, expires stale properties, and normalizes/dedupes addresses to keep inventory current.",
   "definition": {
     "document": {
       "dsl": "1.0.0",
       "name": "daily_maintenance",
-      "version": "1.1",
+      "version": "1.2",
       "namespace": "base44"
     },
     "do": [
@@ -80,10 +80,23 @@
           "with": {
             "function_name": "expireStaleProperties"
           },
-          "then": "end",
+          "then": "normalize_addresses",
           "x-base44": {
             "title": "Expire stale properties",
             "description": "Mark properties not re-verified in 45 days as expired to keep inventory current"
+          }
+        }
+      },
+      {
+        "normalize_addresses": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "normalizeAddresses"
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Normalize & dedupe addresses",
+            "description": "Normalize all property addresses and merge duplicates via geohash proximity"
           }
         }
       }

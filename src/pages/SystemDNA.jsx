@@ -65,10 +65,13 @@ const OUR_CAPABILITIES = [
 ];
 
 const ROADMAP = [
-  { icon: Database, t: "Equity & mortgage-balance fields", d: "Add lien_total, mortgage_balance, and equity-position to properties (PropStream parity)." },
-  { icon: Target, t: "List-stacking UI", d: "Surface cross-referenced distress indicators per property in the marketplace (PropertyRadar parity)." },
-  { icon: Zap, t: "In-app skip trace", d: "One-tap owner contact enrichment from the property detail page (DealMachine parity)." },
-  { icon: Radar, t: "Driving-for-Dollars map mode", d: "Mobile map to tag off-market properties in the field and auto-create draft records." },
+  { icon: Database, t: "Equity & mortgage-balance fields", d: "Add lien_total, mortgage_balance, and equity-position to properties (PropStream parity).", done: false },
+  { icon: Target, t: "List-stacking UI", d: "DistressStack component live on property detail — shows all stacked distress signals.", done: true },
+  { icon: Zap, t: "In-app skip trace", d: "InvokeLLM web-search skip-trace live as fallback. One-tap button on property detail for admins.", done: true },
+  { icon: Radar, t: "Driving-for-Dollars map mode", d: "Mobile map to tag off-market properties in the field and auto-create draft records.", done: false },
+  { icon: Copy, t: "Address normalization + dedupe", d: "normalizeAddress + geohash proximity dedupe live. Batch merge function cleans duplicates.", done: true },
+  { icon: Bug, t: "Failure counter + auto-pause", d: "DataSource auto-pauses after 3 consecutive failures, recovers next cycle.", done: true },
+  { icon: Gauge, t: "SEO + AEO + schema", d: "JSON-LD, sitemap, robots.txt, dynamic sitemap, Search Console sync — all live.", done: true },
 ];
 
 export default function SystemDNA() {
@@ -143,8 +146,11 @@ export default function SystemDNA() {
         </div>
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {ROADMAP.map((r) => (
-            <div key={r.t} className="rounded-sm border border-black/10 p-6">
-              <r.icon className="h-6 w-6 text-black/70" />
+            <div key={r.t} className={`rounded-sm border p-6 ${r.done ? "border-emerald-200 bg-emerald-50/50" : "border-black/10"}`}>
+              <div className="flex items-center justify-between">
+                <r.icon className={`h-6 w-6 ${r.done ? "text-emerald-600" : "text-black/70"}`} />
+                {r.done && <span className="rounded-full bg-emerald-600 px-2 py-0.5 text-[9px] uppercase tracking-[0.2em] text-white">Done</span>}
+              </div>
               <p className="mt-5 font-display text-base tracking-tight">{r.t}</p>
               <p className="mt-2 text-xs leading-relaxed text-black/55">{r.d}</p>
             </div>

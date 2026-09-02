@@ -37,7 +37,8 @@
       "enum": [
         "active",
         "inactive",
-        "error"
+        "error",
+        "paused"
       ],
       "default": "active"
     },
@@ -51,6 +52,17 @@
     },
     "health_score": {
       "type": "number"
+    },
+    "consecutive_failures": {
+      "type": "number",
+      "default": 0
+    },
+    "paused_until": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_error": {
+      "type": "string"
     }
   },
   "required": [

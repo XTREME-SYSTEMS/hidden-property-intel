@@ -12,6 +12,7 @@
  */
 
 import { fetchPropertyImages, hasRealImages } from './propertyImages.ts';
+import { normalizeAddress, dedupeKey } from './addressUtils.ts';
 
 const VALID_DISTRESS = new Set([
   'pre-foreclosure', 'foreclosure', 'probate_inherited', 'tax_delinquent',
@@ -215,12 +216,21 @@ export async function scrapeSource(base44, { source, url, distress_type, state }
   const newRecords = [];
   for (const p of props) {
     if (!p.address) continue;
-    const existing = await base44.asServiceRole.entities.Property.filter({
-      address: p.address,
-      zip_code: p.zip_code
+    const norm = normalizeAddress(p.address);
+    // Dedupe by normalized address + zip (falls back to exact match for legacy records)
+    let existing = await base44.asServiceRole.entities.Property.filter({
+      zip_code: p.zip_code,
+      normalized_address: norm
     });
+    if (!existing.length) {
+      existing = await base44.asServiceRole.entities.Property.filter({
+        address: p.address,
+        zip_code: p.zip_code
+      });
+    }
     const payload = {
       address: p.address,
+      normalized_address: norm,
       city: p.city || cfg.city,
       state: p.state || cfg.state || state,
       zip_code: p.zip_code,

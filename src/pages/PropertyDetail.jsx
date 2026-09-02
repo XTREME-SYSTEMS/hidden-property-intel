@@ -8,6 +8,7 @@ import OwnershipTimeline from "@/components/OwnershipTimeline";
 import ROICalculator from "@/components/ROICalculator";
 import ExitStrategyModel from "@/components/ExitStrategyModel";
 import PropertyBrief from "@/components/PropertyBrief";
+import DistressStack from "@/components/DistressStack";
 import WatchButton from "@/components/WatchButton";
 import { money, num, pct } from "@/lib/format";
 import Seo from "@/components/Seo";
@@ -47,6 +48,7 @@ export default function PropertyDetail() {
   const [active, setActive] = useState(0);
   const [unlocked, setUnlocked] = useState(false);
   const [user, setUser] = useState(null);
+  const [skipTracing, setSkipTracing] = useState(null);
 
   useEffect(() => {
     let alive = true;
@@ -79,6 +81,16 @@ export default function PropertyDetail() {
     })();
     return () => { alive = false; };
   }, [id]);
+
+  const handleSkipTrace = async (ownerId) => {
+    setSkipTracing(ownerId);
+    try {
+      await base44.functions.invoke("skipTraceOwner", { owner_id: ownerId, property_id: id });
+      const ow = await base44.entities.Owner.filter({ property_id: id });
+      setOwners(ow);
+    } catch (e) { console.error("skip trace failed", e); }
+    setSkipTracing(null);
+  };
 
   if (property === null) {
     return <div className="mx-auto max-w-7xl px-6 py-24 text-sm text-[#6B7B72]">Loading property…</div>;
@@ -230,6 +242,10 @@ export default function PropertyDetail() {
             {score?.ai_analysis && <p className="mt-7 border-t border-[#E5EDEA] pt-6 leading-relaxed text-[#6B7B72]">{score.ai_analysis}</p>}
           </Card>
 
+          <Card title="Stacked distress indicators">
+            <DistressStack property={property} titleRisk={titleRisk} chain={chain} score={score} />
+          </Card>
+
           <Card title="Ownership chain">
             {!unlocked ? (
               <div className="rounded-2xl bg-[#F8FAF9] p-8 text-center ring-1 ring-[#E5EDEA]">
@@ -255,6 +271,15 @@ export default function PropertyDetail() {
                         {o.contact_email && <p className="flex items-center gap-1.5"><Mail className="h-3 w-3" />{o.contact_email}</p>}
                       </div>
                       {o.source && <p className="mt-2 text-[11px] text-[#6B7B72]">Source: {o.source}</p>}
+                      {user?.role === 'admin' && (
+                        <button
+                          onClick={() => handleSkipTrace(o.id)}
+                          disabled={skipTracing === o.id}
+                          className="mt-2 rounded-full bg-[#0F2A1D] px-3 py-1.5 text-[10px] uppercase tracking-widest text-white hover:bg-[#1A2B22] disabled:opacity-50"
+                        >
+                          {skipTracing === o.id ? "Tracing…" : "Skip Trace"}
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>
