@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Radar, Brain, FileSignature, Users, RefreshCw, Mail, ShieldCheck, Database, TrendingUp, Target, Zap, ArrowRight } from "lucide-react";
+import { Radar, Brain, FileSignature, Users, RefreshCw, Mail, ShieldCheck, Database, TrendingUp, Target, Zap, ArrowRight, Copy, Bug, Gauge } from "lucide-react";
 
 /**
  * System DNA — the architectural benchmark Hidden Property Intel is built toward.
