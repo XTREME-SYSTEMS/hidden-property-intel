@@ -71,13 +71,13 @@ export default function AdminShell() {
               className={`group mb-1 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition ${
                 activeId === item.id
                   ? "bg-white/10 text-[#e4b653]"
-                  : "text-white/55 hover:bg-white/5 hover:text-white"
+                  : "text-white hover:bg-white/5"
               }`}
             >
-              <item.icon className="h-4 w-4 shrink-0" />
+              <item.icon className="h-[18px] w-[18px] shrink-0" />
               <div className="min-w-0">
-                <p className="truncate text-xs font-medium">{item.label}</p>
-                <p className="truncate text-[10px] text-white/25">{item.desc}</p>
+                <p className="truncate text-sm font-medium">{item.label}</p>
+                <p className="truncate text-xs text-white/70">{item.desc}</p>
               </div>
             </button>
           ))}
