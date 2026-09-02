@@ -1,0 +1,19 @@
+{
+  "name": "propertyintel-scraper",
+  "version": "1.0.0",
+  "description": "Autonomous distressed-property scraper for PropertyIntel — writes to Supabase with address normalization + geohash dedup.",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "scrape": "node src/scraper.js",
+    "scrape-once": "node src/scraper.js --once",
+    "sync-base44": "node src/syncBase44.js"
+  },
+  "dependencies": {
+    "node-cron": "^3.0.3",
+    "cheerio": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
