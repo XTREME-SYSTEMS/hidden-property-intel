@@ -20,6 +20,7 @@ import Alerts from '@/pages/Alerts';
 import SellerDashboard from '@/pages/SellerDashboard';
 import SellerPostProperty from '@/pages/SellerPostProperty';
 import NegotiationAssistant from '@/pages/NegotiationAssistant';
+import AdminDashboard from '@/pages/AdminDashboard';
 import AdminSources from '@/pages/AdminSources';
 import AdminOutreach from '@/pages/AdminOutreach';
 import AdminTestLab from '@/pages/AdminTestLab';
@@ -87,6 +88,7 @@ const AuthenticatedApp = () => {
           <Route path="/seller/negotiation/:propertyId" element={<NegotiationChat />} />
           <Route path="/negotiation/:propertyId" element={<NegotiationChat />} />
           <Route path="/contracts/:id" element={<SmartContractDetail />} />
+          <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/sources" element={<AdminSources />} />
           <Route path="/admin/outreach" element={<AdminOutreach />} />
           <Route path="/admin/test-lab" element={<AdminTestLab />} />
