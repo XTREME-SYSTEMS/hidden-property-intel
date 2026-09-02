@@ -1,19 +1,21 @@
 {
-  "name": "propertyintel-scraper",
+  "name": "hidden-property-intel-scraper",
   "version": "1.0.0",
-  "description": "Autonomous distressed-property scraper for PropertyIntel — writes to Supabase with address normalization + geohash dedup.",
   "type": "module",
+  "main": "dist/scraper-cron.js",
   "scripts": {
-    "start": "node src/index.js",
-    "scrape": "node src/scraper.js",
-    "scrape-once": "node src/scraper.js --once",
-    "sync-base44": "node src/syncBase44.js"
+    "build": "tsc scraper-cron.ts --outDir dist --module commonjs --target es2020 --lib es2020 --skipLibCheck --esModuleInterop",
+    "start": "node dist/scraper-cron.js",
+    "dev": "ts-node scraper-cron.ts"
   },
   "dependencies": {
-    "node-cron": "^3.0.3",
-    "cheerio": "^1.0.0"
+    "@supabase/supabase-js": "^2.39.0",
+    "axios": "^1.6.0"
   },
-  "engines": {
-    "node": ">=18"
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.0"
   }
 }
+
