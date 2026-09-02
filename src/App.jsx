@@ -28,6 +28,7 @@ import AdminArchitecture from '@/pages/AdminArchitecture';
 import AdminSearchConsole from '@/pages/AdminSearchConsole';
 import SystemDNA from '@/pages/SystemDNA';
 import SmartContractMarketing from '@/pages/SmartContractMarketing';
+import PortalRouter from '@/pages/PortalRouter';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
 import Pricing from '@/pages/Pricing';
@@ -92,6 +93,7 @@ const AuthenticatedApp = () => {
           <Route path="/seller/negotiation/:propertyId" element={<NegotiationChat />} />
           <Route path="/negotiation/:propertyId" element={<NegotiationChat />} />
           <Route path="/contracts/:id" element={<SmartContractDetail />} />
+          <Route path="/portal" element={<PortalRouter />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/sources" element={<AdminSources />} />
           <Route path="/admin/outreach" element={<AdminOutreach />} />
