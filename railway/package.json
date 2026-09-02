@@ -5,8 +5,7 @@
   "main": "dist/scraper-cron.js",
   "scripts": {
     "build": "tsc scraper-cron.ts --outDir dist --module commonjs --target es2020 --lib es2020 --skipLibCheck --esModuleInterop",
-    "start": "node dist/scraper-cron.js",
-    "dev": "ts-node scraper-cron.ts"
+    "start": "node dist/scraper-cron.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
@@ -14,8 +13,6 @@
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
-    "typescript": "^5.0.0",
-    "ts-node": "^10.9.0"
+    "typescript": "^5.0.0"
   }
 }
-
