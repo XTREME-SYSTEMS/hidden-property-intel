@@ -68,7 +68,7 @@ export default function GlobalHamburger() {
 
             <div className="mt-2 w-full border-t border-black/10 pt-3">
               <Link
-                to="/login"
+                to="/login?returnTo=/investor/dashboard"
                 onClick={close}
                 className="group flex w-full items-center justify-end gap-2 py-2.5 text-right font-brand text-sm font-bold uppercase tracking-[0.2em] text-black transition-colors hover:text-gold"
               >
