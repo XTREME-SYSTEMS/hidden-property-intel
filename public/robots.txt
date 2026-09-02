@@ -1,9 +1,23 @@
 User-agent: *
 Allow: /
-Disallow: /admin/
-Disallow: /investor/dashboard
-Disallow: /investor/pipeline
-Disallow: /seller/dashboard
-Disallow: /alerts
+Allow: /listings
+Allow: /properties
+Allow: /calculators
+Allow: /about
+Allow: /contact
+Allow: /smart-contracts
 
-Sitemap: https://my-property-intel.base44.app/sitemap.xml
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /investor
+Disallow: /seller
+Disallow: /admin
+Disallow: /alerts
+Disallow: /system-dna
+Disallow: /negotiation
+Disallow: /contracts
+
+Sitemap: https://hiddenpropertyintel.com/sitemap.xml
+Sitemap: https://hiddenpropertyintel.com/functions/dynamicSitemap
