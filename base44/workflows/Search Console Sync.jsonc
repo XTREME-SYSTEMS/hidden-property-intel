@@ -1,0 +1,59 @@
+{
+  "description": "Daily sync of Google Search Console performance data and automatic sitemap submission for hiddenpropertyintel.com",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "search_console_sync",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "sync_data": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "syncSearchConsole",
+            "args": {}
+          },
+          "then": "submit_sitemap",
+          "x-base44": {
+            "title": "Sync search performance",
+            "description": "Pull clicks, impressions, top queries"
+          }
+        }
+      },
+      {
+        "submit_sitemap": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "submitSitemap",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Submit sitemap",
+            "description": "Auto-submit sitemap.xml if missing"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 6 * * *",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "name": "Search Console Sync"
+}

@@ -1,12 +1,26 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, FileText, TrendingUp, MousePointerClick, Eye, ArrowLeft, RefreshCw, ExternalLink } from "lucide-react";
+import { Search, FileText, TrendingUp, MousePointerClick, Eye, ArrowLeft, RefreshCw, ExternalLink, UploadCloud } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 export default function AdminSearchConsole() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitMsg, setSubmitMsg] = useState(null);
+
+  const submitSitemap = async (siteUrl) => {
+    setSubmitting(true); setSubmitMsg(null);
+    try {
+      const res = await base44.functions.invoke("submitSitemap", { site_url: siteUrl });
+      if (res.data?.error) setSubmitMsg({ site: siteUrl, error: res.data.error });
+      else { setSubmitMsg({ site: siteUrl, ok: true, path: res.data.sitemap_path, status: res.data.status }); await load(); }
+    } catch (e) {
+      setSubmitMsg({ site: siteUrl, error: e.response?.data?.error || e.message });
+    }
+    setSubmitting(false);
+  };
 
   const load = async () => {
     setLoading(true); setError(null);
@@ -108,16 +122,29 @@ export default function AdminSearchConsole() {
 
               {/* Sitemaps */}
               <div className="mt-8">
-                <div className="flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-gold" />
-                  <h3 className="font-display text-lg font-light">Sitemaps</h3>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-gold" />
+                    <h3 className="font-display text-lg font-light">Sitemaps</h3>
+                  </div>
+                  {site.sitemaps.length > 0 && (
+                    <button onClick={() => submitSitemap(site.siteUrl)} disabled={submitting} className="inline-flex items-center gap-2 rounded-sm border border-black/15 px-3 py-2 text-[10px] uppercase tracking-[0.3em] hover:bg-black hover:text-white disabled:opacity-50">
+                      <UploadCloud className="h-3.5 w-3.5" /> {submitting ? "Submitting…" : "Resubmit"}
+                    </button>
+                  )}
                 </div>
+                {submitMsg && submitMsg.site === site.siteUrl && (
+                  <div className={`mt-3 rounded-sm border p-3 text-xs ${submitMsg.error ? "border-red-200 bg-red-50 text-red-700" : "border-emerald-200 bg-emerald-50 text-emerald-700"}`}>
+                    {submitMsg.error ? submitMsg.error : `Sitemap ${submitMsg.status === "already_submitted" ? "already registered" : "submitted"}: ${submitMsg.path}`}
+                  </div>
+                )}
                 {site.sitemaps.length === 0 ? (
-                  <p className="mt-3 text-xs text-black/50">
-                    No sitemaps submitted. Submit{" "}
-                    <code className="bg-black/5 px-1.5 py-0.5 rounded">https://my-property-intel.base44.app/sitemap.xml</code>{" "}
-                    in Search Console.
-                  </p>
+                  <div className="mt-3">
+                    <p className="text-xs text-black/50">No sitemaps submitted for this site.</p>
+                    <button onClick={() => submitSitemap(site.siteUrl)} disabled={submitting} className="mt-3 inline-flex items-center gap-2 rounded-sm bg-black px-4 py-2.5 text-[11px] uppercase tracking-[0.3em] text-white disabled:opacity-50">
+                      <UploadCloud className="h-4 w-4" /> {submitting ? "Submitting…" : "Submit sitemap.xml"}
+                    </button>
+                  </div>
                 ) : (
                   <div className="mt-3 grid gap-3 sm:grid-cols-2">
                     {site.sitemaps.map((s) => (
