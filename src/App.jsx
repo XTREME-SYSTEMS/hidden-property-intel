@@ -24,6 +24,7 @@ import AdminSources from '@/pages/AdminSources';
 import AdminOutreach from '@/pages/AdminOutreach';
 import AdminTestLab from '@/pages/AdminTestLab';
 import AdminArchitecture from '@/pages/AdminArchitecture';
+import AdminSearchConsole from '@/pages/AdminSearchConsole';
 import SystemDNA from '@/pages/SystemDNA';
 import SmartContractMarketing from '@/pages/SmartContractMarketing';
 import About from '@/pages/About';
@@ -90,6 +91,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/outreach" element={<AdminOutreach />} />
           <Route path="/admin/test-lab" element={<AdminTestLab />} />
           <Route path="/admin/architecture" element={<AdminArchitecture />} />
+          <Route path="/admin/search-console" element={<AdminSearchConsole />} />
           <Route path="/system-dna" element={<SystemDNA />} />
           <Route path="/smart-contracts" element={<SmartContractMarketing />} />
         </Route>
