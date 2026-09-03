@@ -55,6 +55,28 @@
     },
     "notes": {
       "type": "string"
+    },
+    "follow_up_enabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "follow_up_frequency_days": {
+      "type": "number",
+      "default": 7
+    },
+    "next_follow_up_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "automation_enabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "last_outreach_subject": {
+      "type": "string"
+    },
+    "last_outreach_body": {
+      "type": "string"
     }
   },
   "required": [

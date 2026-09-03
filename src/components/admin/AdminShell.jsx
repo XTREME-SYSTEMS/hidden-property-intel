@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  LayoutDashboard, Database, Mail, FlaskConical, Search, Cpu, Target,
+  LayoutDashboard, Database, Mail, FlaskConical, Search, Cpu, Target, Users, Home,
   ArrowRight, X, ArrowLeft
 } from "lucide-react";
 import AdminOverview from "@/components/admin/AdminOverview";
@@ -11,12 +11,16 @@ import AdminOutreach from "@/pages/AdminOutreach";
 import AdminTestLab from "@/pages/AdminTestLab";
 import AdminArchitecture from "@/pages/AdminArchitecture";
 import AdminSearchConsole from "@/pages/AdminSearchConsole";
+import AdminInvestorList from "@/pages/AdminInvestorList";
+import AdminOwnerList from "@/pages/AdminOwnerList";
 import SystemDNA from "@/pages/SystemDNA";
 
 const NAV_ITEMS = [
   { id: "overview", icon: LayoutDashboard, label: "Dashboard", desc: "Overview & metrics" },
   { id: "sources", icon: Database, label: "Data Sources", desc: "Scrape pipeline", component: AdminSources },
   { id: "outreach", icon: Mail, label: "Outreach", desc: "Email engines", component: AdminOutreach },
+  { id: "investor-list", icon: Users, label: "Investor List", desc: "Leads & outreach", component: AdminInvestorList },
+  { id: "owner-list", icon: Home, label: "Owner List", desc: "Owners & next of kin", component: AdminOwnerList },
   { id: "test-lab", icon: FlaskConical, label: "Test Lab", desc: "Function sandbox", component: AdminTestLab },
   { id: "architecture", icon: Cpu, label: "Architecture", desc: "System DNA & roadmap", component: AdminArchitecture },
   { id: "search-console", icon: Search, label: "Search Console", desc: "SEO indexing", component: AdminSearchConsole },
