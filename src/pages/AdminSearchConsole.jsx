@@ -38,7 +38,10 @@ export default function AdminSearchConsole() {
     setLoading(true); setError(null);
     try {
       const res = await base44.functions.invoke("syncSearchConsole", {});
-      setData(res.data);
+      const filtered = res.data?.report
+        ? { ...res.data, report: res.data.report.filter((s) => s.siteUrl?.includes("hiddenpropertyintel.com")) }
+        : res.data;
+      setData(filtered);
     } catch (e) {
       setError(e.response?.data?.error || e.message || "Failed to load Search Console data");
     } finally {
@@ -72,7 +75,7 @@ export default function AdminSearchConsole() {
         <div className="mt-8 rounded-sm border border-red-200 bg-red-50 p-6 text-sm text-red-700">
           <p className="font-medium">Couldn't pull Search Console data</p>
           <p className="mt-1 text-xs">{error}</p>
-          <p className="mt-3 text-xs">Make sure you've added <code className="bg-red-100 px-1.5 py-0.5 rounded">https://my-property-intel.base44.app</code> as a property in Google Search Console and verified it.</p>
+          <p className="mt-3 text-xs">Make sure you've added <code className="bg-red-100 px-1.5 py-0.5 rounded">https://hiddenpropertyintel.com</code> as a property in Google Search Console and verified it.</p>
         </div>
       )}
 
