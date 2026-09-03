@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  LayoutDashboard, Database, Mail, FlaskConical, Search, Cpu, Target, Users, Home, Blocks, Calculator, Scale, TrendingUp,
+  LayoutDashboard, Database, Mail, FlaskConical, Search, Cpu, Target, Users, Home, Blocks, Calculator, Scale, TrendingUp, BarChart3,
   ArrowRight, X, ArrowLeft
 } from "lucide-react";
 import AdminOverview from "@/components/admin/AdminOverview";
@@ -20,9 +20,11 @@ import AdminCapabilities from "@/pages/AdminCapabilities";
 import SystemDNA from "@/pages/SystemDNA";
 import LegalCompliance from "@/pages/LegalCompliance";
 import IndustryIntelligence from "@/pages/IndustryIntelligence";
+import AdminAnalytics from "@/pages/AdminAnalytics";
 
 const NAV_ITEMS = [
   { id: "overview", icon: LayoutDashboard, label: "Dashboard", desc: "Overview & metrics" },
+  { id: "analytics", icon: BarChart3, label: "Analytics", desc: "Performance & intelligence", component: AdminAnalytics },
   { id: "sources", icon: Database, label: "Data Sources", desc: "Scrape pipeline", component: AdminSources },
   { id: "outreach", icon: Mail, label: "Outreach", desc: "Email engines", component: AdminOutreach },
   { id: "investor-list", icon: Users, label: "Investor List", desc: "Leads & outreach", component: AdminInvestorList },
