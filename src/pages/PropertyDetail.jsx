@@ -11,6 +11,7 @@ import PropertyBrief from "@/components/PropertyBrief";
 import DistressStack from "@/components/DistressStack";
 import WatchButton from "@/components/WatchButton";
 import PropertyAITools from "@/components/ai/PropertyAITools";
+import DealRiskPanel from "@/components/ai/DealRiskPanel";
 import { money, num, pct } from "@/lib/format";
 import Seo from "@/components/Seo";
 import { Lock, MapPin, Phone, Mail, ArrowLeft, ShieldAlert } from "lucide-react";
@@ -330,6 +331,8 @@ export default function PropertyDetail() {
           </Card>
 
           <PropertyAITools property={property} isAdmin={user?.role === 'admin'} />
+
+          <DealRiskPanel propertyId={property.id} />
 
           <Card title="Title & lien risk">
             {titleRisk ? (
