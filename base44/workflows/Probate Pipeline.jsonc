@@ -1,0 +1,78 @@
+{
+  "description": "Daily probate pipeline: scrapes obituary + probate court sources for deceased homeowners, finds their heirs/next of kin, and sends empathetic outreach to identified heirs",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "probate_pipeline",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "scrape_probate": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "scrapeProbateRecords",
+            "payload": {
+              "state": "FL",
+              "max_results": 15
+            }
+          },
+          "then": "find_heirs",
+          "x-base44": {
+            "title": "Scrape probate records",
+            "description": "Search obituaries + probate filings for deceased homeowners in FL"
+          }
+        }
+      },
+      {
+        "find_heirs": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "findHeirsForProperty",
+            "payload": {}
+          },
+          "then": "outreach_heirs",
+          "x-base44": {
+            "title": "Find heirs for probate properties",
+            "description": "Search web for next of kin, executors, and heirs of deceased owners"
+          }
+        }
+      },
+      {
+        "outreach_heirs": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "outreachProbateHeirs",
+            "payload": {
+              "limit": 30
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Outreach to heirs",
+            "description": "Send empathetic, personalized emails to identified heirs with contact info"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 6 * * *",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "name": "Probate Pipeline"
+}

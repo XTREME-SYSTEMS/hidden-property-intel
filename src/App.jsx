@@ -34,6 +34,7 @@ import LegalCompliance from '@/pages/LegalCompliance';
 import IndustryIntelligence from '@/pages/IndustryIntelligence';
 import AdminAnalytics from '@/pages/AdminAnalytics';
 import InvestorLeaderboard from '@/pages/InvestorLeaderboard';
+import AdminProbateDashboard from '@/pages/AdminProbateDashboard';
 import PortalRouter from '@/pages/PortalRouter';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
@@ -114,6 +115,7 @@ const AuthenticatedApp = () => {
         <Route path="/industry-intelligence" element={<IndustryIntelligence />} />
         <Route path="/admin/analytics" element={<AdminAnalytics />} />
         <Route path="/investor/leaderboard" element={<InvestorLeaderboard />} />
+        <Route path="/admin/probate" element={<AdminProbateDashboard />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

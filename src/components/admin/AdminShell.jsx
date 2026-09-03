@@ -21,6 +21,7 @@ import SystemDNA from "@/pages/SystemDNA";
 import LegalCompliance from "@/pages/LegalCompliance";
 import IndustryIntelligence from "@/pages/IndustryIntelligence";
 import AdminAnalytics from "@/pages/AdminAnalytics";
+import AdminProbateDashboard from "@/pages/AdminProbateDashboard";
 
 const NAV_ITEMS = [
   { id: "overview", icon: LayoutDashboard, label: "Dashboard", desc: "Overview & metrics" },
@@ -29,6 +30,7 @@ const NAV_ITEMS = [
   { id: "outreach", icon: Mail, label: "Outreach", desc: "Email engines", component: AdminOutreach },
   { id: "investor-list", icon: Users, label: "Investor List", desc: "Leads & outreach", component: AdminInvestorList },
   { id: "owner-list", icon: Home, label: "Owner List", desc: "Owners & next of kin", component: AdminOwnerList },
+  { id: "probate", icon: Home, label: "Probate Pipeline", desc: "Deceased owners & heirs", component: AdminProbateDashboard },
   { id: "smart-contracts", icon: Blocks, label: "Smart Contracts", desc: "On-chain escrow", component: AdminSmartContracts },
   { id: "deal-calculator", icon: Calculator, label: "Deal Calculator", desc: "Profit split & fairness", component: DealCalculator },
   { id: "agent-portal", icon: Users, label: "Agent Portal", desc: "Licensed agent tools", component: AgentDashboard },
