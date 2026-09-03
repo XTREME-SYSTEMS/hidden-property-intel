@@ -462,6 +462,18 @@
     {
       "function_name": "auditSmartContract",
       "description": "AI smart contract security audit \u2014 checks for reentrancy, overflow, access control, and 10+ vulnerability categories"
+    },
+    {
+      "function_name": "scrapeProbateRecords",
+      "description": "Scrapes obituary and probate court sources for deceased homeowners, cross-references with property records, creates probate_inherited properties and potential_heir owners"
+    },
+    {
+      "function_name": "findHeirsForProperty",
+      "description": "Enhanced heir finder for probate properties \u2014 searches obituaries, probate filings, people-search sites, and social media for next of kin and executors"
+    },
+    {
+      "function_name": "outreachProbateHeirs",
+      "description": "Sends empathetic, personalized outreach emails to identified heirs of deceased homeowners with cash offer and probate assistance"
     }
   ],
   "context_files": [],
