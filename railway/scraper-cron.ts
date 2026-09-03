@@ -1,34 +1,43 @@
 /**
- * Hidden Property Intel - Railway Aggressive Scraper
- * Scrapes 500+ FL distressed properties daily
- * Uses Cloud Browser Engine for people-finder + web scraping
- * Uses Base44 InvokeLLM for property scoring
- * Auto-syncs to Base44 via webhook after each batch
+ * Hidden Property Intel — Railway Scraper
+ * Scrapes FL distressed properties via self-hosted CloudBrowser-Control engine.
+ * Writes raw rows to Supabase via upsert (dedup_key unique index).
+ * Triggers Base44 sync webhook after each batch.
+ *
+ * Scoring, ownership chains, images, and title risks are handled by Base44 —
+ * this scraper ONLY harvests and stores raw property data.
  */
 
 import { createClient } from '@supabase/supabase-js';
 import axios from 'axios';
 
 const log = (level: string, msg: string, data?: any) => {
-  const ts = new Date().toISOString();
-  console.log(`[${ts}] [${level}] ${msg}`, data || '');
+  console.log(`[${new Date().toISOString()}] [${level}] ${msg}`, data ?? '');
 };
 
-// Init clients
+// --- Env ---
 const supabaseUrl = process.env.SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY!;
-const browserEngineUrl = process.env.BROWSER_ENGINE_URL!;
+const browserEngineUrl = (process.env.BROWSER_ENGINE_URL || '').replace(/\/$/, '');
 const browserEngineApiKey = process.env.BROWSER_ENGINE_API_KEY!;
 const base44SyncUrl = process.env.BASE44_SYNC_URL!;
+const syncToken = process.env.BASE44_SYNC_TOKEN || '';
+const dailyTarget = parseInt(process.env.DAILY_TARGET || '500', 10);
+
+if (!supabaseUrl || !supabaseServiceKey || !browserEngineUrl || !browserEngineApiKey || !base44SyncUrl) {
+  log('error', 'Missing required env vars. Exiting.');
+  process.exit(1);
+}
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-interface Property {
+// --- Types ---
+interface RawProperty {
   address: string;
-  city: string;
-  state: string;
-  zip_code: string;
-  distress_type: string;
+  city?: string;
+  state?: string;
+  zip_code?: string;
+  distress_type?: string;
   estimated_value?: number;
   bedrooms?: number;
   bathrooms?: number;
@@ -36,335 +45,216 @@ interface Property {
   owner_name?: string;
   owner_email?: string;
   owner_phone?: string;
-  source_url: string;
+  source_url?: string;
   listing_notes?: string;
 }
 
-interface EnrichedProperty extends Property {
-  ai_score: number;
-  family_members?: Array<{ name: string; relationship: string; contact?: string }>;
-  dedup_key: string;
-  scraped_at: string;
-  source: string;
-}
-
-// FL Counties for comprehensive coverage
-const FL_COUNTIES = [
-  'Alachua', 'Baker', 'Bradford', 'Brevard', 'Broward', 'Calhoun', 'Charlotte', 'Citrus', 'Clay', 'Collier',
-  'Columbia', 'DeSoto', 'Dixie', 'Duval', 'Escambia', 'Flagler', 'Franklin', 'Gadsden', 'Gilchrist', 'Glades',
-  'Gulf', 'Hamilton', 'Hardee', 'Hendry', 'Hernando', 'Highlands', 'Hillsborough', 'Holmes', 'Indian River', 'Jackson',
-  'Jefferson', 'Lafayette', 'Lake', 'Lee', 'Leon', 'Levy', 'Liberty', 'Madison', 'Manatee', 'Marion',
-  'Martin', 'Miami-Dade', 'Monroe', 'Nassau', 'Okaloosa', 'Okeechobee', 'Orange', 'Osceola', 'Palm Beach', 'Pasco',
-  'Pinellas', 'Polk', 'Putnam', 'St. Johns', 'St. Lucie', 'Santa Rosa', 'Sarasota', 'Seminole', 'Sumter', 'Suwannee',
-  'Taylor', 'Union', 'Volusia', 'Wakulla', 'Walton', 'Washington'
-];
-
-// Scrape sources
+// --- Sources ---
 const SCRAPE_SOURCES = [
-  {
-    name: 'County Tax Deeds (All 67 FL Counties)',
-    method: 'browser',
-    distress_type: 'tax_delinquent'
-  },
-  {
-    name: 'Zillow Foreclosures - FL',
-    method: 'browser',
-    url: 'https://www.zillow.com/homes/for_sale/foreclosed/?searchQueryState=%7B%22pagination%22%3A%7B%7D%2C%22mapBounds%22%3A%7B%22north%22%3A30.95%2C%22south%22%3A24.5%2C%22east%22%3A-80.03%2C%22west%22%3A-87.63%7D%7D',
-    distress_type: 'foreclosure'
-  },
-  {
-    name: 'Auction.com - FL Distressed',
-    method: 'browser',
-    url: 'https://www.auction.com/real-estate/florida',
-    distress_type: 'auction'
-  },
-  {
-    name: 'Probate & Deceased Properties',
-    method: 'browser',
-    url: 'https://www.flcourts.org',
-    distress_type: 'probate_inherited'
-  },
-  {
-    name: 'HUD Home Store - Florida',
-    method: 'browser',
-    url: 'https://www.hudhomestore.com/search/FL',
-    distress_type: 'bank_owned'
-  }
+  { name: 'Zillow Foreclosures - FL', url: 'https://www.zillow.com/homes/for_sale/foreclosed/', distress_type: 'foreclosure' },
+  { name: 'Auction.com - FL', url: 'https://www.auction.com/real-estate/florida', distress_type: 'auction' },
+  { name: 'HUD Home Store - FL', url: 'https://www.hudhomestore.com/search/FL', distress_type: 'bank_owned' },
+  { name: 'FL Foreclosures', url: 'https://www.realforeclose.com', distress_type: 'foreclosure' },
 ];
 
-function generateDedupeKey(address: string, zip: string): string {
-  const normalized = `${address.toLowerCase().trim()}|${zip.trim()}`;
-  return Buffer.from(normalized).toString('base64');
+const PROPERTY_SCHEMA = {
+  type: 'object',
+  properties: {
+    address: { type: 'string' },
+    city: { type: 'string' },
+    state: { type: 'string' },
+    zip_code: { type: 'string' },
+    distress_type: { type: 'string' },
+    estimated_value: { type: 'number' },
+    bedrooms: { type: 'number' },
+    bathrooms: { type: 'number' },
+    square_footage: { type: 'number' },
+    owner_name: { type: 'string' },
+    owner_email: { type: 'string' },
+    owner_phone: { type: 'string' },
+    source_url: { type: 'string' },
+    listing_notes: { type: 'string' },
+  },
+};
+
+// --- Helpers ---
+function normalizeAddress(addr: string): string {
+  return (addr || '')
+    .toLowerCase()
+    .replace(/\b(st|street|ave|avenue|blvd|boulevard|rd|road|dr|drive|ln|lane|ct|court|pl|place|way)\b/g, m => m)
+    .replace(/[^a-z0-9\s]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
-async function fetchFromBrowserEngine(sessionId: string | null, action: any): Promise<any> {
-  try {
-    const url = sessionId 
-      ? `${browserEngineUrl}/sessions/${sessionId}/execute`
-      : `${browserEngineUrl}/sessions`;
-    
-    const response = await axios({
-      method: 'POST',
-      url,
-      headers: { 'x-api-key': browserEngineApiKey },
-      data: action,
-      timeout: 45000
-    });
-    
-    return response.data;
-  } catch (error: any) {
-    log('error', `Browser engine error: ${error.message}`);
-    throw error;
-  }
+function dedupKey(address: string, zip: string): string {
+  return Buffer.from(`${normalizeAddress(address)}|${(zip || '').trim()}`).toString('base64');
 }
 
-async function createBrowserSession(): Promise<string> {
-  const result = await fetchFromBrowserEngine(null, {
-    action: 'create',
-    headless: true,
-    viewport: { width: 1280, height: 720 }
+// --- CloudBrowser-Control engine ---
+async function createSession(): Promise<string> {
+  const res = await axios.post(`${browserEngineUrl}/sessions`, {
+    viewport: { width: 1280, height: 800 },
+    locale: 'en-US',
+    timezone: 'America/New_York',
+  }, {
+    headers: { 'x-api-key': browserEngineApiKey, 'Content-Type': 'application/json' },
+    timeout: 30000,
   });
-  return result.session_id;
+  const data = res.data;
+  const id = data.sessionId || data.id;
+  if (!id) throw new Error(`Engine did not return session id: ${JSON.stringify(data).slice(0, 200)}`);
+  return id;
 }
 
-async function closeBrowserSession(sessionId: string): Promise<void> {
+async function closeSession(sessionId: string): Promise<void> {
   try {
     await axios.delete(`${browserEngineUrl}/sessions/${sessionId}`, {
       headers: { 'x-api-key': browserEngineApiKey },
-      timeout: 5000
+      timeout: 5000,
     });
-  } catch (error) {
-    log('warn', `Failed to close session ${sessionId}`);
-  }
+  } catch { /* best effort */ }
 }
 
-async function scrapeSource(source: any, sessionId: string): Promise<Property[]> {
-  log('info', `Scraping ${source.name}...`);
-  
-  try {
-    // Navigate and extract
-    const result = await fetchFromBrowserEngine(sessionId, {
-      action: 'execute',
-      commands: [
-        { command: 'goto', url: source.url || `https://www.zillow.com`, waitUntil: 'networkidle2' },
-        {
-          command: 'ai_extract',
-          prompt: `Extract all distressed properties visible on this page. Return JSON with array of: address, city, state, zip_code, distress_type, estimated_value, bedrooms, bathrooms, square_footage, owner_name, owner_email, owner_phone, source_url, listing_notes. Distress type: ${source.distress_type}. Return ONLY valid JSON.`,
-          schema: {
-            type: 'object',
-            properties: {
-              properties: {
-                type: 'array',
-                items: { type: 'object' }
-              }
-            }
-          }
-        }
-      ]
-    });
-    
-    const props = result.properties || [];
-    props.forEach((p: any) => {
-      p.state = p.state || 'FL';
-      p.distress_type = p.distress_type || source.distress_type;
-      p.source_url = p.source_url || source.url || 'unknown';
-    });
-    
-    log('info', `Found ${props.length} properties from ${source.name}`);
-    return props;
-  } catch (error: any) {
-    log('error', `Scrape failed for ${source.name}: ${error.message}`);
-    return [];
-  }
-}
-
-async function dedupeProperties(properties: Property[]): Promise<Property[]> {
-  log('info', `Deduping ${properties.length} properties...`);
-  
-  const { data: existing, error } = await supabase
-    .from('properties')
-    .select('address, zip_code')
-    .eq('state', 'FL');
-  
-  if (error) {
-    log('warn', `Dedupe query failed: ${error.message}`);
-    return properties;
-  }
-  
-  const existingSet = new Set(
-    (existing || []).map((p: any) => generateDedupeKey(p.address, p.zip_code))
+async function scrapeUrl(sessionId: string, url: string, distressType: string): Promise<RawProperty[]> {
+  // 1. Navigate
+  await axios.post(`${browserEngineUrl}/sessions/${sessionId}/execute`,
+    { action_type: 'goto', value: url },
+    { headers: { 'x-api-key': browserEngineApiKey, 'Content-Type': 'application/json' }, timeout: 45000 }
   );
-  
-  const deduped = properties.filter(p => {
-    const key = generateDedupeKey(p.address, p.zip_code);
-    return !existingSet.has(key);
-  });
-  
-  log('info', `Dedupe: ${deduped.length} new properties (${properties.length - deduped.length} duplicates removed)`);
-  return deduped;
-}
 
-async function scoreProperty(property: Property): Promise<number> {
-  try {
-    // This would call Base44's InvokeLLM in production
-    // For now, return a placeholder score based on distress type
-    const scoreMap: Record<string, number> = {
-      'foreclosure': 85,
-      'pre-foreclosure': 80,
-      'tax_delinquent': 75,
-      'probate_inherited': 70,
-      'auction': 90,
-      'bank_owned': 82,
-      'short_sale': 78
-    };
-    
-    const baseScore = scoreMap[property.distress_type] || 70;
-    const valueBonus = property.estimated_value && property.estimated_value < 200000 ? 5 : 0;
-    
-    return Math.max(1, Math.min(100, baseScore + valueBonus));
-  } catch (error: any) {
-    log('warn', `Scoring failed: ${error.message}`);
-    return 50;
+  // 2. Extract structured data
+  const res = await axios.post(`${browserEngineUrl}/sessions/${sessionId}/execute`,
+    {
+      action_type: 'extract_table',
+      selector: 'body',
+      options: { output_schema: PROPERTY_SCHEMA },
+    },
+    { headers: { 'x-api-key': browserEngineApiKey, 'Content-Type': 'application/json' }, timeout: 45000 }
+  );
+
+  const data = res.data?.data;
+  let props: any[] = [];
+  if (Array.isArray(data)) props = data;
+  else if (data?.properties) props = data.properties;
+  else if (typeof data === 'string') {
+    try { const p = JSON.parse(data); props = Array.isArray(p) ? p : (p.properties || []); } catch {}
   }
+
+  // Tag with distress type + source
+  return props
+    .filter(p => p.address)
+    .map(p => ({
+      ...p,
+      state: p.state || 'FL',
+      distress_type: p.distress_type || distressType,
+      source_url: p.source_url || url,
+    }));
 }
 
-async function extractHeirsForProbate(property: Property): Promise<Array<{ name: string; relationship: string; contact?: string }>> {
-  if (property.distress_type !== 'probate_inherited') return [];
-  
-  try {
-    // Cloud Browser Engine can search for family info via people-finder
-    // This is a placeholder — in production, use CBE's people-finder API
-    return [];
-  } catch (error) {
-    log('warn', `Heir extraction failed: ${error.message}`);
-    return [];
-  }
-}
+// --- Supabase upsert (race-safe dedup via unique index on dedup_key) ---
+async function storeProperties(props: RawProperty[], sourceName: string): Promise<{ upserted: number; errors: number }> {
+  let upserted = 0;
+  let errors = 0;
 
-async function enrichProperty(property: Property): Promise<EnrichedProperty> {
-  return {
-    ...property,
-    ai_score: await scoreProperty(property),
-    family_members: await extractHeirsForProbate(property),
-    dedup_key: generateDedupeKey(property.address, property.zip_code),
+  const rows = props.map(p => ({
+    address: p.address,
+    normalized_address: normalizeAddress(p.address),
+    dedup_key: dedupKey(p.address, p.zip_code || ''),
+    city: p.city || null,
+    state: p.state || 'FL',
+    zip_code: p.zip_code || null,
+    distress_type: p.distress_type || 'foreclosure',
+    estimated_value: p.estimated_value || null,
+    bedrooms: p.bedrooms || null,
+    bathrooms: p.bathrooms || null,
+    square_footage: p.square_footage || null,
+    source: 'railway-scraper',
+    source_name: sourceName,
+    source_url: p.source_url || null,
     scraped_at: new Date().toISOString(),
-    source: 'railway-aggressive-scraper'
-  };
-}
+    raw_data: p,
+    images: [],
+  }));
 
-async function storeProperties(properties: EnrichedProperty[]): Promise<void> {
-  log('info', `Storing ${properties.length} properties in Supabase...`);
-  
-  for (const prop of properties) {
-    try {
-      const { error } = await supabase.from('properties').insert({
-        address: prop.address,
-        city: prop.city,
-        state: prop.state,
-        zip_code: prop.zip_code,
-        distress_type: prop.distress_type,
-        estimated_value: prop.estimated_value,
-        bedrooms: prop.bedrooms,
-        bathrooms: prop.bathrooms,
-        square_footage: prop.square_footage,
-        owner_name: prop.owner_name,
-        owner_email: prop.owner_email,
-        owner_phone: prop.owner_phone,
-        source_url: prop.source_url,
-        listing_notes: prop.listing_notes,
-        ai_score: prop.ai_score,
-        family_members: prop.family_members,
-        dedup_key: prop.dedup_key,
-        scraped_at: prop.scraped_at,
-        source: prop.source
-      });
-      
-      if (error) throw error;
-    } catch (error: any) {
-      log('warn', `Store failed for ${prop.address}: ${error.message}`);
+  // Batch upsert — 100 at a time
+  for (let i = 0; i < rows.length; i += 100) {
+    const batch = rows.slice(i, i + 100);
+    const { error } = await supabase
+      .from('properties')
+      .upsert(batch, { onConflict: 'dedup_key' });
+
+    if (error) {
+      log('warn', `Upsert batch ${i} failed: ${error.message}`);
+      errors += batch.length;
+    } else {
+      upserted += batch.length;
     }
   }
+
+  return { upserted, errors };
 }
 
+// --- Base44 sync trigger ---
 async function triggerBase44Sync(): Promise<void> {
   try {
-    log('info', `Triggering Base44 sync: ${base44SyncUrl}`);
-    const response = await axios.post(base44SyncUrl, {}, { timeout: 30000 });
-    log('info', `Base44 sync triggered: ${response.status}`);
-  } catch (error: any) {
-    log('error', `Base44 sync failed: ${error.message}`);
+    await axios.post(base44SyncUrl,
+      { trigger: true, source: 'railway-scraper' },
+      {
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${syncToken}` },
+        timeout: 30000,
+      }
+    );
+    log('info', 'Base44 sync triggered');
+  } catch (e: any) {
+    log('error', `Base44 sync failed: ${e.message}`);
   }
 }
 
-async function runDailyScrapeCycle(): Promise<void> {
-  log('info', '=== Starting Daily Scrape Cycle ===');
-  
-  const concurrency = parseInt(process.env.SCRAPE_CONCURRENCY || '8');
-  const dailyTarget = parseInt(process.env.DAILY_TARGET || '500');
-  
-  let totalScraped = 0;
-  const allProperties: Property[] = [];
-  
+// --- Main ---
+async function main() {
+  log('info', '=== Daily Scrape Cycle Starting ===');
+  let totalUpserted = 0;
+  let totalErrors = 0;
+  let sessionId: string | null = null;
+
   try {
-    // Create concurrent browser sessions
-    const sessionIds: string[] = [];
-    for (let i = 0; i < concurrency; i++) {
-      const sid = await createBrowserSession();
-      sessionIds.push(sid);
-      log('info', `Session ${i + 1}/${concurrency} created`);
+    sessionId = await createSession();
+    log('info', `Browser session created: ${sessionId}`);
+
+    for (const source of SCRAPE_SOURCES) {
+      if (totalUpserted >= dailyTarget) break;
+
+      log('info', `Scraping ${source.name}...`);
+      let props: RawProperty[] = [];
+      try {
+        props = await scrapeUrl(sessionId!, source.url, source.distress_type);
+      } catch (e: any) {
+        log('error', `Scrape failed for ${source.name}: ${e.message}`);
+        continue;
+      }
+
+      log('info', `  Found ${props.length} properties from ${source.name}`);
+
+      if (props.length > 0) {
+        const { upserted, errors } = await storeProperties(props, source.name);
+        totalUpserted += upserted;
+        totalErrors += errors;
+        log('info', `  Upserted ${upserted} (errors: ${errors})`);
+      }
     }
-    
-    // Distribute sources across sessions
-    for (let i = 0; i < SCRAPE_SOURCES.length; i++) {
-      const source = SCRAPE_SOURCES[i];
-      const sessionId = sessionIds[i % sessionIds.length];
-      
-      const props = await scrapeSource(source, sessionId);
-      allProperties.push(...props);
-      totalScraped += props.length;
-      
-      if (totalScraped >= dailyTarget) break;
-    }
-    
-    // Close sessions
-    for (const sid of sessionIds) {
-      await closeBrowserSession(sid);
-    }
-    
-    log('info', `Scraped ${totalScraped} properties total`);
-    
-    // Dedupe
-    const newProps = await dedupeProperties(allProperties);
-    log('info', `${newProps.length} new properties after dedupe`);
-    
-    // Enrich
-    log('info', `Enriching ${newProps.length} properties with AI scores...`);
-    const enriched: EnrichedProperty[] = [];
-    for (const prop of newProps) {
-      enriched.push(await enrichProperty(prop));
-    }
-    
-    // Store
-    await storeProperties(enriched);
-    
-    // Sync to Base44
-    if (enriched.length > 0) {
+
+    if (totalUpserted > 0) {
       await triggerBase44Sync();
     }
-    
-    log('info', `=== Scrape Complete: ${enriched.length} new properties stored, Base44 synced ===`);
-  } catch (error: any) {
-    log('error', `Scrape cycle failed: ${error.message}`);
-    process.exit(1);
+
+    log('info', `=== Done: ${totalUpserted} upserted, ${totalErrors} errors ===`);
+  } catch (e: any) {
+    log('error', `Fatal: ${e.message}`);
+    process.exitCode = 1;
+  } finally {
+    if (sessionId) await closeSession(sessionId);
   }
 }
 
-// Run
-runDailyScrapeCycle().then(() => {
-  log('info', 'Scraper completed');
-  process.exit(0);
-}).catch(error => {
-  log('error', `Fatal error: ${error.message}`);
-  process.exit(1);
-});
-
+main();

@@ -20,7 +20,9 @@ export default async function(req: Request): Promise<Response> {
     // Allow unauthenticated calls if a sync token is provided (Railway scraper)
     // Otherwise require admin auth
     const body = await req.json().catch(() => ({}));
-    const hasToken = req.headers.get("Authorization")?.startsWith("Bearer ") && body?.trigger;
+    const authHeader = req.headers.get("Authorization") || "";
+    const syncToken = (await import("base44:runtime")).secrets.get("BASE44_SYNC_TOKEN") || "";
+    const hasToken = authHeader.startsWith("Bearer ") && body?.trigger && syncToken && authHeader === `Bearer ${syncToken}`;
 
     if (!hasToken) {
       if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
