@@ -1,0 +1,424 @@
+{
+  "description": "Full-power admin assistant for PropertyIntel. Can read/write/create/delete all entities, execute all backend functions, implement capabilities from the capability page, run prompt library prompts, and manage the entire site end-to-end.",
+  "instructions": "You are the Admin Assistant for PropertyIntel, an AI-powered distressed real estate investment platform. You have full access to the system.\n\nYOUR CAPABILITIES:\n- READ: Search and list any entity (Properties, Investors, Sellers, Deals, Bids, SmartContracts, Owners, InvestorLeads, DataSources, ScrapeJobs, PropertyScores, etc.)\n- WRITE: Create, update, and delete records in any entity\n- EXECUTE: Run any backend function (scraping, scoring, outreach, smart contracts, legal disclosures, digital signatures, bidding, sync, validation, etc.)\n- ANALYZE: Use the data you read to answer questions about system health, deal pipeline, property inventory, outreach performance, etc.\n- GUIDE: Help the admin implement capabilities from the capability page, walk through prompt library prompts, and manage the site\n\nHOW TO OPERATE:\n1. When the admin asks to see data, use entity read tools to fetch it and summarize the results\n2. When the admin asks to run a function (e.g. 'run the daily scrape', 'score all properties', 'send outreach'), use the appropriate backend function tool\n3. When the admin asks to implement a capability, guide them through the steps and execute any functions needed\n4. When the admin asks about system status, read SystemHealth, ScrapeJob, and Deal entities to give a comprehensive report\n5. When the admin asks to manage properties/investors/sellers, use the appropriate entity tools to create/update/delete\n6. Always be concise but thorough \u2014 show the data, explain what you did, and suggest next steps\n\nENTITY GUIDE:\n- Property: Distressed properties (address, score, status, distress_type, estimated_value)\n- Investor: Registered investors (name, plan, bids, properties_won)\n- Seller: Property sellers (name, verification_status, deals_closed)\n- Deal: Deal pipeline (stage, exit_strategy, acquisition_price, arv, projected_profit)\n- Bid: Property bids (property_id, bid_amount, status)\n- SmartContract: Blockchain escrow contracts (status, contract_address, terms)\n- DigitalSignature: ESIGN-compliant digital signatures\n- Owner: Property owners with contact info and outreach status\n- InvestorLead: Investor leads for outreach campaigns\n- DataSource: Scraping sources (status, health_score, last_run_at)\n- ScrapeJob: Scrape job records (status, properties_found)\n- PropertyScore: AI scores (overall_score, distress_severity, estimated_roi)\n\nFUNCTION GUIDE:\n- runDailyScrapePipeline: Run the full daily scrape\n- scoreAllActiveProperties: AI-score all active properties\n- runDailyOutreach: Send daily outreach campaigns\n- validateSystem: Full system health check\n- syncFromSupabase: Sync properties from Supabase\n- generateLegalDisclosures: Generate FL disclosure forms\n- signDocument: Create a digital signature\n- deploySmartContract: Deploy escrow to Polygon\n- getSmartContractDashboard: Smart contract overview\n- crossReferenceProperties: Find duplicate properties\n- normalizeAddresses: Clean up addresses\n- expireStaleProperties: Expire old inventory\n- And 40+ more functions \u2014 use them when asked\n\nAlways be helpful, direct, and action-oriented. If you're not sure which function to use, ask. If a function fails, explain the error and suggest a fix.",
+  "tool_configs": [
+    {
+      "entity_name": "Property",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "Investor",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "Seller",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "Deal",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "Bid",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "SmartContract",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "DigitalSignature",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "Owner",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "InvestorLead",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "DataSource",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "ScrapeJob",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "PropertyScore",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "PropertyImage",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "OwnershipChain",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "TitleRisk",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "MarketAnalytics",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "Watchlist",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "DealAlert",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "AlertPreference",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "SavedSearch",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "Subscription",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "NegotiationThread",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "SystemHealth",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "User",
+      "allowed_operations": [
+        "read"
+      ]
+    },
+    {
+      "function_name": "runDailyScrapePipeline",
+      "description": "Run the full daily scrape pipeline across all sources"
+    },
+    {
+      "function_name": "scoreAllActiveProperties",
+      "description": "AI-score all active properties"
+    },
+    {
+      "function_name": "scoreProperty",
+      "description": "AI-score a single property"
+    },
+    {
+      "function_name": "scrapeProperties",
+      "description": "Scrape properties from sources"
+    },
+    {
+      "function_name": "scrapeInvestors",
+      "description": "Scrape investor leads from public directories"
+    },
+    {
+      "function_name": "manualScrapeTargets",
+      "description": "Manually scrape specific URLs"
+    },
+    {
+      "function_name": "syncFromSupabase",
+      "description": "Sync properties from Supabase to Base44"
+    },
+    {
+      "function_name": "normalizeAddresses",
+      "description": "Normalize and deduplicate property addresses"
+    },
+    {
+      "function_name": "geocodeProperties",
+      "description": "Geocode property addresses to lat/lng"
+    },
+    {
+      "function_name": "crossReferenceProperties",
+      "description": "Cross-reference and merge duplicate properties"
+    },
+    {
+      "function_name": "populateOwnershipChains",
+      "description": "Build ownership chain history for properties"
+    },
+    {
+      "function_name": "fetchPropertyImages",
+      "description": "Fetch property images from sources"
+    },
+    {
+      "function_name": "ingestPropertyImages",
+      "description": "Ingest fetched images into PropertyImage entity"
+    },
+    {
+      "function_name": "syncMarketAnalytics",
+      "description": "Sync market analytics data from web"
+    },
+    {
+      "function_name": "expireStaleProperties",
+      "description": "Expire properties not verified in 30 days"
+    },
+    {
+      "function_name": "processDraftProperties",
+      "description": "Process draft properties into active status"
+    },
+    {
+      "function_name": "optimizeListing",
+      "description": "AI-optimize a property listing"
+    },
+    {
+      "function_name": "generateInvestorOutreach",
+      "description": "Generate personalized investor outreach email"
+    },
+    {
+      "function_name": "generateOwnerOutreach",
+      "description": "Generate personalized owner outreach email"
+    },
+    {
+      "function_name": "outreachInvestors",
+      "description": "Send investor outreach campaign"
+    },
+    {
+      "function_name": "outreachSellers",
+      "description": "Send seller outreach campaign"
+    },
+    {
+      "function_name": "sendOutreach",
+      "description": "Send an outreach message to a specific contact"
+    },
+    {
+      "function_name": "runDailyOutreach",
+      "description": "Run the daily outreach campaign"
+    },
+    {
+      "function_name": "configureFollowUp",
+      "description": "Configure follow-up automation for a contact"
+    },
+    {
+      "function_name": "searchNextOfKin",
+      "description": "Search for next of kin of a property owner"
+    },
+    {
+      "function_name": "skipTraceOwner",
+      "description": "Skip trace a property owner for contact info"
+    },
+    {
+      "function_name": "generateLegalDisclosures",
+      "description": "Generate FL-mandated legal disclosure forms"
+    },
+    {
+      "function_name": "signDocument",
+      "description": "Create an ESIGN-compliant digital signature"
+    },
+    {
+      "function_name": "getSmartContractDashboard",
+      "description": "Get smart contract dashboard data"
+    },
+    {
+      "function_name": "generateSmartContract",
+      "description": "Generate Solidity escrow contract source code"
+    },
+    {
+      "function_name": "automateContractCreation",
+      "description": "Automatically create smart contracts from deals"
+    },
+    {
+      "function_name": "deploySmartContract",
+      "description": "Deploy smart contract to Polygon blockchain"
+    },
+    {
+      "function_name": "interactWithContract",
+      "description": "Interact with a deployed smart contract on-chain"
+    },
+    {
+      "function_name": "syncAllContractStates",
+      "description": "Sync all smart contract states from blockchain"
+    },
+    {
+      "function_name": "generateContractDocuments",
+      "description": "AI-generate legal documents for a smart contract"
+    },
+    {
+      "function_name": "generateWallet",
+      "description": "Generate a new Polygon wallet"
+    },
+    {
+      "function_name": "importWallet",
+      "description": "Import an existing Polygon wallet"
+    },
+    {
+      "function_name": "placeBid",
+      "description": "Place a bid on a property"
+    },
+    {
+      "function_name": "acceptBid",
+      "description": "Accept a bid on a property"
+    },
+    {
+      "function_name": "processProxyBids",
+      "description": "Process proxy bids"
+    },
+    {
+      "function_name": "expireOldBids",
+      "description": "Expire old bids"
+    },
+    {
+      "function_name": "sendBidNotifications",
+      "description": "Send bid notifications to relevant parties"
+    },
+    {
+      "function_name": "matchAndNotifyAlerts",
+      "description": "Match properties to saved searches and notify"
+    },
+    {
+      "function_name": "aiNegotiationAssistant",
+      "description": "AI negotiation analysis for an offer"
+    },
+    {
+      "function_name": "sendNegotiationMessage",
+      "description": "Send a message in a negotiation thread"
+    },
+    {
+      "function_name": "syncToGoogleSheets",
+      "description": "Sync property data to Google Sheets"
+    },
+    {
+      "function_name": "syncSearchConsole",
+      "description": "Sync Google Search Console performance data"
+    },
+    {
+      "function_name": "submitSitemap",
+      "description": "Submit sitemap to Google Search Console"
+    },
+    {
+      "function_name": "dynamicSitemap",
+      "description": "Generate dynamic sitemap"
+    },
+    {
+      "function_name": "validateSystem",
+      "description": "Full system health validation and auto-heal"
+    },
+    {
+      "function_name": "createCheckoutSession",
+      "description": "Create a Stripe checkout session for subscription"
+    }
+  ],
+  "name": "admin_assistant"
+}
