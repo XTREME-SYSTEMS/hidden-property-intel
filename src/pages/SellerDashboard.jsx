@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { money } from "@/lib/format";
-import { Plus } from "lucide-react";
+import { Plus, FileText, PenTool, Scale, Mail, Calculator, Shield } from "lucide-react";
+import DashboardFAQ from "@/components/DashboardFAQ";
 
 export default function SellerDashboard() {
   const [properties, setProperties] = useState([]);
@@ -33,6 +34,17 @@ export default function SellerDashboard() {
         </Link>
       </div>
 
+      <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Link to="/seller/post-property" className="rounded-sm border border-black/10 p-4 transition hover:border-black/30"><Plus className="h-5 w-5 text-black/40" /><p className="mt-2 text-sm font-medium">Post Property</p><p className="text-[10px] text-black/40">Free listing</p></Link>
+        <div className="rounded-sm border border-black/10 p-4 transition hover:border-black/30 cursor-pointer"><FileText className="h-5 w-5 text-black/40" /><p className="mt-2 text-sm font-medium">Disclosure Forms</p><p className="text-[10px] text-black/40">FL-mandated, auto-generated</p></div>
+        <div className="rounded-sm border border-black/10 p-4 transition hover:border-black/30 cursor-pointer"><PenTool className="h-5 w-5 text-black/40" /><p className="mt-2 text-sm font-medium">Digital Signing</p><p className="text-[10px] text-black/40">ESIGN compliant</p></div>
+        <div className="rounded-sm border border-black/10 p-4 transition hover:border-black/30 cursor-pointer"><Scale className="h-5 w-5 text-black/40" /><p className="mt-2 text-sm font-medium">AI Negotiation</p><p className="text-[10px] text-black/40">Evaluate offers</p></div>
+        <Link to="/deal-calculator" className="rounded-sm border border-black/10 p-4 transition hover:border-black/30"><Calculator className="h-5 w-5 text-black/40" /><p className="mt-2 text-sm font-medium">Deal Calculator</p><p className="text-[10px] text-black/40">See your net proceeds</p></Link>
+        <div className="rounded-sm border border-black/10 p-4 transition hover:border-black/30 cursor-pointer"><Shield className="h-5 w-5 text-black/40" /><p className="mt-2 text-sm font-medium">Smart Contract</p><p className="text-[10px] text-black/40">Blockchain escrow</p></div>
+        <div className="rounded-sm border border-black/10 p-4 transition hover:border-black/30 cursor-pointer"><Mail className="h-5 w-5 text-black/40" /><p className="mt-2 text-sm font-medium">Document Vault</p><p className="text-[10px] text-black/40">Secure storage</p></div>
+        <div className="rounded-sm border border-black/10 p-4 transition hover:border-black/30 cursor-pointer"><FileText className="h-5 w-5 text-black/40" /><p className="mt-2 text-sm font-medium">Closing Checklist</p><p className="text-[10px] text-black/40">Track deadlines</p></div>
+      </div>
+
       {properties.length === 0 ? (
         <div className="mt-12 rounded-sm border border-dashed border-black/20 p-16 text-center">
           <p className="font-display text-xl font-light">No properties posted yet.</p>
@@ -58,6 +70,10 @@ export default function SellerDashboard() {
           ))}
         </div>
       )}
+
+      <div className="mt-12">
+        <DashboardFAQ type="seller" />
+      </div>
     </div>
   );
 }

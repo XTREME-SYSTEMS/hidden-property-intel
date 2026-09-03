@@ -3,8 +3,9 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { money } from "@/lib/format";
 import LuxuryListingCard from "@/components/luxury/LuxuryListingCard";
-import { Trash2, Plus } from "lucide-react";
+import { Trash2, Plus, Search, Calculator, Blocks, FileText, SkipForward, Mail, TrendingUp } from "lucide-react";
 import { DISTRESS_TYPES as DISTRESS } from "@/lib/constants";
+import DashboardFAQ from "@/components/DashboardFAQ";
 
 export default function InvestorDashboard() {
   const [investor, setInvestor] = useState(null);
@@ -127,6 +128,20 @@ export default function InvestorDashboard() {
       </div>
 
       <div className="mt-12">
+        <h2 className="font-display text-2xl font-light">Investor tools</h2>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Link to="/listings" className="rounded-sm border border-black/10 p-4 transition hover:border-black/30"><Search className="h-5 w-5 text-black/40" /><p className="mt-2 text-sm font-medium">Search Properties</p><p className="text-[10px] text-black/40">165+ filters, AI scored</p></Link>
+          <Link to="/deal-calculator" className="rounded-sm border border-black/10 p-4 transition hover:border-black/30"><Calculator className="h-5 w-5 text-black/40" /><p className="mt-2 text-sm font-medium">Deal Calculator</p><p className="text-[10px] text-black/40">Profit split & fairness</p></Link>
+          <Link to="/smart-contracts" className="rounded-sm border border-black/10 p-4 transition hover:border-black/30"><Blocks className="h-5 w-5 text-black/40" /><p className="mt-2 text-sm font-medium">Smart Contracts</p><p className="text-[10px] text-black/40">Blockchain escrow</p></Link>
+          <div className="rounded-sm border border-black/10 p-4 transition hover:border-black/30 cursor-pointer"><SkipForward className="h-5 w-5 text-black/40" /><p className="mt-2 text-sm font-medium">Skip Trace</p><p className="text-[10px] text-black/40">Find owner contacts</p></div>
+          <div className="rounded-sm border border-black/10 p-4 transition hover:border-black/30 cursor-pointer"><Mail className="h-5 w-5 text-black/40" /><p className="mt-2 text-sm font-medium">Direct Mail</p><p className="text-[10px] text-black/40">Postcards & letters</p></div>
+          <div className="rounded-sm border border-black/10 p-4 transition hover:border-black/30 cursor-pointer"><TrendingUp className="h-5 w-5 text-black/40" /><p className="mt-2 text-sm font-medium">Market Analytics</p><p className="text-[10px] text-black/40">Trends & comps</p></div>
+          <div className="rounded-sm border border-black/10 p-4 transition hover:border-black/30 cursor-pointer"><FileText className="h-5 w-5 text-black/40" /><p className="mt-2 text-sm font-medium">Offer Generator</p><p className="text-[10px] text-black/40">AI-powered offers</p></div>
+          <div className="rounded-sm border border-black/10 p-4 transition hover:border-black/30 cursor-pointer"><Blocks className="h-5 w-5 text-black/40" /><p className="mt-2 text-sm font-medium">Buyer's List</p><p className="text-[10px] text-black/40">Auto-match deals</p></div>
+        </div>
+      </div>
+
+      <div className="mt-12">
         <h2 className="font-display text-2xl font-light">Saved searches</h2>
         <div className="mt-4 flex flex-wrap gap-3">
           <input value={newSearch.name} onChange={(e) => setNewSearch({ ...newSearch, name: e.target.value })} placeholder="Search name" className="flex-1 min-w-[160px] rounded-sm border border-black/15 px-3 py-2.5 text-sm outline-none focus:border-black" />
@@ -152,6 +167,10 @@ export default function InvestorDashboard() {
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="mt-12">
+        <DashboardFAQ type="investor" />
       </div>
     </div>
   );

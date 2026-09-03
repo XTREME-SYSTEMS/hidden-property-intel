@@ -1,0 +1,124 @@
+{
+  "name": "DigitalSignature",
+  "type": "object",
+  "properties": {
+    "document_type": {
+      "type": "string",
+      "enum": [
+        "purchase_agreement",
+        "disclosure",
+        "addendum",
+        "assignment_contract",
+        "closing_statement",
+        "buyer_representation",
+        "co_marketing",
+        "other"
+      ]
+    },
+    "document_title": {
+      "type": "string"
+    },
+    "document_content": {
+      "type": "string"
+    },
+    "document_hash": {
+      "type": "string"
+    },
+    "signer_name": {
+      "type": "string"
+    },
+    "signer_email": {
+      "type": "string"
+    },
+    "signer_role": {
+      "type": "string",
+      "enum": [
+        "buyer",
+        "seller",
+        "agent",
+        "witness",
+        "notary",
+        "investor",
+        "wholesaler"
+      ]
+    },
+    "signature_hash": {
+      "type": "string"
+    },
+    "signature_image": {
+      "type": "string"
+    },
+    "ip_address": {
+      "type": "string"
+    },
+    "user_agent": {
+      "type": "string"
+    },
+    "signed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "property_id": {
+      "type": "string"
+    },
+    "deal_id": {
+      "type": "string"
+    },
+    "contract_id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "signed",
+        "voided",
+        "expired"
+      ],
+      "default": "pending"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "witness_name": {
+      "type": "string"
+    },
+    "notary_name": {
+      "type": "string"
+    },
+    "notary_commission": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "document_title",
+    "signer_name",
+    "signer_email"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.signer_email": "{{user.email}}"
+        }
+      ]
+    },
+    "create": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
