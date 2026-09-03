@@ -1,11 +1,16 @@
 /**
- * Hidden Property Intel — Railway Scraper
- * Scrapes FL distressed properties via self-hosted CloudBrowser-Control engine.
+ * Hidden Property Intel — Railway Scraper (Aggressive)
+ * Scrapes distressed properties across multiple states via self-hosted
+ * CloudBrowser-Control engine. Paginates through result pages, retries
+ * failed sources, rotates browser sessions to avoid detection.
+ *
  * Writes raw rows to Supabase via upsert (dedup_key unique index).
- * Triggers Base44 sync webhook after each batch.
+ * Triggers Base44 sync webhook after each source batch.
  *
  * Scoring, ownership chains, images, and title risks are handled by Base44 —
  * this scraper ONLY harvests and stores raw property data.
+ *
+ * Railway has no function timeout — this process can run for 10+ minutes.
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -22,7 +27,11 @@ const browserEngineUrl = (process.env.BROWSER_ENGINE_URL || '').replace(/\/$/, '
 const browserEngineApiKey = process.env.BROWSER_ENGINE_API_KEY!;
 const base44SyncUrl = process.env.BASE44_SYNC_URL!;
 const syncToken = process.env.BASE44_SYNC_TOKEN || '';
-const dailyTarget = parseInt(process.env.DAILY_TARGET || '500', 10);
+const dailyTarget = parseInt(process.env.DAILY_TARGET || '5000', 10);
+const maxPagesPerSource = parseInt(process.env.MAX_PAGES || '8', 10);
+const requestDelayMs = parseInt(process.env.REQUEST_DELAY_MS || '2000', 10);
+const sessionRotateEvery = parseInt(process.env.SESSION_ROTATE_EVERY || '10', 10);
+const maxRetries = parseInt(process.env.MAX_RETRIES || '2', 10);
 
 if (!supabaseUrl || !supabaseServiceKey || !browserEngineUrl || !browserEngineApiKey || !base44SyncUrl) {
   log('error', 'Missing required env vars. Exiting.');
@@ -30,6 +39,8 @@ if (!supabaseUrl || !supabaseServiceKey || !browserEngineUrl || !browserEngineAp
 }
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 // --- Types ---
 interface RawProperty {
@@ -49,12 +60,62 @@ interface RawProperty {
   listing_notes?: string;
 }
 
-// --- Sources ---
-const SCRAPE_SOURCES = [
-  { name: 'Zillow Foreclosures - FL', url: 'https://www.zillow.com/homes/for_sale/foreclosed/', distress_type: 'foreclosure' },
-  { name: 'Auction.com - FL', url: 'https://www.auction.com/real-estate/florida', distress_type: 'auction' },
-  { name: 'HUD Home Store - FL', url: 'https://www.hudhomestore.com/search/FL', distress_type: 'bank_owned' },
-  { name: 'FL Foreclosures', url: 'https://www.realforeclose.com', distress_type: 'foreclosure' },
+interface ScrapeSource {
+  name: string;
+  url: string;
+  distress_type: string;
+  state: string;
+  paginated?: boolean;
+  page_param?: string;
+  max_pages?: number;
+}
+
+// --- Sources (multi-state, high-volume) ---
+const SCRAPE_SOURCES: ScrapeSource[] = [
+  // FL
+  { name: 'Zillow Foreclosures - FL', url: 'https://www.zillow.com/homes/foreclosures/', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 8 },
+  { name: 'Auction.com - FL', url: 'https://www.auction.com/real-estate/florida/', distress_type: 'auction', state: 'FL', paginated: true, page_param: 'page', max_pages: 6 },
+  { name: 'HUD Home Store - FL', url: 'https://www.hudhomestore.com/PropertySearch?state=FL', distress_type: 'bank_owned', state: 'FL', paginated: false, max_pages: 1 },
+  { name: 'FL Foreclosures - Miami-Dade', url: 'https://www.miamidadeclerk.gov/public-records/search/foreclosures', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 5 },
+  { name: 'FL Foreclosures - Broward', url: 'https://www.browardclerk.org/foreclosures', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 5 },
+  // GA
+  { name: 'Zillow Foreclosures - GA', url: 'https://www.zillow.com/ga/foreclosures/', distress_type: 'foreclosure', state: 'GA', paginated: true, page_param: 'page', max_pages: 6 },
+  { name: 'Auction.com - GA', url: 'https://www.auction.com/real-estate/georgia/', distress_type: 'auction', state: 'GA', paginated: true, page_param: 'page', max_pages: 5 },
+  { name: 'HUD Home Store - GA', url: 'https://www.hudhomestore.com/PropertySearch?state=GA', distress_type: 'bank_owned', state: 'GA', paginated: false, max_pages: 1 },
+  // TX
+  { name: 'Zillow Foreclosures - TX', url: 'https://www.zillow.com/tx/foreclosures/', distress_type: 'foreclosure', state: 'TX', paginated: true, page_param: 'page', max_pages: 8 },
+  { name: 'Auction.com - TX', url: 'https://www.auction.com/real-estate/texas/', distress_type: 'auction', state: 'TX', paginated: true, page_param: 'page', max_pages: 6 },
+  { name: 'HUD Home Store - TX', url: 'https://www.hudhomestore.com/PropertySearch?state=TX', distress_type: 'bank_owned', state: 'TX', paginated: false, max_pages: 1 },
+  // OH
+  { name: 'Zillow Foreclosures - OH', url: 'https://www.zillow.com/oh/foreclosures/', distress_type: 'foreclosure', state: 'OH', paginated: true, page_param: 'page', max_pages: 6 },
+  { name: 'Auction.com - OH', url: 'https://www.auction.com/real-estate/ohio/', distress_type: 'auction', state: 'OH', paginated: true, page_param: 'page', max_pages: 5 },
+  // MI
+  { name: 'Zillow Foreclosures - MI', url: 'https://www.zillow.com/mi/foreclosures/', distress_type: 'foreclosure', state: 'MI', paginated: true, page_param: 'page', max_pages: 6 },
+  { name: 'Auction.com - MI', url: 'https://www.auction.com/real-estate/michigan/', distress_type: 'auction', state: 'MI', paginated: true, page_param: 'page', max_pages: 5 },
+  // NV
+  { name: 'Zillow Foreclosures - NV', url: 'https://www.zillow.com/nv/foreclosures/', distress_type: 'foreclosure', state: 'NV', paginated: true, page_param: 'page', max_pages: 5 },
+  { name: 'Auction.com - NV', url: 'https://www.auction.com/real-estate/nevada/', distress_type: 'auction', state: 'NV', paginated: true, page_param: 'page', max_pages: 4 },
+  // AZ
+  { name: 'Zillow Foreclosures - AZ', url: 'https://www.zillow.com/az/foreclosures/', distress_type: 'foreclosure', state: 'AZ', paginated: true, page_param: 'page', max_pages: 5 },
+  { name: 'Auction.com - AZ', url: 'https://www.auction.com/real-estate/arizona/', distress_type: 'auction', state: 'AZ', paginated: true, page_param: 'page', max_pages: 4 },
+  // IN
+  { name: 'Zillow Foreclosures - IN', url: 'https://www.zillow.com/in/foreclosures/', distress_type: 'foreclosure', state: 'IN', paginated: true, page_param: 'page', max_pages: 5 },
+  // AL
+  { name: 'Zillow Foreclosures - AL', url: 'https://www.zillow.com/al/foreclosures/', distress_type: 'foreclosure', state: 'AL', paginated: true, page_param: 'page', max_pages: 5 },
+  // NC
+  { name: 'Zillow Foreclosures - NC', url: 'https://www.zillow.com/nc/foreclosures/', distress_type: 'foreclosure', state: 'NC', paginated: true, page_param: 'page', max_pages: 5 },
+  // SC
+  { name: 'Zillow Foreclosures - SC', url: 'https://www.zillow.com/sc/foreclosures/', distress_type: 'foreclosure', state: 'SC', paginated: true, page_param: 'page', max_pages: 5 },
+  // IL
+  { name: 'Zillow Foreclosures - IL', url: 'https://www.zillow.com/il/foreclosures/', distress_type: 'foreclosure', state: 'IL', paginated: true, page_param: 'page', max_pages: 5 },
+  // TN
+  { name: 'Zillow Foreclosures - TN', url: 'https://www.zillow.com/tn/foreclosures/', distress_type: 'foreclosure', state: 'TN', paginated: true, page_param: 'page', max_pages: 5 },
+  // PA
+  { name: 'Zillow Foreclosures - PA', url: 'https://www.zillow.com/pa/foreclosures/', distress_type: 'foreclosure', state: 'PA', paginated: true, page_param: 'page', max_pages: 5 },
+  // National aggregators
+  { name: 'RealtyTrac Foreclosures', url: 'https://www.realtytrac.com/foreclosures/', distress_type: 'foreclosure', state: 'US', paginated: true, page_param: 'page', max_pages: 6 },
+  { name: 'HomePath Fannie Mae', url: 'https://www.homepath.com/search.html', distress_type: 'bank_owned', state: 'US', paginated: true, page_param: 'page', max_pages: 5 },
+  { name: 'HUD Home Store - US', url: 'https://www.hudhomestore.com/PropertySearch', distress_type: 'bank_owned', state: 'US', paginated: false, max_pages: 1 },
 ];
 
 const PROPERTY_SCHEMA = {
@@ -91,10 +152,16 @@ function dedupKey(address: string, zip: string): string {
   return Buffer.from(`${normalizeAddress(address)}|${(zip || '').trim()}`).toString('base64');
 }
 
+function buildPageUrl(source: ScrapeSource, page: number): string {
+  if (!source.paginated || page <= 1) return source.url;
+  const sep = source.url.includes('?') ? '&' : '?';
+  return `${source.url}${sep}${source.page_param}=${page}`;
+}
+
 // --- CloudBrowser-Control engine ---
 async function createSession(): Promise<string> {
   const res = await axios.post(`${browserEngineUrl}/sessions`, {
-    viewport: { width: 1280, height: 800 },
+    viewport: { width: 1366, height: 900 },
     locale: 'en-US',
     timezone: 'America/New_York',
   }, {
@@ -116,12 +183,15 @@ async function closeSession(sessionId: string): Promise<void> {
   } catch { /* best effort */ }
 }
 
-async function scrapeUrl(sessionId: string, url: string, distressType: string): Promise<RawProperty[]> {
+async function scrapePage(sessionId: string, url: string, distressType: string, defaultState: string): Promise<RawProperty[]> {
   // 1. Navigate
   await axios.post(`${browserEngineUrl}/sessions/${sessionId}/execute`,
     { action_type: 'goto', value: url },
-    { headers: { 'x-api-key': browserEngineApiKey, 'Content-Type': 'application/json' }, timeout: 45000 }
+    { headers: { 'x-api-key': browserEngineApiKey, 'Content-Type': 'application/json' }, timeout: 60000 }
   );
+
+  // Small delay to let JS render
+  await sleep(1500);
 
   // 2. Extract structured data
   const res = await axios.post(`${browserEngineUrl}/sessions/${sessionId}/execute`,
@@ -130,7 +200,7 @@ async function scrapeUrl(sessionId: string, url: string, distressType: string): 
       selector: 'body',
       options: { output_schema: PROPERTY_SCHEMA },
     },
-    { headers: { 'x-api-key': browserEngineApiKey, 'Content-Type': 'application/json' }, timeout: 45000 }
+    { headers: { 'x-api-key': browserEngineApiKey, 'Content-Type': 'application/json' }, timeout: 60000 }
   );
 
   const data = res.data?.data;
@@ -146,10 +216,54 @@ async function scrapeUrl(sessionId: string, url: string, distressType: string): 
     .filter(p => p.address)
     .map(p => ({
       ...p,
-      state: p.state || 'FL',
+      state: p.state || defaultState,
       distress_type: p.distress_type || distressType,
       source_url: p.source_url || url,
     }));
+}
+
+async function scrapeSourceWithRetries(sessionId: string, source: ScrapeSource): Promise<{ props: RawProperty[]; pages: number }> {
+  const maxPages = source.max_pages || maxPagesPerSource;
+  const allProps: RawProperty[] = [];
+  let pagesScraped = 0;
+
+  for (let page = 1; page <= maxPages; page++) {
+    const pageUrl = buildPageUrl(source, page);
+    let pageProps: RawProperty[] = [];
+    let succeeded = false;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        log('info', `  [${source.name}] page ${page} (attempt ${attempt})`);
+        pageProps = await scrapePage(sessionId, pageUrl, source.distress_type, source.state);
+        succeeded = true;
+        break;
+      } catch (e: any) {
+        log('warn', `  [${source.name}] page ${page} attempt ${attempt} failed: ${e.message}`);
+        if (attempt < maxRetries) await sleep(3000 * attempt);
+      }
+    }
+
+    if (!succeeded) {
+      log('error', `  [${source.name}] page ${page} failed after ${maxRetries} retries, skipping source`);
+      break;
+    }
+
+    if (pageProps.length === 0) {
+      log('info', `  [${source.name}] page ${page} returned 0 properties — end of results`);
+      break;
+    }
+
+    allProps.push(...pageProps);
+    pagesScraped++;
+    log('info', `  [${source.name}] page ${page}: ${pageProps.length} properties (total: ${allProps.length})`);
+
+    // Stop if we've hit the per-source cap or daily target
+    if (!source.paginated) break;
+    if (page < maxPages) await sleep(requestDelayMs);
+  }
+
+  return { props: allProps, pages: pagesScraped };
 }
 
 // --- Supabase upsert (race-safe dedup via unique index on dedup_key) ---
@@ -213,42 +327,53 @@ async function triggerBase44Sync(): Promise<void> {
 
 // --- Main ---
 async function main() {
-  log('info', '=== Daily Scrape Cycle Starting ===');
+  log('info', `=== Aggressive Scrape Cycle Starting (target: ${dailyTarget}, sources: ${SCRAPE_SOURCES.length}) ===`);
   let totalUpserted = 0;
   let totalErrors = 0;
   let sessionId: string | null = null;
+  let sourcesProcessed = 0;
 
   try {
     sessionId = await createSession();
     log('info', `Browser session created: ${sessionId}`);
 
     for (const source of SCRAPE_SOURCES) {
-      if (totalUpserted >= dailyTarget) break;
-
-      log('info', `Scraping ${source.name}...`);
-      let props: RawProperty[] = [];
-      try {
-        props = await scrapeUrl(sessionId!, source.url, source.distress_type);
-      } catch (e: any) {
-        log('error', `Scrape failed for ${source.name}: ${e.message}`);
-        continue;
+      if (totalUpserted >= dailyTarget) {
+        log('info', `Daily target ${dailyTarget} reached, stopping.`);
+        break;
       }
 
-      log('info', `  Found ${props.length} properties from ${source.name}`);
+      log('info', `Scraping ${source.name}...`);
+
+      // Rotate session periodically to avoid detection
+      if (sourcesProcessed > 0 && sourcesProcessed % sessionRotateEvery === 0) {
+        log('info', `Rotating browser session (every ${sessionRotateEvery} sources)...`);
+        if (sessionId) await closeSession(sessionId);
+        await sleep(2000);
+        sessionId = await createSession();
+        log('info', `New session: ${sessionId}`);
+      }
+
+      const { props, pages } = await scrapeSourceWithRetries(sessionId!, source);
+      log('info', `  ${source.name}: ${props.length} properties from ${pages} pages`);
 
       if (props.length > 0) {
         const { upserted, errors } = await storeProperties(props, source.name);
         totalUpserted += upserted;
         totalErrors += errors;
-        log('info', `  Upserted ${upserted} (errors: ${errors})`);
+        log('info', `  Upserted ${upserted} (errors: ${errors}) — running total: ${totalUpserted}`);
+
+        // Sync to Base44 after each source so data appears incrementally
+        if (upserted > 0) {
+          await triggerBase44Sync();
+        }
       }
+
+      sourcesProcessed++;
+      await sleep(requestDelayMs);
     }
 
-    if (totalUpserted > 0) {
-      await triggerBase44Sync();
-    }
-
-    log('info', `=== Done: ${totalUpserted} upserted, ${totalErrors} errors ===`);
+    log('info', `=== Done: ${totalUpserted} upserted, ${totalErrors} errors, ${sourcesProcessed} sources processed ===`);
   } catch (e: any) {
     log('error', `Fatal: ${e.message}`);
     process.exitCode = 1;
