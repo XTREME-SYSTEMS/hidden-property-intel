@@ -11,6 +11,9 @@
     "seller_id": {
       "type": "string"
     },
+    "deal_id": {
+      "type": "string"
+    },
     "contract_type": {
       "type": "string",
       "enum": [
@@ -38,6 +41,12 @@
           "items": {
             "type": "string"
           }
+        },
+        "buyer_address": {
+          "type": "string"
+        },
+        "seller_address": {
+          "type": "string"
         }
       }
     },
@@ -89,6 +98,27 @@
           },
           "signature_hash": {
             "type": "string"
+          }
+        }
+      }
+    },
+    "documents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       }
