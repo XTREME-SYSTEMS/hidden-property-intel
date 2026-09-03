@@ -23,7 +23,7 @@ export default function AgentMessageBubble({ message }) {
   );
 }
 
-function ToolCallDisplay({ toolCall }) {
+function ToolCallDisplay({ toolCall: tc }) {
   const [expanded, setExpanded] = useState(false);
 
   const status = tc.status || "pending";
