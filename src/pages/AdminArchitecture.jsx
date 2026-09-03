@@ -5,7 +5,7 @@ import {
   Radar, Brain, FileSignature, Users, RefreshCw, Mail, ShieldCheck, Database,
   TrendingUp, Target, Zap, ArrowRight, Activity, AlertTriangle, CheckCircle2,
   Image, Phone, Eye, Bug, Copy, MapPin, Cpu, Server, Gauge, Layers,
-  Scale, BarChart3, Trophy,
+  Scale, BarChart3, Trophy, Blocks,
 } from "lucide-react";
 
 /**
@@ -157,6 +157,12 @@ const CAPABILITY_MATRIX = [
   { cap: "AI portfolio optimization", us: 9, best: "None (unique)", gap: "Diversification scoring + gap analysis", status: "Unique" },
   { cap: "Advanced analytics dashboard", us: 8, best: "ATTOM (9)", gap: "Recharts visualizations, outreach funnel", status: "Strong" },
   { cap: "Investor performance leaderboard", us: 8, best: "DealMachine (6)", gap: "Gamification, deal of the month", status: "Strong" },
+  { cap: "AI property condition assessment (vision)", us: 9, best: "None (unique)", gap: "Image-based condition scoring, no physical visit", status: "Unique" },
+  { cap: "Deal risk intelligence (5-dimension)", us: 9, best: "None (unique)", gap: "Title + market + condition + financial + legal risk", status: "Unique" },
+  { cap: "Seller timing optimizer", us: 9, best: "None (unique)", gap: "AI tells sellers when to sell for max price", status: "Unique" },
+  { cap: "Investor-seller compatibility matching", us: 8, best: "None (unique)", gap: "AI matching by portfolio, deal type, track record", status: "Unique" },
+  { cap: "Autonomous follow-up intelligence", us: 9, best: "DealMachine (5)", gap: "AI-driven timing, channel, tone decisions", status: "Leading" },
+  { cap: "Smart contract security auditing", us: 8, best: "None (unique)", gap: "AI Solidity analysis, 10+ vulnerability categories", status: "Unique" },
 ];
 
 const STATUS_COLOR = {
@@ -182,6 +188,12 @@ const ROADMAP = [
   { icon: Target, t: "AI portfolio optimizer", d: "Analyzes investor portfolio and recommends 5 properties that complement existing holdings with ROI and risk assessment.", priority: "P1", area: "AI/ML", status: "Live" },
   { icon: BarChart3, t: "Advanced analytics dashboard", d: "Recharts-powered dashboard: deal pipeline, exit strategies, distress types, outreach funnel, scrape performance.", priority: "P1", area: "Analytics", status: "Live" },
   { icon: Trophy, t: "Investor performance leaderboard", d: "Ranks investors by profit, ROI, deals closed. Top-3 podium + deal of the month + full table.", priority: "P2", area: "Engagement", status: "Live" },
+  { icon: Eye, t: "AI property condition assessment", d: "Vision-based condition scoring from property images. Estimates roof age, exterior damage, yard condition, overall 1-10 score, and repair costs.", priority: "P1", area: "AI/ML", status: "Live" },
+  { icon: ShieldCheck, t: "Deal risk intelligence engine", d: "5-dimension risk scoring: title, market, condition, financial, legal. AI generates risk report with mitigation recommendations before offer.", priority: "P1", area: "AI/ML", status: "Live" },
+  { icon: TrendingUp, t: "Seller timing optimizer", d: "AI tells sellers optimal time to sell based on market trends, seasonality, interest rates. Sell now vs wait 3/6 months with projected prices.", priority: "P1", area: "AI/ML", status: "Live" },
+  { icon: Users, t: "Investor-seller compatibility matching", d: "AI matches properties to best investors by portfolio, deal type, price range, track record. Top 5 ranked with match scores.", priority: "P1", area: "AI/ML", status: "Live" },
+  { icon: Mail, t: "Autonomous follow-up intelligence", d: "AI decides when/how/whether to follow up with each contact. Analyzes response patterns, optimal timing, channel preference, message tone.", priority: "P1", area: "Automation", status: "Live" },
+  { icon: Blocks, t: "Smart contract security auditing", d: "AI analyzes Solidity code for 10+ vulnerability categories: reentrancy, overflow, access control, unchecked calls. Blocks deployment on critical findings.", priority: "P1", area: "Blockchain", status: "Live" },
 ];
 
 const PRIORITY_COLOR = { "P0": "bg-red-600", "P1": "bg-amber-500", "P2": "bg-black/60" };

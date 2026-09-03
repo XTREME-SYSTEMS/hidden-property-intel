@@ -438,6 +438,30 @@
     {
       "function_name": "optimizePortfolio",
       "description": "AI recommend 5 properties to complement an investor's existing portfolio"
+    },
+    {
+      "function_name": "assessPropertyCondition",
+      "description": "AI vision-based property condition assessment from images \u2014 roof age, exterior damage, overall condition score, repair cost estimates"
+    },
+    {
+      "function_name": "assessDealRisk",
+      "description": "5-dimension deal risk intelligence: title, market, condition, financial, legal risk with mitigation recommendations"
+    },
+    {
+      "function_name": "optimizeSellerTiming",
+      "description": "AI seller timing optimizer \u2014 sell now vs wait 3/6 months with projected prices and market analysis"
+    },
+    {
+      "function_name": "matchInvestorSeller",
+      "description": "AI investor-seller compatibility matching \u2014 ranks top 5 investors by match score with deal type and offer range"
+    },
+    {
+      "function_name": "autonomousFollowUp",
+      "description": "AI autonomous follow-up intelligence \u2014 decides when/how/whether to follow up with each contact"
+    },
+    {
+      "function_name": "auditSmartContract",
+      "description": "AI smart contract security audit \u2014 checks for reentrancy, overflow, access control, and 10+ vulnerability categories"
     }
   ],
   "context_files": [],

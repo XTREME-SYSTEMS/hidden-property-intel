@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { money } from "@/lib/format";
 import { Plus, FileText, PenTool, Scale, Mail, Calculator, Shield } from "lucide-react";
 import DashboardFAQ from "@/components/DashboardFAQ";
+import SellerTimingOptimizer from "@/components/ai/SellerTimingOptimizer";
 
 export default function SellerDashboard() {
   const [properties, setProperties] = useState([]);
@@ -68,6 +69,12 @@ export default function SellerDashboard() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {properties.length > 0 && (
+        <div className="mt-12">
+          <SellerTimingOptimizer propertyId={properties[0].id} />
         </div>
       )}
 
