@@ -418,7 +418,46 @@
     {
       "function_name": "createCheckoutSession",
       "description": "Create a Stripe checkout session for subscription"
+    },
+    {
+      "function_name": "generatePropertyDescription",
+      "description": "AI-generate 3 SEO-optimized property listing descriptions in different tones (professional, emotional, investment)"
+    },
+    {
+      "function_name": "estimateRehabCosts",
+      "description": "AI estimate rehab costs by category (roof, kitchen, baths, etc.) with local contractor rates"
+    },
+    {
+      "function_name": "predictDistress",
+      "description": "AI predict probability of property becoming distressed in next 90 days"
+    },
+    {
+      "function_name": "auditFairHousing",
+      "description": "Audit outreach emails and listings for fair housing compliance violations"
+    },
+    {
+      "function_name": "optimizePortfolio",
+      "description": "AI recommend 5 properties to complement an investor's existing portfolio"
     }
   ],
+  "context_files": [],
+  "app_user_connector_configs": [],
+  "selected_skill_names": [],
+  "selected_workspace_skill_ids": [],
+  "model": "automatic",
+  "whatsapp_greeting": null,
+  "telegram_greeting": null,
+  "line_greeting": null,
+  "memory_config": {
+    "enabled": true,
+    "scope": "both",
+    "include_other_conversation_context": false,
+    "instructions": null
+  },
+  "voice_config": {
+    "voice_id": null
+  },
+  "emails_settings": null,
+  "allow_anonymous_access": false,
   "name": "admin_assistant"
 }

@@ -5,6 +5,7 @@ import {
   Radar, Brain, FileSignature, Users, RefreshCw, Mail, ShieldCheck, Database,
   TrendingUp, Target, Zap, ArrowRight, Activity, AlertTriangle, CheckCircle2,
   Image, Phone, Eye, Bug, Copy, MapPin, Cpu, Server, Gauge, Layers,
+  Scale, BarChart3, Trophy,
 } from "lucide-react";
 
 /**
@@ -149,6 +150,13 @@ const CAPABILITY_MATRIX = [
   { cap: "Sold-detection re-verify", us: 7, best: "ATTOM (9)", gap: "crossReferenceProperties live + daily workflow", status: "Strong" },
   { cap: "Data freshness SLA", us: 7, best: "BatchData (10)", gap: "No formal SLA", status: "Strong" },
   { cap: "SEO / AEO optimization", us: 8, best: "PropStream (8)", gap: "JSON-LD, sitemap, Search Console live", status: "Strong" },
+  { cap: "AI property description generation", us: 9, best: "None (unique)", gap: "3 tones, bilingual, SEO-optimized", status: "Unique" },
+  { cap: "AI rehab cost estimation", us: 8, best: "DealCheck (7)", gap: "Local contractor rates, regional adjustment", status: "Leading" },
+  { cap: "Predictive distress scoring", us: 9, best: "ATTOM (8)", gap: "90-day probability + risk factors", status: "Leading" },
+  { cap: "Fair housing compliance audit", us: 9, best: "None (unique)", gap: "Real-time scan + one-click fix", status: "Unique" },
+  { cap: "AI portfolio optimization", us: 9, best: "None (unique)", gap: "Diversification scoring + gap analysis", status: "Unique" },
+  { cap: "Advanced analytics dashboard", us: 8, best: "ATTOM (9)", gap: "Recharts visualizations, outreach funnel", status: "Strong" },
+  { cap: "Investor performance leaderboard", us: 8, best: "DealMachine (6)", gap: "Gamification, deal of the month", status: "Strong" },
 ];
 
 const STATUS_COLOR = {
@@ -167,6 +175,13 @@ const ROADMAP = [
   { icon: Target, t: "List-stacking UI", d: "DistressStack component live on property detail. Shows all stacked distress signals (liens, tax, code, DOM, severity).", priority: "P2", area: "Marketplace", status: "Live" },
   { icon: Gauge, t: "SEO + AEO + schema", d: "JSON-LD schema, sitemap.xml, robots.txt, dynamic sitemap, Search Console sync — all live.", priority: "P1", area: "SEO/AEO", status: "Live" },
   { icon: Bug, t: "Failure counter + auto-pause", d: "consecutive_failures + paused_until on DataSource. Auto-pauses after 3 failures, recovers next cycle.", priority: "P2", area: "Error handling", status: "Live" },
+  { icon: Brain, t: "AI property description generator", d: "Generates 3 SEO-optimized listing descriptions (professional, emotional, investment) with keyword extraction. Bilingual EN/ES.", priority: "P1", area: "AI/ML", status: "Live" },
+  { icon: Brain, t: "AI rehab cost estimator", d: "Estimates rehab costs by category (roof, kitchen, baths, etc.) with local contractor rates and regional cost adjustments.", priority: "P1", area: "AI/ML", status: "Live" },
+  { icon: TrendingUp, t: "Predictive distress scoring", d: "AI predicts probability of property becoming distressed in next 90 days with risk factors and recommendations.", priority: "P1", area: "AI/ML", status: "Live" },
+  { icon: Scale, t: "Fair housing compliance audit", d: "Scans outreach emails and listings for discriminatory language. Suggests compliant alternatives. One-click fix.", priority: "P1", area: "Legal", status: "Live" },
+  { icon: Target, t: "AI portfolio optimizer", d: "Analyzes investor portfolio and recommends 5 properties that complement existing holdings with ROI and risk assessment.", priority: "P1", area: "AI/ML", status: "Live" },
+  { icon: BarChart3, t: "Advanced analytics dashboard", d: "Recharts-powered dashboard: deal pipeline, exit strategies, distress types, outreach funnel, scrape performance.", priority: "P1", area: "Analytics", status: "Live" },
+  { icon: Trophy, t: "Investor performance leaderboard", d: "Ranks investors by profit, ROI, deals closed. Top-3 podium + deal of the month + full table.", priority: "P2", area: "Engagement", status: "Live" },
 ];
 
 const PRIORITY_COLOR = { "P0": "bg-red-600", "P1": "bg-amber-500", "P2": "bg-black/60" };

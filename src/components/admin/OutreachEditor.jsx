@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { X, Loader2, Send, Sparkles, Mail } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import FairHousingAudit from "@/components/ai/FairHousingAudit";
 
 export default function OutreachEditor({
   targetType,
@@ -152,14 +153,24 @@ export default function OutreachEditor({
         </div>
 
         <div className="flex items-center justify-between border-t border-black/10 px-5 py-3">
-          <button
-            onClick={handleGenerate}
-            disabled={generating || (mode === "reply" && !replyContent)}
-            className="inline-flex items-center gap-2 rounded-md border border-black/15 px-4 py-2 text-xs font-medium disabled:opacity-50"
-          >
-            {generating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5 text-[#c38a1b]" />}
-            {generating ? "Generating…" : "Generate with AI"}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleGenerate}
+              disabled={generating || (mode === "reply" && !replyContent)}
+              className="inline-flex items-center gap-2 rounded-md border border-black/15 px-4 py-2 text-xs font-medium disabled:opacity-50"
+            >
+              {generating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5 text-[#c38a1b]" />}
+              {generating ? "Generating…" : "Generate with AI"}
+            </button>
+            <FairHousingAudit
+              subject={subject}
+              body={body}
+              onFix={(original, replacement) => {
+                setBody(prev => prev.replace(original, replacement));
+                setSubject(prev => prev.replace(original, replacement));
+              }}
+            />
+          </div>
           <button
             onClick={handleSend}
             disabled={sending || !subject || !body || !hasEmail}

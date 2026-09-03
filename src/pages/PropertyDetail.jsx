@@ -10,6 +10,7 @@ import ExitStrategyModel from "@/components/ExitStrategyModel";
 import PropertyBrief from "@/components/PropertyBrief";
 import DistressStack from "@/components/DistressStack";
 import WatchButton from "@/components/WatchButton";
+import PropertyAITools from "@/components/ai/PropertyAITools";
 import { money, num, pct } from "@/lib/format";
 import Seo from "@/components/Seo";
 import { Lock, MapPin, Phone, Mail, ArrowLeft, ShieldAlert } from "lucide-react";
@@ -327,6 +328,8 @@ export default function PropertyDetail() {
               defaultArv={score?.after_repair_value || property.estimated_value || 380000}
             />
           </Card>
+
+          <PropertyAITools property={property} isAdmin={user?.role === 'admin'} />
 
           <Card title="Title & lien risk">
             {titleRisk ? (
