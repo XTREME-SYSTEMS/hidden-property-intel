@@ -1,6 +1,6 @@
 /**
- * Hidden Property Intel — Railway Scraper (Aggressive)
- * Scrapes distressed properties across multiple states via self-hosted
+ * Hidden Property Intel — Railway Scraper (Aggressive, FL-only)
+ * Scrapes distressed properties across Florida counties via self-hosted
  * CloudBrowser-Control engine. Paginates through result pages, retries
  * failed sources, rotates browser sessions to avoid detection.
  *
@@ -27,7 +27,7 @@ const browserEngineUrl = (process.env.BROWSER_ENGINE_URL || '').replace(/\/$/, '
 const browserEngineApiKey = process.env.BROWSER_ENGINE_API_KEY!;
 const base44SyncUrl = process.env.BASE44_SYNC_URL!;
 const syncToken = process.env.BASE44_SYNC_TOKEN || '';
-const dailyTarget = parseInt(process.env.DAILY_TARGET || '5000', 10);
+const dailyTarget = parseInt(process.env.DAILY_TARGET || '3000', 10);
 const maxPagesPerSource = parseInt(process.env.MAX_PAGES || '8', 10);
 const requestDelayMs = parseInt(process.env.REQUEST_DELAY_MS || '2000', 10);
 const sessionRotateEvery = parseInt(process.env.SESSION_ROTATE_EVERY || '10', 10);
@@ -70,52 +70,62 @@ interface ScrapeSource {
   max_pages?: number;
 }
 
-// --- Sources (multi-state, high-volume) ---
+// --- Sources (Florida-only, deep coverage across counties + distress types) ---
 const SCRAPE_SOURCES: ScrapeSource[] = [
-  // FL
-  { name: 'Zillow Foreclosures - FL', url: 'https://www.zillow.com/homes/foreclosures/', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 8 },
-  { name: 'Auction.com - FL', url: 'https://www.auction.com/real-estate/florida/', distress_type: 'auction', state: 'FL', paginated: true, page_param: 'page', max_pages: 6 },
+  // === FL Aggregators (deep pagination) ===
+  { name: 'Zillow Foreclosures - FL', url: 'https://www.zillow.com/homes/fl/foreclosures/', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 10 },
+  { name: 'Auction.com - FL', url: 'https://www.auction.com/real-estate/florida/', distress_type: 'auction', state: 'FL', paginated: true, page_param: 'page', max_pages: 8 },
   { name: 'HUD Home Store - FL', url: 'https://www.hudhomestore.com/PropertySearch?state=FL', distress_type: 'bank_owned', state: 'FL', paginated: false, max_pages: 1 },
-  { name: 'FL Foreclosures - Miami-Dade', url: 'https://www.miamidadeclerk.gov/public-records/search/foreclosures', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 5 },
-  { name: 'FL Foreclosures - Broward', url: 'https://www.browardclerk.org/foreclosures', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 5 },
-  // GA
-  { name: 'Zillow Foreclosures - GA', url: 'https://www.zillow.com/ga/foreclosures/', distress_type: 'foreclosure', state: 'GA', paginated: true, page_param: 'page', max_pages: 6 },
-  { name: 'Auction.com - GA', url: 'https://www.auction.com/real-estate/georgia/', distress_type: 'auction', state: 'GA', paginated: true, page_param: 'page', max_pages: 5 },
-  { name: 'HUD Home Store - GA', url: 'https://www.hudhomestore.com/PropertySearch?state=GA', distress_type: 'bank_owned', state: 'GA', paginated: false, max_pages: 1 },
-  // TX
-  { name: 'Zillow Foreclosures - TX', url: 'https://www.zillow.com/tx/foreclosures/', distress_type: 'foreclosure', state: 'TX', paginated: true, page_param: 'page', max_pages: 8 },
-  { name: 'Auction.com - TX', url: 'https://www.auction.com/real-estate/texas/', distress_type: 'auction', state: 'TX', paginated: true, page_param: 'page', max_pages: 6 },
-  { name: 'HUD Home Store - TX', url: 'https://www.hudhomestore.com/PropertySearch?state=TX', distress_type: 'bank_owned', state: 'TX', paginated: false, max_pages: 1 },
-  // OH
-  { name: 'Zillow Foreclosures - OH', url: 'https://www.zillow.com/oh/foreclosures/', distress_type: 'foreclosure', state: 'OH', paginated: true, page_param: 'page', max_pages: 6 },
-  { name: 'Auction.com - OH', url: 'https://www.auction.com/real-estate/ohio/', distress_type: 'auction', state: 'OH', paginated: true, page_param: 'page', max_pages: 5 },
-  // MI
-  { name: 'Zillow Foreclosures - MI', url: 'https://www.zillow.com/mi/foreclosures/', distress_type: 'foreclosure', state: 'MI', paginated: true, page_param: 'page', max_pages: 6 },
-  { name: 'Auction.com - MI', url: 'https://www.auction.com/real-estate/michigan/', distress_type: 'auction', state: 'MI', paginated: true, page_param: 'page', max_pages: 5 },
-  // NV
-  { name: 'Zillow Foreclosures - NV', url: 'https://www.zillow.com/nv/foreclosures/', distress_type: 'foreclosure', state: 'NV', paginated: true, page_param: 'page', max_pages: 5 },
-  { name: 'Auction.com - NV', url: 'https://www.auction.com/real-estate/nevada/', distress_type: 'auction', state: 'NV', paginated: true, page_param: 'page', max_pages: 4 },
-  // AZ
-  { name: 'Zillow Foreclosures - AZ', url: 'https://www.zillow.com/az/foreclosures/', distress_type: 'foreclosure', state: 'AZ', paginated: true, page_param: 'page', max_pages: 5 },
-  { name: 'Auction.com - AZ', url: 'https://www.auction.com/real-estate/arizona/', distress_type: 'auction', state: 'AZ', paginated: true, page_param: 'page', max_pages: 4 },
-  // IN
-  { name: 'Zillow Foreclosures - IN', url: 'https://www.zillow.com/in/foreclosures/', distress_type: 'foreclosure', state: 'IN', paginated: true, page_param: 'page', max_pages: 5 },
-  // AL
-  { name: 'Zillow Foreclosures - AL', url: 'https://www.zillow.com/al/foreclosures/', distress_type: 'foreclosure', state: 'AL', paginated: true, page_param: 'page', max_pages: 5 },
-  // NC
-  { name: 'Zillow Foreclosures - NC', url: 'https://www.zillow.com/nc/foreclosures/', distress_type: 'foreclosure', state: 'NC', paginated: true, page_param: 'page', max_pages: 5 },
-  // SC
-  { name: 'Zillow Foreclosures - SC', url: 'https://www.zillow.com/sc/foreclosures/', distress_type: 'foreclosure', state: 'SC', paginated: true, page_param: 'page', max_pages: 5 },
-  // IL
-  { name: 'Zillow Foreclosures - IL', url: 'https://www.zillow.com/il/foreclosures/', distress_type: 'foreclosure', state: 'IL', paginated: true, page_param: 'page', max_pages: 5 },
-  // TN
-  { name: 'Zillow Foreclosures - TN', url: 'https://www.zillow.com/tn/foreclosures/', distress_type: 'foreclosure', state: 'TN', paginated: true, page_param: 'page', max_pages: 5 },
-  // PA
-  { name: 'Zillow Foreclosures - PA', url: 'https://www.zillow.com/pa/foreclosures/', distress_type: 'foreclosure', state: 'PA', paginated: true, page_param: 'page', max_pages: 5 },
-  // National aggregators
-  { name: 'RealtyTrac Foreclosures', url: 'https://www.realtytrac.com/foreclosures/', distress_type: 'foreclosure', state: 'US', paginated: true, page_param: 'page', max_pages: 6 },
-  { name: 'HomePath Fannie Mae', url: 'https://www.homepath.com/search.html', distress_type: 'bank_owned', state: 'US', paginated: true, page_param: 'page', max_pages: 5 },
-  { name: 'HUD Home Store - US', url: 'https://www.hudhomestore.com/PropertySearch', distress_type: 'bank_owned', state: 'US', paginated: false, max_pages: 1 },
+  { name: 'HomePath Fannie Mae - FL', url: 'https://www.homepath.com/search.html?state=FL', distress_type: 'bank_owned', state: 'FL', paginated: true, page_param: 'page', max_pages: 5 },
+  { name: 'RealtyTrac - FL', url: 'https://www.realtytrac.com/foreclosures/fl/', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 6 },
+  { name: 'RealForeclose - FL', url: 'https://www.realforeclose.com/', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 5 },
+
+  // === FL County Clerk Foreclosure Sites (South FL) ===
+  { name: 'Miami-Dade Clerk Foreclosures', url: 'https://www.miamidadeclerk.gov/public-records/search/foreclosures', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 8 },
+  { name: 'Broward Clerk Foreclosures', url: 'https://www.browardclerk.org/foreclosures', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 8 },
+  { name: 'Palm Beach Clerk Foreclosures', url: 'https://www.mypalmbeachclerk.com/foreclosures', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 8 },
+  { name: 'Monroe Clerk Foreclosures', url: 'https://www.clerk-of-the-court.monroe.fl.us/foreclosures', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 4 },
+
+  // === FL County Clerk Foreclosure Sites (Central FL) ===
+  { name: 'Orange Clerk Foreclosures', url: 'https://www.orangeclerk.org/records/foreclosures', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 6 },
+  { name: 'Hillsborough Clerk Foreclosures', url: 'https://www.hillsboroughclerk.org/foreclosures', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 6 },
+  { name: 'Pinellas Clerk Foreclosures', url: 'https://www.pinellasclerk.org/foreclosures', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 6 },
+  { name: 'Seminole Clerk Foreclosures', url: 'https://www.seminoleclerk.org/foreclosures', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 5 },
+  { name: 'Osceola Clerk Foreclosures', url: 'https://www.osceolaclerk.org/foreclosures', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 5 },
+  { name: 'Polk Clerk Foreclosures', url: 'https://www.polkcountyclerk.net/foreclosures', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 5 },
+  { name: 'Volusia Clerk Foreclosures', url: 'https://www.clerk.org/foreclosures', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 5 },
+  { name: 'Brevard Clerk Foreclosures', url: 'https://www.brevardclerk.us/foreclosures', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 5 },
+  { name: 'Lake Clerk Foreclosures', url: 'https://www.lakecountyclerk.org/foreclosures', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 5 },
+  { name: 'Marion Clerk Foreclosures', url: 'https://www.marioncountyclerk.org/foreclosures', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 5 },
+  { name: 'Pasco Clerk Foreclosures', url: 'https://www.pascoclerk.com/foreclosures', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 5 },
+  { name: 'Citrus Clerk Foreclosures', url: 'https://www.citrusclerk.org/foreclosures', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 4 },
+
+  // === FL County Clerk Foreclosure Sites (North FL) ===
+  { name: 'Duval Clerk Foreclosures', url: 'https://www.duvalclerk.com/foreclosures', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 6 },
+  { name: 'Escambia Clerk Foreclosures', url: 'https://www.escambiaclerk.com/foreclosures', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 5 },
+  { name: 'St. Johns Clerk Foreclosures', url: 'https://www.stjohnsclerk.com/foreclosures', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 5 },
+  { name: 'Leon Clerk Foreclosures', url: 'https://www.leoncountyclerk.gov/foreclosures', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 4 },
+  { name: 'Alachua Clerk Foreclosures', url: 'https://www.alachuaclerk.org/foreclosures', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 4 },
+
+  // === FL County Clerk Foreclosure Sites (SW FL) ===
+  { name: 'Lee Clerk Foreclosures', url: 'https://www.leeclerk.org/foreclosures', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 6 },
+  { name: 'Sarasota Clerk Foreclosures', url: 'https://www.sarasotaclerk.org/foreclosures', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 5 },
+  { name: 'Collier Clerk Foreclosures', url: 'https://www.collierclerk.org/foreclosures', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 5 },
+  { name: 'Manatee Clerk Foreclosures', url: 'https://www.manateeclerk.org/foreclosures', distress_type: 'foreclosure', state: 'FL', paginated: true, page_param: 'page', max_pages: 5 },
+
+  // === FL Tax Deed Sales ===
+  { name: 'FL Tax Deed Sales - Miami-Dade', url: 'https://www.miamidade.gov/taxcollector/tax-deed-sales', distress_type: 'tax_delinquent', state: 'FL', paginated: true, page_param: 'page', max_pages: 5 },
+  { name: 'FL Tax Deed Sales - Broward', url: 'https://www.broward.org/treasury/taxdeedsales', distress_type: 'tax_delinquent', state: 'FL', paginated: true, page_param: 'page', max_pages: 5 },
+  { name: 'FL Tax Deed Sales - Hillsborough', url: 'https://www.hillsboroughtaxcollector.com/tax-deed-sales', distress_type: 'tax_delinquent', state: 'FL', paginated: true, page_param: 'page', max_pages: 4 },
+  { name: 'FL Tax Deed Sales - Orange', url: 'https://www.orangetaxcollector.com/tax-deed-sales', distress_type: 'tax_delinquent', state: 'FL', paginated: true, page_param: 'page', max_pages: 4 },
+  { name: 'FL Tax Deed Sales - Pinellas', url: 'https://www.pinellascounty.org/tax-deed-sales', distress_type: 'tax_delinquent', state: 'FL', paginated: true, page_param: 'page', max_pages: 4 },
+
+  // === FL Probate / Inherited ===
+  { name: 'FL Probate - Miami-Dade', url: 'https://www.miamidadeclerk.gov/public-records/search/probate', distress_type: 'probate_inherited', state: 'FL', paginated: true, page_param: 'page', max_pages: 5 },
+  { name: 'FL Probate - Broward', url: 'https://www.browardclerk.org/probate', distress_type: 'probate_inherited', state: 'FL', paginated: true, page_param: 'page', max_pages: 5 },
+  { name: 'FL Probate - Palm Beach', url: 'https://www.mypalmbeachclerk.com/probate', distress_type: 'probate_inherited', state: 'FL', paginated: true, page_param: 'page', max_pages: 5 },
+  { name: 'FL Probate - Hillsborough', url: 'https://www.hillsboroughclerk.org/probate', distress_type: 'probate_inherited', state: 'FL', paginated: true, page_param: 'page', max_pages: 4 },
+  { name: 'FL Probate - Orange', url: 'https://www.orangeclerk.org/records/probate', distress_type: 'probate_inherited', state: 'FL', paginated: true, page_param: 'page', max_pages: 4 },
 ];
 
 const PROPERTY_SCHEMA = {
