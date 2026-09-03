@@ -2,12 +2,13 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Scale, FileText, ShieldCheck, Building2, Bitcoin, DollarSign, Users, AlertTriangle,
-  CheckCircle2, ExternalLink as ExternalLinkIcon, ChevronDown, ChevronUp, BookOpen, Gavel, Lock,
+  CheckCircle2, ExternalLink as ExternalLinkIcon, ChevronDown, ChevronUp, BookOpen, Gavel, Lock, HeartCrack,
 } from "lucide-react";
 
 const SECTIONS = [
   { id: "wholesaling", icon: Scale, label: "Wholesaling & Brokerage", statute: "FL Stat. 475" },
   { id: "distressed", icon: AlertTriangle, label: "Distressed Property Protections", statute: "FL Stat. 501.1377, 697.08" },
+  { id: "probate", icon: HeartCrack, label: "Probate & Inheritance", statute: "FL Stat. 731-735" },
   { id: "disclosures", icon: FileText, label: "Required Disclosures", statute: "FL & Federal" },
   { id: "esignatures", icon: ShieldCheck, label: "Digital Signatures", statute: "ESIGN / UETA / FL 668.50" },
   { id: "smart-contracts", icon: Bitcoin, label: "Smart Contract & Blockchain", statute: "SEC / Reg D-S-A+-CF" },
@@ -107,6 +108,21 @@ const REQUIRED_FORMS = [
   { form: "BOI Report (FinCEN)", purpose: "Beneficial ownership information report", when: "All business entities", authority: "Corporate Transparency Act" },
 ];
 
+const PROBATE_RULES = [
+  { req: "Probate required for estate property", detail: "When a property owner dies, the property must go through probate court before it can be transferred to heirs or sold. Florida requires formal or summary probate administration depending on estate size.", citation: "FL Stat. 731-735 (Florida Probate Code)" },
+  { req: "Homestead exemption protections", detail: "Florida's homestead exemption protects a primary residence from forced sale by most creditors. When the owner dies, the homestead passes to heirs or surviving spouse outside probate in many cases, but the property loses the exemption and tax reassessment may occur.", citation: "FL Stat. 732.4015, Art. X §4 FL Constitution" },
+  { req: "Personal Representative (Executor) authority", detail: "Only the court-appointed Personal Representative has authority to sell estate property. Heirs cannot sell until the PR is appointed and Letters of Administration are issued. Contacting heirs before PR appointment is premature.", citation: "FL Stat. 733.607" },
+  { req: "Summary vs Formal Administration", detail: "Estates under $75,000 (excluding homestead) or with assets held less than 2 years qualify for Summary Administration — faster, less expensive. Properties in these estates can be distributed via court order without full probate.", citation: "FL Stat. 735.0801" },
+  { req: "Disposition Without Administration", detail: "Very small estates (assets to cover funeral + medical + mortgage only) may qualify for Disposition Without Administration — no court process needed. The property passes directly to beneficiaries.", citation: "FL Stat. 735.301" },
+  { req: "Elective share for surviving spouse", detail: "A surviving spouse is entitled to 30% of the elective estate including the homestead, regardless of the will. This can complicate probate property sales — the spouse must consent or waive their elective share.", citation: "FL Stat. 732.201-732.215" },
+  { req: "Family allowance", detail: "A surviving spouse and minor children are entitled to a reasonable family allowance from the estate during probate. This takes priority over most creditors and can delay property sale.", citation: "FL Stat. 732.403" },
+  { req: "Creditor claims period", detail: "Creditors have 3 months from the publication of the Notice to Creditors to file claims against the estate. Property cannot be fully distributed until this period expires. Plan for 3-4 month minimum probate timeline.", citation: "FL Stat. 709.22" },
+  { req: "Personal Representative's Deed", detail: "When estate property is sold, the PR executes a 'Personal Representative's Deed' (not a warranty deed). This deed conveys the estate's interest but offers limited warranties. Title companies require specific probate documentation to insure.", citation: "FL Stat. 733.607" },
+  { req: "Disclosure of death on property", detail: "In Florida, a seller or agent is NOT required to disclose that a death (including homicide or suicide) occurred on the property. This is a non-material fact under FL law. However, if asked directly, the seller must answer truthfully.", citation: "FL Stat. 689.25(b)" },
+  { req: "Outreach to heirs — ethical considerations", detail: "Contacting grieving heirs requires sensitivity. While legal, aggressive or deceptive outreach to recently bereaved families can trigger FDUPTA claims (unfair/deceptive trade practices) and reputational damage. Always identify yourself as an investor, not an attorney or government official.", citation: "FL Stat. 501.204 (FDUPTA)" },
+  { req: "No upfront fees for probate assistance", detail: "Under FL foreclosure rescue laws (501.1377), if the property is also in pre-foreclosure, no upfront fees may be charged for 'rescue' services. Probate property outreach must not promise legal services or charge for probate assistance.", citation: "FL Stat. 501.1377(3)(b)" },
+];
+
 const SYSTEM_MAPPING = [
   { systemFeature: "Property entity (distress_type field)", complianceArea: "Distressed Property Protections", requirement: "Properties flagged as pre-foreclosure/foreclosure trigger FL 501.1377 requirements. System must enforce written agreement + 3-day cancellation.", status: "Enforced" },
   { systemFeature: "generateLegalDisclosures function", complianceArea: "Required Disclosures", requirement: "Generates FL-mandated disclosure forms (seller, lead paint, radon, HOA, mold). Must include all 8 statutory disclosures.", status: "Live" },
@@ -198,6 +214,37 @@ export default function LegalCompliance() {
               result in $45,000+ in penalties. These requirements are NOT optional for distressed property investors.
             </Callout>
             <ResourceLink href="https://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&URL=0500-0599/0501/Sections/0501.1377.html" label="FL Stat. 501.1377 (full text)" />
+          </Section>
+        )}
+
+        {activeSection === "probate" && (
+          <Section title="Probate & Inheritance Compliance" subtitle="FL Stat. 731-735 — Florida Probate Code" icon={HeartCrack}>
+            <p className="text-sm text-black/60">
+              When a property owner dies, the property must go through Florida's probate court before it can be
+              transferred to heirs or sold. Understanding the probate process, the Personal Representative's authority,
+              and the rights of surviving spouses and creditors is essential for legally acquiring probate properties
+              and conducting ethical outreach to heirs.
+            </p>
+            <div className="mt-6 space-y-3">
+              {PROBATE_RULES.map((r, i) => (
+                <ExpandableItem key={i} id={`p-${i}`} title={r.req} detail={r.detail} citation={r.citation} expanded={expandedItems[`p-${i}`]} onToggle={() => toggleItem(`p-${i}`)} />
+              ))}
+            </div>
+            <Callout type="warning" title="Personal Representative Authority">
+              Only the court-appointed Personal Representative (executor) has legal authority to sell estate property.
+              Contacting heirs before the PR is appointed is premature — they cannot sign a valid contract. Wait for
+              Letters of Administration to be issued before pursuing a sale. Search probate court filings to identify
+              who the PR is.
+            </Callout>
+            <Callout type="danger" title="Ethical Outreach to Grieving Families">
+              Outreach to recently bereaved heirs must be conducted with sensitivity and transparency. Misrepresenting
+              yourself as an attorney, government official, or probate specialist can trigger FDUPTA claims ($15,000
+              per violation). Always identify as a real estate investor. Never charge upfront fees for "probate assistance."
+              Give families time to grieve before aggressive follow-up.
+            </Callout>
+            <ResourceLink href="https://www.floridabar.org/public/consumer-pamphlets/probate-in-florida/" label="Florida Bar — Probate in Florida (Consumer Guide)" />
+            <ResourceLink href="https://www.leg.state.fl.us/statutes/index.cfm?App_mode=Display_Statute&URL=0700-0799/0709/Sections/0709.02.html" label="FL Stat. 709.02 (Notice to Creditors)" />
+            <ResourceLink href="https://www.flsenate.gov/Laws/Statutes/2025/733.607" label="FL Stat. 733.607 (Personal Representative's Powers)" />
           </Section>
         )}
 

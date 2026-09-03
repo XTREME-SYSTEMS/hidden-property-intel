@@ -2,13 +2,14 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   TrendingUp, Bitcoin, BarChart3, Building2, BookOpen, ExternalLink, ChevronDown, ChevronUp,
-  Calculator, Target, Zap, DollarSign, Percent, MapPin, FileText, Cpu, Globe, Scale,
+  Calculator, Target, Zap, DollarSign, Percent, MapPin, FileText, Cpu, Globe, Scale, HeartCrack,
 } from "lucide-react";
 
 const SECTIONS = [
   { id: "financial", icon: TrendingUp, label: "Financial Intelligence" },
   { id: "smart-contract", icon: Bitcoin, label: "Smart Contract Intelligence" },
   { id: "market", icon: BarChart3, label: "Market Intelligence" },
+  { id: "probate", icon: HeartCrack, label: "Probate Intelligence" },
   { id: "distressed", icon: Building2, label: "Distressed Property Intelligence" },
   { id: "competitors", icon: Target, label: "Competitor Intelligence" },
   { id: "resources", icon: Globe, label: "Resource Links" },
@@ -67,6 +68,28 @@ const DISTRESS_TYPES = [
   { type: "Divorce", description: "Owners divorcing and need to sell jointly-owned property quickly to divide assets.", opportunity: "Motivated sellers, often need fast close. Can negotiate favorable terms. No property distress — just seller distress.", timeline: "Varies (30-180 days)" },
   { type: "Bankruptcy", description: "Owner has filed bankruptcy. Property may be sold as part of bankruptcy proceedings.", opportunity: "Trustee sale or negotiated purchase. Court approval required. Clean title. Can take 60-180 days.", timeline: "60-180 days" },
   { type: "Bank-Owned (REO) Bulk", description: "Banks selling multiple REO properties as a portfolio at a discount.", opportunity: "Buy in bulk at 50-70% of market value. Requires significant capital. Best for institutional investors.", timeline: "30-90 days" },
+];
+
+const PROBATE_INTEL = [
+  { metric: "Annual FL Deaths with Real Estate", value: "~45,000", note: "Approximate number of FL residents who die each year owning real property. Each represents a potential probate lead." },
+  { metric: "Average Probate Timeline", value: "3-9 months", note: "Summary administration: 3-4 months. Formal administration: 6-9 months. Creditors' claims period is 3 months minimum." },
+  { metric: "Probate Properties on Market", value: "~5-8%", note: "Estimated percentage of inherited properties that go to market rather than being kept by heirs. This is the addressable market." },
+  { metric: "Heir Contact Success Rate", value: "15-25%", note: "Typical response rate for outreach to identified heirs. Out-of-state heirs respond higher (30%+) than local heirs." },
+  { metric: "Average Probate Discount", value: "15-30%", note: "Probate properties typically sell 15-30% below market value due to condition, urgency, and as-is sales." },
+  { metric: "Best Contact Window", value: "30-60 days", note: "The optimal window to contact heirs is 30-60 days after death — after initial grief, before they list with a Realtor." },
+  { metric: "Out-of-State Heir Percentage", value: "~40%", note: "Approximately 40% of heirs live in a different state than the inherited property. These are the most motivated sellers." },
+  { metric: "Properties Needing Rehab", value: "~70%", note: "About 70% of probate properties need significant rehab — deferred maintenance during the owner's final years or after death." },
+];
+
+const PROBATE_SOURCES = [
+  { source: "Legacy.com", type: "Obituary aggregator", value: "Lists surviving family members — your heirs. Search by city + date range.", coverage: "Nationwide" },
+  { source: "County Circuit Court — Probate Division", type: "Probate filings", value: "Filings list the Personal Representative (executor) and all heirs at law. The PR has authority to sell.", coverage: "Per FL county" },
+  { source: "County Property Appraiser", type: "Property records", value: "Check for homestead exemption removal — signals owner death or move. Cross-reference with obituaries.", coverage: "Per FL county" },
+  { source: "County Tax Collector", type: "Tax records", value: "Request 'returned mail' list — undeliverable tax bills signal deceased or absent owners.", coverage: "Per FL county" },
+  { source: "Local Newspaper Obituaries", type: "Death notices", value: "Published daily. Search Miami Herald, Orlando Sentinel, Tampa Bay Times, etc. for local deaths.", coverage: "Regional FL" },
+  { source: "Funeral Home Websites", type: "Obituaries + service info", value: "Local funeral homes post obituaries with full survivor lists. Often published before newspaper obituaries.", coverage: "Local FL" },
+  { source: "Florida Bar — Probate Section", type: "Attorney directory", value: "Network with probate attorneys for referrals. They know when estates need to sell property quickly.", coverage: "FL statewide" },
+  { source: "Estate Sale Companies", type: "Estate liquidation", value: "Estate sale companies are hired by executors before the property is sold. They know about probate properties first.", coverage: "Local FL" },
 ];
 
 const COMPETITORS = [
@@ -246,6 +269,69 @@ export default function IndustryIntelligence() {
               days-on-market, distress counts, and ROI trends. The matchAndNotifyAlerts workflow uses these to match
               investor saved searches with new properties.
             </Callout>
+          </Section>
+        )}
+
+        {activeSection === "probate" && (
+          <Section title="Probate & Inheritance Intelligence" subtitle="Market Data, Sources & Strategy for Probate Properties" icon={HeartCrack}>
+            <p className="text-sm text-black/60">
+              Probate properties — homes left to heirs after the owner's death — are one of the highest-value distressed
+              property niches. Heirs are motivated, properties often need work, and there's no emotional attachment to
+              the house. This intelligence covers the market size, timeline, sources, and strategy for acquiring
+              probate properties in Florida.
+            </p>
+
+            {/* Market metrics */}
+            <div className="mt-6 grid gap-px overflow-hidden rounded-sm border border-black/10 bg-black/10 sm:grid-cols-2 lg:grid-cols-4">
+              {PROBATE_INTEL.map((m, i) => (
+                <div key={i} className="bg-white p-5">
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-black/40">{m.metric}</p>
+                  <p className="mt-2 font-display text-xl font-light">{m.value}</p>
+                  <p className="mt-2 text-xs leading-relaxed text-black/50">{m.note}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Sources */}
+            <div className="mt-8">
+              <h3 className="font-display text-lg font-light">Where to Find Probate Leads</h3>
+              <div className="mt-4 overflow-x-auto">
+                <table className="w-full border-collapse text-sm">
+                  <thead>
+                    <tr className="border-b border-black/15 text-left text-[10px] uppercase tracking-[0.3em] text-black/40">
+                      <th className="pb-3 pr-4">Source</th>
+                      <th className="pb-3 pr-4">Type</th>
+                      <th className="pb-3 pr-4">Value</th>
+                      <th className="pb-3">Coverage</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-black/10">
+                    {PROBATE_SOURCES.map((s, i) => (
+                      <tr key={i} className="align-top">
+                        <td className="py-3 pr-4 font-medium">{s.source}</td>
+                        <td className="py-3 pr-4 text-black/60">{s.type}</td>
+                        <td className="py-3 pr-4 text-black/70">{s.value}</td>
+                        <td className="py-3 text-black/60">{s.coverage}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <Callout type="info" title="System Integration">
+              The PropertyIntel probate pipeline includes: scrapeProbateRecords (searches obituaries + probate filings),
+              findHeirsForProperty (identifies heirs via web search), and outreachProbateHeirs (sends empathetic outreach
+              emails). The Probate Pipeline workflow runs daily at 6 AM ET.
+            </Callout>
+            <Callout type="warning" title="Legal Compliance">
+              Only the court-appointed Personal Representative has authority to sell estate property. Contacting heirs
+              before the PR is appointed is premature. See the Legal Compliance page for full probate legal requirements
+              under FL Stat. 731-735.
+            </Callout>
+            <Link to="/legal-compliance" className="mt-4 inline-flex items-center gap-2 rounded-sm border border-black/15 px-5 py-3 text-[11px] uppercase tracking-[0.3em] hover:bg-black hover:text-white">
+              <Scale className="h-4 w-4" /> Probate Legal Compliance
+            </Link>
           </Section>
         )}
 

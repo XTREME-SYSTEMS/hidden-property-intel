@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   LayoutDashboard, Database, Mail, FlaskConical, Search, Cpu, Target, Users, Home, Blocks, Calculator, Scale, TrendingUp, BarChart3,
-  ArrowRight, X, ArrowLeft
+  ArrowRight, X, ArrowLeft, Lightbulb, BookOpen, Globe
 } from "lucide-react";
 import AdminOverview from "@/components/admin/AdminOverview";
 import AdminChatBar from "@/components/admin/AdminChatBar";
@@ -22,6 +22,10 @@ import LegalCompliance from "@/pages/LegalCompliance";
 import IndustryIntelligence from "@/pages/IndustryIntelligence";
 import AdminAnalytics from "@/pages/AdminAnalytics";
 import AdminProbateDashboard from "@/pages/AdminProbateDashboard";
+import AdminStrategy from "@/pages/AdminStrategy";
+import AdminTricksOfTrade from "@/pages/AdminTricksOfTrade";
+import AdminSourcesDirectory from "@/pages/AdminSourcesDirectory";
+import AdminDistressEducation from "@/pages/AdminDistressEducation";
 
 const NAV_ITEMS = [
   { id: "overview", icon: LayoutDashboard, label: "Dashboard", desc: "Overview & metrics" },
@@ -31,6 +35,10 @@ const NAV_ITEMS = [
   { id: "investor-list", icon: Users, label: "Investor List", desc: "Leads & outreach", component: AdminInvestorList },
   { id: "owner-list", icon: Home, label: "Owner List", desc: "Owners & next of kin", component: AdminOwnerList },
   { id: "probate", icon: Home, label: "Probate Pipeline", desc: "Deceased owners & heirs", component: AdminProbateDashboard },
+  { id: "strategy", icon: Target, label: "Strategy Playbook", desc: "Acquisition & exit strategies", component: AdminStrategy },
+  { id: "tricks", icon: Lightbulb, label: "Tricks of the Trade", desc: "Insider secrets & niches", component: AdminTricksOfTrade },
+  { id: "sources", icon: Globe, label: "Sources Directory", desc: "Every data source online", component: AdminSourcesDirectory },
+  { id: "distress-edu", icon: BookOpen, label: "Distress Education", desc: "Causes, warning signs & data", component: AdminDistressEducation },
   { id: "smart-contracts", icon: Blocks, label: "Smart Contracts", desc: "On-chain escrow", component: AdminSmartContracts },
   { id: "deal-calculator", icon: Calculator, label: "Deal Calculator", desc: "Profit split & fairness", component: DealCalculator },
   { id: "agent-portal", icon: Users, label: "Agent Portal", desc: "Licensed agent tools", component: AgentDashboard },

@@ -35,6 +35,10 @@ import IndustryIntelligence from '@/pages/IndustryIntelligence';
 import AdminAnalytics from '@/pages/AdminAnalytics';
 import InvestorLeaderboard from '@/pages/InvestorLeaderboard';
 import AdminProbateDashboard from '@/pages/AdminProbateDashboard';
+import AdminStrategy from '@/pages/AdminStrategy';
+import AdminTricksOfTrade from '@/pages/AdminTricksOfTrade';
+import AdminSourcesDirectory from '@/pages/AdminSourcesDirectory';
+import AdminDistressEducation from '@/pages/AdminDistressEducation';
 import PortalRouter from '@/pages/PortalRouter';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
@@ -116,6 +120,10 @@ const AuthenticatedApp = () => {
         <Route path="/admin/analytics" element={<AdminAnalytics />} />
         <Route path="/investor/leaderboard" element={<InvestorLeaderboard />} />
         <Route path="/admin/probate" element={<AdminProbateDashboard />} />
+        <Route path="/admin/strategy" element={<AdminStrategy />} />
+        <Route path="/admin/tricks" element={<AdminTricksOfTrade />} />
+        <Route path="/admin/sources-directory" element={<AdminSourcesDirectory />} />
+        <Route path="/admin/distress-education" element={<AdminDistressEducation />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
