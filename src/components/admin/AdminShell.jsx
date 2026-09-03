@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  LayoutDashboard, Database, Mail, FlaskConical, Search, Cpu, Target, Users, Home, Blocks,
+  LayoutDashboard, Database, Mail, FlaskConical, Search, Cpu, Target, Users, Home, Blocks, Calculator,
   ArrowRight, X, ArrowLeft
 } from "lucide-react";
 import AdminOverview from "@/components/admin/AdminOverview";
@@ -14,6 +14,7 @@ import AdminSearchConsole from "@/pages/AdminSearchConsole";
 import AdminInvestorList from "@/pages/AdminInvestorList";
 import AdminOwnerList from "@/pages/AdminOwnerList";
 import AdminSmartContracts from "@/pages/AdminSmartContracts";
+import DealCalculator from "@/pages/DealCalculator";
 import SystemDNA from "@/pages/SystemDNA";
 
 const NAV_ITEMS = [
@@ -23,6 +24,7 @@ const NAV_ITEMS = [
   { id: "investor-list", icon: Users, label: "Investor List", desc: "Leads & outreach", component: AdminInvestorList },
   { id: "owner-list", icon: Home, label: "Owner List", desc: "Owners & next of kin", component: AdminOwnerList },
   { id: "smart-contracts", icon: Blocks, label: "Smart Contracts", desc: "On-chain escrow", component: AdminSmartContracts },
+  { id: "deal-calculator", icon: Calculator, label: "Deal Calculator", desc: "Profit split & fairness", component: DealCalculator },
   { id: "test-lab", icon: FlaskConical, label: "Test Lab", desc: "Function sandbox", component: AdminTestLab },
   { id: "architecture", icon: Cpu, label: "Architecture", desc: "System DNA & roadmap", component: AdminArchitecture },
   { id: "search-console", icon: Search, label: "Search Console", desc: "SEO indexing", component: AdminSearchConsole },

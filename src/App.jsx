@@ -28,6 +28,7 @@ import AdminArchitecture from '@/pages/AdminArchitecture';
 import AdminSearchConsole from '@/pages/AdminSearchConsole';
 import SystemDNA from '@/pages/SystemDNA';
 import SmartContractMarketing from '@/pages/SmartContractMarketing';
+import DealCalculator from '@/pages/DealCalculator';
 import PortalRouter from '@/pages/PortalRouter';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
@@ -102,6 +103,7 @@ const AuthenticatedApp = () => {
           <Route path="/admin/search-console" element={<AdminSearchConsole />} />
           <Route path="/system-dna" element={<SystemDNA />} />
           <Route path="/smart-contracts" element={<SmartContractMarketing />} />
+        <Route path="/deal-calculator" element={<DealCalculator />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
