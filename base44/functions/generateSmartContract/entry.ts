@@ -16,7 +16,7 @@ export default async function(req) {
     if (user && user.role !== 'admin') return Response.json({ error: 'Admin only' }, { status: 403 });
 
     const body = await req.json();
-    const { property_id, investor_id, seller_id, contract_type, terms } = body;
+    const { property_id, investor_id, seller_id, deal_id, contract_type, terms } = body;
     if (!property_id || !investor_id || !seller_id) {
       return Response.json({ error: 'property_id, investor_id, seller_id required' }, { status: 400 });
     }
@@ -35,6 +35,7 @@ export default async function(req) {
       property_id,
       investor_id,
       seller_id,
+      deal_id: deal_id || null,
       contract_type: contract_type || 'escrow',
       terms: t,
       blockchain: 'polygon',
