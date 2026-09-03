@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  LayoutDashboard, Database, Mail, FlaskConical, Search, Cpu, Target, Users, Home, Blocks, Calculator,
+  LayoutDashboard, Database, Mail, FlaskConical, Search, Cpu, Target, Users, Home, Blocks, Calculator, Scale, TrendingUp,
   ArrowRight, X, ArrowLeft
 } from "lucide-react";
 import AdminOverview from "@/components/admin/AdminOverview";
@@ -18,6 +18,8 @@ import DealCalculator from "@/pages/DealCalculator";
 import AgentDashboard from "@/pages/AgentDashboard";
 import AdminCapabilities from "@/pages/AdminCapabilities";
 import SystemDNA from "@/pages/SystemDNA";
+import LegalCompliance from "@/pages/LegalCompliance";
+import IndustryIntelligence from "@/pages/IndustryIntelligence";
 
 const NAV_ITEMS = [
   { id: "overview", icon: LayoutDashboard, label: "Dashboard", desc: "Overview & metrics" },
@@ -29,6 +31,8 @@ const NAV_ITEMS = [
   { id: "deal-calculator", icon: Calculator, label: "Deal Calculator", desc: "Profit split & fairness", component: DealCalculator },
   { id: "agent-portal", icon: Users, label: "Agent Portal", desc: "Licensed agent tools", component: AgentDashboard },
   { id: "test-lab", icon: FlaskConical, label: "Test Lab", desc: "Full system test suite", component: AdminTestLab },
+  { id: "legal-compliance", icon: Scale, label: "Legal Compliance", desc: "FL & federal regulations", component: LegalCompliance },
+  { id: "industry-intel", icon: TrendingUp, label: "Industry Intel", desc: "Financial & market intelligence", component: IndustryIntelligence },
   { id: "capabilities", icon: Target, label: "Capabilities", desc: "Capability map & prompts", component: AdminCapabilities },
   { id: "architecture", icon: Cpu, label: "Architecture", desc: "System DNA & roadmap", component: AdminArchitecture },
   { id: "search-console", icon: Search, label: "Search Console", desc: "SEO indexing", component: AdminSearchConsole },
