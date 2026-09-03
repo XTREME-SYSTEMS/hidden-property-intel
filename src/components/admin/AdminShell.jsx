@@ -16,6 +16,7 @@ import AdminOwnerList from "@/pages/AdminOwnerList";
 import AdminSmartContracts from "@/pages/AdminSmartContracts";
 import DealCalculator from "@/pages/DealCalculator";
 import AgentDashboard from "@/pages/AgentDashboard";
+import AdminCapabilities from "@/pages/AdminCapabilities";
 import SystemDNA from "@/pages/SystemDNA";
 
 const NAV_ITEMS = [
@@ -28,6 +29,7 @@ const NAV_ITEMS = [
   { id: "deal-calculator", icon: Calculator, label: "Deal Calculator", desc: "Profit split & fairness", component: DealCalculator },
   { id: "agent-portal", icon: Users, label: "Agent Portal", desc: "Licensed agent tools", component: AgentDashboard },
   { id: "test-lab", icon: FlaskConical, label: "Test Lab", desc: "Full system test suite", component: AdminTestLab },
+  { id: "capabilities", icon: Target, label: "Capabilities", desc: "Capability map & prompts", component: AdminCapabilities },
   { id: "architecture", icon: Cpu, label: "Architecture", desc: "System DNA & roadmap", component: AdminArchitecture },
   { id: "search-console", icon: Search, label: "Search Console", desc: "SEO indexing", component: AdminSearchConsole },
   { id: "system-dna", icon: Target, label: "System DNA", desc: "Competitive benchmark", component: SystemDNA },
