@@ -1,0 +1,45 @@
+{
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "daily_follow_up",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "process_followups": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "processFollowUps",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Process Due Follow-Ups",
+            "description": "Generate + send AI follow-up emails to due contacts"
+          }
+        }
+      }
+    ]
+  },
+  "name": "Daily Follow-Up Engine",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 8 * * *",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "description": "Autonomous follow-up engine \u2014 finds all investor leads and property owners with follow-ups due, generates personalized AI follow-up emails, sends them, and reschedules the next follow-up. Runs daily at 8am ET."
+}

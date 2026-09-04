@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Search, Mail, Building2, ShieldCheck, FlaskConical, Dna } from "lucide-react";
+import { Search, Mail, Building2, ShieldCheck, FlaskConical, Dna, Send, Reply, Clock, X } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function AdminOutreach() {
@@ -11,6 +11,11 @@ export default function AdminOutreach() {
   const [region, setRegion] = useState("Florida");
   const [busy, setBusy] = useState("");
   const [msg, setMsg] = useState("");
+  const [testEmail, setTestEmail] = useState("jeremy@xtremepolishingsystems.com");
+  const [replyLead, setReplyLead] = useState(null);
+  const [replyContent, setReplyContent] = useState("");
+  const [replyResult, setReplyResult] = useState(null);
+  const [replyBusy, setReplyBusy] = useState(false);
 
   const load = async () => {
     try {
@@ -61,6 +66,78 @@ export default function AdminOutreach() {
       const res = await base44.functions.invoke("validateSystem", {});
       if (res.data?.error) setMsg(`Error: ${res.data.error}`);
       else { setMsg(`System ${res.data.overall_status.toUpperCase()} — ${res.data.actions_taken?.length || 0} auto-heal actions taken.`); await load(); }
+    } catch (e) { setMsg(e.response?.data?.error || e.message); }
+    setBusy("");
+  };
+
+  const sendTestEmail = async () => {
+    setMsg(""); setBusy("testEmail");
+    try {
+      const res = await base44.functions.invoke("sendOutreach", {
+        entity_type: "investor",
+        record_id: leads[0]?.id || "test",
+        to_email: testEmail,
+        subject: "Test Email — Hidden Property Intel Outreach Engine",
+        body: `<div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:auto;color:#1a1a1a">
+          <h2 style="color:#c38a1b">Hidden Property Intel — Test Email</h2>
+          <p>Hi Jeremy,</p>
+          <p>This is a test email from the Hidden Property Intel outreach engine. If you're reading this, the email sending system is working correctly.</p>
+          <p>Our platform identifies off-market distressed Florida properties before they hit the MLS, scores them with AI (0-100), traces ownership chains and heirs, and closes deals with smart-contract escrow on Polygon.</p>
+          <p><strong>What was tested:</strong></p>
+          <ul>
+            <li>✅ SendEmail integration (Base44 Core)</li>
+            <li>✅ Email delivery to external address</li>
+            <li>✅ HTML email formatting</li>
+          </ul>
+          <p>You can now start sending real investor outreach emails from this console.</p>
+          <p>Best,<br>Steve Giordano<br>Licensed Real Estate Broker<br>Hidden Property Intel<br>772-812-3930</p>
+        </div>`,
+      });
+      setMsg(res.data?.error ? `Error: ${res.data.error}` : `Test email sent to ${testEmail}. Check your inbox!`);
+    } catch (e) { setMsg(e.response?.data?.error || e.message); }
+    setBusy("");
+  };
+
+  const processFollowups = async () => {
+    setMsg(""); setBusy("followup");
+    try {
+      const res = await base44.functions.invoke("processFollowUps", {});
+      if (res.data?.error) setMsg(`Error: ${res.data.error}`);
+      else setMsg(`Follow-ups processed: ${res.data.sent} sent, ${res.data.skipped} skipped, ${res.data.errors} errors. (${res.data.due_investors} investors + ${res.data.due_owners} owners were due.)`);
+    } catch (e) { setMsg(e.response?.data?.error || e.message); }
+    setBusy("");
+  };
+
+  const generateReply = async () => {
+    if (!replyLead || !replyContent) return;
+    setReplyBusy(true);
+    setReplyResult(null);
+    try {
+      const res = await base44.functions.invoke("generateReplyEmail", {
+        contact_type: "investor",
+        contact_id: replyLead.id,
+        reply_content: replyContent,
+      });
+      if (res.data?.error) setMsg(`Error: ${res.data.error}`);
+      else setReplyResult(res.data);
+    } catch (e) { setMsg(e.response?.data?.error || e.message); }
+    setReplyBusy(false);
+  };
+
+  const sendReply = async () => {
+    if (!replyLead || !replyResult) return;
+    setBusy("sendReply");
+    try {
+      const res = await base44.functions.invoke("sendOutreach", {
+        entity_type: "investor",
+        record_id: replyLead.id,
+        to_email: replyLead.email,
+        subject: replyResult.subject,
+        body: replyResult.body,
+      });
+      setMsg(res.data?.error ? `Error: ${res.data.error}` : `Reply sent to ${replyLead.name} (${replyLead.email}).`);
+      setReplyLead(null); setReplyContent(""); setReplyResult(null);
+      await load();
     } catch (e) { setMsg(e.response?.data?.error || e.message); }
     setBusy("");
   };
@@ -133,6 +210,39 @@ export default function AdminOutreach() {
         </div>
       </div>
 
+      {/* Follow-Up Engine + Test Email */}
+      <div className="mt-4 grid gap-4 lg:grid-cols-3">
+        <div className="rounded-sm border border-black/10 p-6">
+          <Clock className="h-5 w-5 text-black/60" />
+          <p className="mt-4 font-display text-lg">Follow-up engine</p>
+          <p className="mt-1 text-xs text-black/50">AI generates + sends personalized follow-ups to all due contacts. Runs daily at 8 AM ET.</p>
+          <button onClick={processFollowups} disabled={busy === "followup"} className="mt-6 w-full rounded-sm bg-black py-3 text-[11px] uppercase tracking-[0.3em] text-white disabled:opacity-50">
+            {busy === "followup" ? "Processing…" : "Process follow-ups now"}
+          </button>
+        </div>
+        <div className="rounded-sm border border-black/10 p-6">
+          <Send className="h-5 w-5 text-black/60" />
+          <p className="mt-4 font-display text-lg">Send test email</p>
+          <p className="mt-1 text-xs text-black/50">Verify email delivery to any address.</p>
+          <input value={testEmail} onChange={(e) => setTestEmail(e.target.value)} placeholder="you@email.com" className="mt-4 w-full rounded-sm border border-black/15 px-3 py-2.5 text-sm outline-none focus:border-black" />
+          <button onClick={sendTestEmail} disabled={busy === "testEmail" || !testEmail} className="mt-3 w-full rounded-sm bg-black py-3 text-[11px] uppercase tracking-[0.3em] text-white disabled:opacity-50">
+            {busy === "testEmail" ? "Sending…" : "Send test email"}
+          </button>
+        </div>
+        <div className="rounded-sm border border-black/10 p-6">
+          <Reply className="h-5 w-5 text-black/60" />
+          <p className="mt-4 font-display text-lg">Reply generator</p>
+          <p className="mt-1 text-xs text-black/50">AI writes personalized replies for contacts who responded. Click "Reply" on any lead below.</p>
+          <p className="mt-6 text-[10px] uppercase tracking-[0.2em] text-black/40">How it works</p>
+          <ol className="mt-2 space-y-1 text-xs text-black/50">
+            <li>1. Click Reply on a lead</li>
+            <li>2. Paste what they said</li>
+            <li>3. AI generates a reply</li>
+            <li>4. Review & send</li>
+          </ol>
+        </div>
+      </div>
+
       {msg && <p className="mt-6 rounded-sm bg-black/5 px-4 py-3 text-sm text-black/70">{msg}</p>}
 
       <div className="mt-12 rounded-sm border border-black/10 p-6">
@@ -192,11 +302,11 @@ export default function AdminOutreach() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-black/10 text-left text-[10px] uppercase tracking-[0.3em] text-black/40">
-                <th className="pb-3">Name</th><th className="pb-3">Company</th><th className="pb-3">Region</th><th className="pb-3">Contact</th><th className="pb-3">Status</th><th className="pb-3">Last contacted</th>
+                <th className="pb-3">Name</th><th className="pb-3">Company</th><th className="pb-3">Region</th><th className="pb-3">Contact</th><th className="pb-3">Status</th><th className="pb-3">Last contacted</th><th className="pb-3">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-black/10">
-              {leads.length === 0 && <tr><td colSpan={6} className="py-4 text-black/50">No leads yet. Scrape a region to start.</td></tr>}
+              {leads.length === 0 && <tr><td colSpan={7} className="py-4 text-black/50">No leads yet. Scrape a region to start.</td></tr>}
               {leads.map((l) => (
                 <tr key={l.id}>
                   <td className="py-3">{l.name}</td>
@@ -205,12 +315,84 @@ export default function AdminOutreach() {
                   <td className="py-3 text-black/60">{l.email || l.phone || "—"}</td>
                   <td className="py-3"><span className={`rounded-full px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] ${l.outreach_status === "new" ? "border border-black/15 text-black/60" : "bg-black text-white"}`}>{l.outreach_status}</span></td>
                   <td className="py-3 text-black/50">{l.last_contacted ? new Date(l.last_contacted).toLocaleDateString() : "—"}</td>
+                  <td className="py-3">
+                    <button
+                      onClick={() => { setReplyLead(l); setReplyContent(""); setReplyResult(null); }}
+                      className="inline-flex items-center gap-1.5 rounded-sm border border-black/15 px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] text-black/70 hover:bg-black hover:text-white"
+                    >
+                      <Reply className="h-3 w-3" /> Reply
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </div>
+
+      {/* Reply Generator Modal */}
+      {replyLead && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setReplyLead(null)}>
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-sm border border-black/10 bg-white p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.3em] text-black/40">Reply to</p>
+                <h3 className="font-display text-xl">{replyLead.name}</h3>
+                <p className="text-xs text-black/50">{replyLead.email || "No email on file"} · {replyLead.company || "—"}</p>
+              </div>
+              <button onClick={() => setReplyLead(null)} className="rounded-sm p-1.5 text-black/40 hover:bg-black/5"><X className="h-5 w-5" /></button>
+            </div>
+
+            {!replyResult ? (
+              <>
+                <label className="mt-6 block text-xs font-medium text-black/70">What did they say in their response?</label>
+                <textarea
+                  value={replyContent}
+                  onChange={(e) => setReplyContent(e.target.value)}
+                  placeholder="Paste the investor's reply here..."
+                  className="mt-2 min-h-[120px] w-full resize-y rounded-sm border border-black/15 p-3 text-sm outline-none focus:border-black"
+                />
+                <button
+                  onClick={generateReply}
+                  disabled={!replyContent || replyBusy}
+                  className="mt-4 w-full rounded-sm bg-black py-3 text-[11px] uppercase tracking-[0.3em] text-white disabled:opacity-50"
+                >
+                  {replyBusy ? "Generating AI reply…" : "Generate AI reply"}
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="mt-6 space-y-4">
+                  <div>
+                    <label className="text-xs font-medium text-black/70">Subject</label>
+                    <p className="mt-1 rounded-sm border border-black/10 bg-black/5 p-3 text-sm">{replyResult.subject}</p>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-black/70">Body</label>
+                    <div className="mt-1 max-h-[300px] overflow-y-auto whitespace-pre-wrap rounded-sm border border-black/10 bg-black/5 p-3 text-sm leading-relaxed">{replyResult.body}</div>
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={sendReply}
+                      disabled={busy === "sendReply" || !replyLead.email}
+                      className="flex-1 rounded-sm bg-black py-3 text-[11px] uppercase tracking-[0.3em] text-white disabled:opacity-50"
+                    >
+                      {busy === "sendReply" ? "Sending…" : `Send to ${replyLead.email || "(no email)"}`}
+                    </button>
+                    <button
+                      onClick={() => { setReplyResult(null); }}
+                      className="rounded-sm border border-black/15 px-5 py-3 text-[11px] uppercase tracking-[0.3em] text-black/70 hover:bg-black/5"
+                    >
+                      Regenerate
+                    </button>
+                  </div>
+                  {!replyLead.email && <p className="text-center text-xs text-red-600">This lead has no email address on file.</p>}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
