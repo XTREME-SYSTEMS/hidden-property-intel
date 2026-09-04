@@ -14,7 +14,30 @@
         "foreclosure",
         "auction",
         "obituary",
-        "mls"
+        "mls",
+        "code_violation",
+        "divorce",
+        "bankruptcy",
+        "short_sale",
+        "bank_owned",
+        "hoa_foreclosure",
+        "mobile_home",
+        "commercial",
+        "land",
+        "legal_notice",
+        "lis_pendens",
+        "tax_lien",
+        "aggregator",
+        "waterfront",
+        "multi_family",
+        "vacant_land",
+        "agricultural",
+        "mixed_use",
+        "condo",
+        "rental",
+        "eviction",
+        "environmental",
+        "permit"
       ]
     },
     "url": {
@@ -63,6 +86,91 @@
     },
     "last_error": {
       "type": "string"
+    },
+    "county": {
+      "type": "string",
+      "description": "Florida county name (e.g., Miami-Dade, Broward)"
+    },
+    "distress_type": {
+      "type": "string",
+      "enum": [
+        "pre-foreclosure",
+        "foreclosure",
+        "probate_inherited",
+        "tax_delinquent",
+        "code_violation",
+        "divorce",
+        "bankruptcy",
+        "auction",
+        "short_sale",
+        "bank_owned",
+        "hoa_foreclosure",
+        "waterfront",
+        "eviction",
+        "environmental",
+        "permit",
+        "mixed_distress"
+      ]
+    },
+    "property_type": {
+      "type": "string",
+      "enum": [
+        "residential",
+        "commercial",
+        "land",
+        "multi-family",
+        "mixed-use",
+        "mobile",
+        "condo",
+        "vacant_land",
+        "agricultural",
+        "waterfront",
+        "industrial",
+        "retail",
+        "office",
+        "all"
+      ],
+      "default": "all"
+    },
+    "acquisition_method": {
+      "type": "string",
+      "enum": [
+        "cloudbrowser",
+        "ai",
+        "browser",
+        "api",
+        "manual"
+      ],
+      "default": "cloudbrowser"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "high"
+    },
+    "anti_bot_required": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if source has WAF/bot detection requiring stealth mode"
+    },
+    "proxy_required": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if source blocks datacenter IPs and needs residential proxy"
+    },
+    "captcha_required": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if source presents CAPTCHAs"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Source-specific scraping notes, selectors, or configuration hints"
     }
   },
   "required": [
