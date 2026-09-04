@@ -87,9 +87,10 @@ const AuthenticatedApp = () => {
   if (authError) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
-    } else if (authError.type === 'auth_required' && !isPublicApp && !onLoginPage) {
-      return null; // useEffect above handles the redirect
     }
+    // For auth_required or unknown errors, fall through and render the app.
+    // ProtectedRoute handles gating for auth-only pages, and this is a public
+    // app — returning null here caused a white screen in the preview iframe.
   }
 
   // Render the main app
