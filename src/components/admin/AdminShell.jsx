@@ -31,6 +31,7 @@ import AdminDistressEducation from "@/pages/AdminDistressEducation";
 import ShadowCommandCenter from "@/pages/ShadowCommandCenter";
 import EdenSkyeProfile from "@/pages/EdenSkyeProfile";
 import EmailTemplateGallery from "@/pages/EmailTemplateGallery";
+import EdenEmailCenter from "@/pages/EdenEmailCenter";
 import TitleEscrowDashboard from "@/pages/TitleEscrowDashboard";
 import WholesalerDashboard from "@/pages/WholesalerDashboard";
 import NotaryDashboard from "@/pages/NotaryDashboard";
@@ -65,6 +66,7 @@ const NAV_ITEMS = [
   { id: "shadow", icon: Radar, label: "Shadow Command", desc: "Autonomous intelligence & self-healing", component: ShadowCommandCenter },
   { id: "eden-skye", icon: Sparkles, label: "Eden Skye", desc: "AI agent profile & chat", component: EdenSkyeProfile },
   { id: "email-gallery", icon: Mail, label: "Email Gallery", desc: "Template gallery & QA validation", component: EmailTemplateGallery },
+  { id: "eden-email", icon: Mail, label: "Eden Email Center", desc: "Send & manage emails via Eden", component: EdenEmailCenter },
   { id: "architecture", icon: Cpu, label: "Architecture", desc: "System DNA & roadmap", component: AdminArchitecture },
   { id: "search-console", icon: Search, label: "Search Console", desc: "SEO indexing", component: AdminSearchConsole },
   { id: "system-test", icon: Cpu, label: "System Test Engine", desc: "Autonomous test, score & gap analysis", component: AdminSystemTest },

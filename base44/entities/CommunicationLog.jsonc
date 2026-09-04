@@ -1,0 +1,145 @@
+{
+  "name": "CommunicationLog",
+  "type": "object",
+  "properties": {
+    "direction": {
+      "type": "string",
+      "enum": [
+        "sent",
+        "received"
+      ],
+      "default": "sent"
+    },
+    "to_email": {
+      "type": "string"
+    },
+    "to_name": {
+      "type": "string"
+    },
+    "from_name": {
+      "type": "string",
+      "default": "Eden Skye"
+    },
+    "subject": {
+      "type": "string"
+    },
+    "body": {
+      "type": "string"
+    },
+    "audience": {
+      "type": "string",
+      "enum": [
+        "investor",
+        "owner",
+        "heir",
+        "agent",
+        "internal",
+        "other"
+      ]
+    },
+    "contact_id": {
+      "type": "string"
+    },
+    "contact_type": {
+      "type": "string",
+      "enum": [
+        "InvestorLead",
+        "Owner",
+        "Seller",
+        "Deal",
+        "external"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "sent",
+        "failed",
+        "qa_failed",
+        "draft",
+        "pending"
+      ],
+      "default": "pending"
+    },
+    "qa_score": {
+      "type": "number"
+    },
+    "qa_passed": {
+      "type": "boolean"
+    },
+    "qa_findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "finding": {
+            "type": "string"
+          },
+          "recommendation": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "template_id": {
+      "type": "string"
+    },
+    "thread_id": {
+      "type": "string",
+      "description": "Groups emails in a conversation thread"
+    },
+    "message_id": {
+      "type": "string",
+      "description": "Email Message-ID header for threading"
+    },
+    "in_reply_to": {
+      "type": "string",
+      "description": "Message-ID this email replies to"
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "opened_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "replied_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "to_email",
+    "subject",
+    "body"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
