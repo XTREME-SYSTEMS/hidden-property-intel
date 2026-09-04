@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
         
         // If we got the app public settings successfully, check if user is authenticated
         if (appParams.token) {
-          await checkUserAuth();
+          await checkUserAuth(publicSettings);
         } else {
           setIsLoadingAuth(false);
           setIsAuthenticated(false);
@@ -89,7 +89,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const checkUserAuth = async () => {
+  const checkUserAuth = async (publicSettings) => {
     try {
       // Now check if the user is authenticated
       setIsLoadingAuth(true);
@@ -104,8 +104,10 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(false);
       setAuthChecked(true);
       
-      // If user auth fails, it might be an expired token
-      if (error.status === 401 || error.status === 403) {
+      // If user auth fails, it might be an expired token.
+      // Only redirect to login if the app actually requires auth —
+      // a public app should render normally with an expired/stale token.
+      if ((error.status === 401 || error.status === 403) && publicSettings?.public_settings !== 'public_without_login') {
         setAuthError({
           type: 'auth_required',
           message: 'Authentication required'
