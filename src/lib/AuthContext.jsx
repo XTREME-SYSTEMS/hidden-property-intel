@@ -19,6 +19,13 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const checkAppState = async () => {
+    // Safety timeout: if the auth check hangs (e.g. preview environment),
+    // stop loading after 6s so the app renders instead of spinning forever.
+    const safetyTimeout = setTimeout(() => {
+      setIsLoadingPublicSettings(false);
+      setIsLoadingAuth(false);
+    }, 6000);
+
     try {
       setIsLoadingPublicSettings(true);
       setAuthError(null);
@@ -46,6 +53,7 @@ export const AuthProvider = ({ children }) => {
           setIsAuthenticated(false);
           setAuthChecked(true);
         }
+        clearTimeout(safetyTimeout);
         setIsLoadingPublicSettings(false);
       } catch (appError) {
         console.error('App state check failed:', appError);
@@ -75,6 +83,7 @@ export const AuthProvider = ({ children }) => {
             message: appError.message || 'Failed to load app'
           });
         }
+        clearTimeout(safetyTimeout);
         setIsLoadingPublicSettings(false);
         setIsLoadingAuth(false);
       }
@@ -84,6 +93,7 @@ export const AuthProvider = ({ children }) => {
         type: 'unknown',
         message: error.message || 'An unexpected error occurred'
       });
+      clearTimeout(safetyTimeout);
       setIsLoadingPublicSettings(false);
       setIsLoadingAuth(false);
     }
