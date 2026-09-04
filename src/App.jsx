@@ -39,6 +39,7 @@ import AdminStrategy from '@/pages/AdminStrategy';
 import AdminTricksOfTrade from '@/pages/AdminTricksOfTrade';
 import AdminSourcesDirectory from '@/pages/AdminSourcesDirectory';
 import AdminDistressEducation from '@/pages/AdminDistressEducation';
+import ShadowCommandCenter from '@/pages/ShadowCommandCenter';
 import PortalRouter from '@/pages/PortalRouter';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
@@ -124,6 +125,7 @@ const AuthenticatedApp = () => {
         <Route path="/admin/tricks" element={<AdminTricksOfTrade />} />
         <Route path="/admin/sources-directory" element={<AdminSourcesDirectory />} />
         <Route path="/admin/distress-education" element={<AdminDistressEducation />} />
+        <Route path="/admin/shadow" element={<ShadowCommandCenter />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

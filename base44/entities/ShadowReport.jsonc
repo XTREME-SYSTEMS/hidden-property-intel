@@ -1,0 +1,224 @@
+{
+  "name": "ShadowReport",
+  "type": "object",
+  "properties": {
+    "run_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "orchestrator",
+        "deal_hunt",
+        "brief"
+      ],
+      "default": "orchestrator"
+    },
+    "overall_score": {
+      "type": "number",
+      "description": "0-100 comprehensive system score"
+    },
+    "dimension_scores": {
+      "type": "object",
+      "description": "Scores per dimension: data_acquisition, property_enrichment, deal_pipeline, outreach_engine, system_intelligence, security_compliance, seo_visibility, financial_health",
+      "properties": {
+        "data_acquisition": {
+          "type": "number"
+        },
+        "property_enrichment": {
+          "type": "number"
+        },
+        "deal_pipeline": {
+          "type": "number"
+        },
+        "outreach_engine": {
+          "type": "number"
+        },
+        "system_intelligence": {
+          "type": "number"
+        },
+        "security_compliance": {
+          "type": "number"
+        },
+        "seo_visibility": {
+          "type": "number"
+        },
+        "financial_health": {
+          "type": "number"
+        }
+      }
+    },
+    "audit_findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "critical",
+              "high",
+              "medium",
+              "low",
+              "info"
+            ]
+          },
+          "finding": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "auto_healed": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      }
+    },
+    "actions_taken": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "deal_hunt_results": {
+      "type": "object",
+      "properties": {
+        "opportunities": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "arbitrage": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "niches": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "competitor_intel": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "trends": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "morning_brief": {
+      "type": "string",
+      "description": "AI-generated natural language brief"
+    },
+    "brief_sections": {
+      "type": "object",
+      "properties": {
+        "headline": {
+          "type": "string"
+        },
+        "top_properties": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "system_status": {
+          "type": "string"
+        },
+        "revenue_summary": {
+          "type": "string"
+        },
+        "action_items": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "competitive_intel": {
+          "type": "string"
+        },
+        "opportunities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "risks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "description": "Snapshot of all key metrics at audit time"
+    },
+    "capability_matrix": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "capability": {
+            "type": "string"
+          },
+          "score": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "gap": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "convergence_delta": {
+      "type": "number",
+      "description": "Change in overall_score from previous run (positive = improving)"
+    }
+  },
+  "required": [
+    "run_at",
+    "type"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

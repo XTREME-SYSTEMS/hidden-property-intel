@@ -1,0 +1,73 @@
+{
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "shadow_orchestrator",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_audit": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "shadowOrchestrator",
+            "args": {}
+          },
+          "then": "run_deal_hunt",
+          "x-base44": {
+            "title": "System Audit + Self-Heal",
+            "description": "Audit 8 dimensions, auto-heal issues, compute 0-100 score"
+          }
+        }
+      },
+      {
+        "run_deal_hunt": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "shadowDealHunt",
+            "args": {}
+          },
+          "then": "generate_brief",
+          "x-base44": {
+            "title": "Deal Hunt",
+            "description": "AI web-search for FL opportunities, arbitrage, niches, competitor intel"
+          }
+        }
+      },
+      {
+        "generate_brief": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "generateMorningBrief",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Morning Brief",
+            "description": "AI-generated daily intelligence brief"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Autonomous intelligence cycle \u2014 audits all 8 system dimensions, self-heals issues, hunts for FL deal opportunities, and generates a morning brief. Runs every 6 hours to ensure the system converges to 100/100.",
+  "name": "Shadow Orchestrator",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 */6 * * *",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  }
+}

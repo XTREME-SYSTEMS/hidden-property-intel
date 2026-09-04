@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   LayoutDashboard, Database, Mail, FlaskConical, Search, Cpu, Target, Users, Home, Blocks, Calculator, Scale, TrendingUp, BarChart3,
-  ArrowRight, X, ArrowLeft, Lightbulb, BookOpen, Globe, Building2, Handshake, Stamp
+  ArrowRight, X, ArrowLeft, Lightbulb, BookOpen, Globe, Building2, Handshake, Stamp, Radar
 } from "lucide-react";
 import AdminOverview from "@/components/admin/AdminOverview";
 import AdminChatBar from "@/components/admin/AdminChatBar";
@@ -28,6 +28,7 @@ import AdminStrategy from "@/pages/AdminStrategy";
 import AdminTricksOfTrade from "@/pages/AdminTricksOfTrade";
 import AdminSourcesDirectory from "@/pages/AdminSourcesDirectory";
 import AdminDistressEducation from "@/pages/AdminDistressEducation";
+import ShadowCommandCenter from "@/pages/ShadowCommandCenter";
 import TitleEscrowDashboard from "@/pages/TitleEscrowDashboard";
 import WholesalerDashboard from "@/pages/WholesalerDashboard";
 import NotaryDashboard from "@/pages/NotaryDashboard";
@@ -59,6 +60,7 @@ const NAV_ITEMS = [
   { id: "legal-compliance", icon: Scale, label: "Legal Compliance", desc: "FL & federal regulations", component: LegalCompliance },
   { id: "industry-intel", icon: TrendingUp, label: "Industry Intel", desc: "Financial & market intelligence", component: IndustryIntelligence },
   { id: "capabilities", icon: Target, label: "Capabilities", desc: "Capability map & prompts", component: AdminCapabilities },
+  { id: "shadow", icon: Radar, label: "Shadow Command", desc: "Autonomous intelligence & self-healing", component: ShadowCommandCenter },
   { id: "architecture", icon: Cpu, label: "Architecture", desc: "System DNA & roadmap", component: AdminArchitecture },
   { id: "search-console", icon: Search, label: "Search Console", desc: "SEO indexing", component: AdminSearchConsole },
   { id: "system-test", icon: Cpu, label: "System Test Engine", desc: "Autonomous test, score & gap analysis", component: AdminSystemTest },
