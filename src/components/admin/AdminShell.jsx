@@ -16,6 +16,8 @@ import AdminOwnerList from "@/pages/AdminOwnerList";
 import AdminSmartContracts from "@/pages/AdminSmartContracts";
 import DealCalculator from "@/pages/DealCalculator";
 import AgentDashboard from "@/pages/AgentDashboard";
+import InvestorDashboard from "@/pages/InvestorDashboard";
+import SellerDashboard from "@/pages/SellerDashboard";
 import AdminCapabilities from "@/pages/AdminCapabilities";
 import SystemDNA from "@/pages/SystemDNA";
 import LegalCompliance from "@/pages/LegalCompliance";
@@ -41,6 +43,8 @@ const NAV_ITEMS = [
   { id: "distress-edu", icon: BookOpen, label: "Distress Education", desc: "Causes, warning signs & data", component: AdminDistressEducation },
   { id: "smart-contracts", icon: Blocks, label: "Smart Contracts", desc: "On-chain escrow", component: AdminSmartContracts },
   { id: "deal-calculator", icon: Calculator, label: "Deal Calculator", desc: "Profit split & fairness", component: DealCalculator },
+  { id: "mirror-investor", icon: TrendingUp, label: "Investor Mirror", desc: "View investor dashboard", component: InvestorDashboard },
+  { id: "mirror-seller", icon: Home, label: "Seller Mirror", desc: "View seller dashboard", component: SellerDashboard },
   { id: "agent-portal", icon: Users, label: "Agent Portal", desc: "Licensed agent tools", component: AgentDashboard },
   { id: "test-lab", icon: FlaskConical, label: "Test Lab", desc: "Full system test suite", component: AdminTestLab },
   { id: "legal-compliance", icon: Scale, label: "Legal Compliance", desc: "FL & federal regulations", component: LegalCompliance },
