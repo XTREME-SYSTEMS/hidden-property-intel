@@ -1,171 +1,102 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { appParams } from '@/lib/app-params';
 
 const AuthContext = createContext();
+
+// Hard cap on how long we'll wait for an auth check before giving up and
+// letting the app render. Prevents the white-screen hang that happens when
+// the SDK's me() call stalls (e.g. after an OAuth popup freeze).
+const AUTH_TIMEOUT_MS = 4000;
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoadingAuth, setIsLoadingAuth] = useState(false);
-  const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState(false);
   const [authError, setAuthError] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
-  const [appPublicSettings, setAppPublicSettings] = useState(null); // Contains only { id, public_settings }
 
+  // On mount, fire a single non-blocking auth check. The app renders
+  // immediately regardless of the outcome; auth state updates when this
+  // resolves or times out.
   useEffect(() => {
-    checkAppState();
+    let cancelled = false;
+
+    const timeout = setTimeout(() => {
+      if (cancelled) return;
+      setIsLoadingAuth(false);
+      setAuthChecked(true);
+    }, AUTH_TIMEOUT_MS);
+
+    setIsLoadingAuth(true);
+    base44.auth.me()
+      .then((u) => {
+        if (cancelled) return;
+        setUser(u);
+        setIsAuthenticated(true);
+        setAuthChecked(true);
+        clearTimeout(timeout);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setIsAuthenticated(false);
+        setAuthChecked(true);
+        if (err?.status === 401 || err?.status === 403) {
+          setAuthError({ type: 'auth_required', message: 'Authentication required' });
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoadingAuth(false);
+      });
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeout);
+    };
   }, []);
 
-  const checkAppState = async () => {
-    // Safety timeout: if the auth check hangs (e.g. preview environment),
-    // stop loading after 6s so the app renders instead of spinning forever.
-    const safetyTimeout = setTimeout(() => {
-      setIsLoadingPublicSettings(false);
-      setIsLoadingAuth(false);
-    }, 6000);
-
+  const checkUserAuth = async () => {
+    setIsLoadingAuth(true);
     try {
-      setAuthError(null);
-
-      // First, check app public settings (with token if available)
-      // This will tell us if auth is required, user not registered, etc.
-      try {
-        const headers = { 'X-App-Id': appParams.appId };
-        if (appParams.token) headers['Authorization'] = `Bearer ${appParams.token}`;
-        const res = await fetch(`/api/apps/public/prod/public-settings/by-id/${appParams.appId}`, { headers });
-        let publicSettings = null;
-        if (res.ok) {
-          publicSettings = await res.json();
-        } else if (res.status === 403) {
-          const data = await res.json().catch(() => ({}));
-          const reason = data?.extra_data?.reason;
-          if (reason === 'auth_required') {
-            setAuthError({ type: 'auth_required', message: 'Authentication required' });
-          } else if (reason === 'user_not_registered') {
-            setAuthError({ type: 'user_not_registered', message: 'User not registered for this app' });
-          } else {
-            setAuthError({ type: reason || 'unknown', message: data?.message || 'Failed to load app' });
-          }
-          clearTimeout(safetyTimeout);
-          setIsLoadingPublicSettings(false);
-          setIsLoadingAuth(false);
-          return;
-        }
-        setAppPublicSettings(publicSettings);
-        
-        // If we got the app public settings successfully, check if user is authenticated
-        if (appParams.token) {
-          await checkUserAuth(publicSettings);
-        } else {
-          setIsLoadingAuth(false);
-          setIsAuthenticated(false);
-          setAuthChecked(true);
-        }
-        clearTimeout(safetyTimeout);
-        setIsLoadingPublicSettings(false);
-      } catch (appError) {
-        console.error('App state check failed:', appError);
-        
-        // Handle app-level errors
-        if (appError.status === 403 && appError.data?.extra_data?.reason) {
-          const reason = appError.data.extra_data.reason;
-          if (reason === 'auth_required') {
-            setAuthError({
-              type: 'auth_required',
-              message: 'Authentication required'
-            });
-          } else if (reason === 'user_not_registered') {
-            setAuthError({
-              type: 'user_not_registered',
-              message: 'User not registered for this app'
-            });
-          } else {
-            setAuthError({
-              type: reason,
-              message: appError.message
-            });
-          }
-        } else {
-          setAuthError({
-            type: 'unknown',
-            message: appError.message || 'Failed to load app'
-          });
-        }
-        clearTimeout(safetyTimeout);
-        setIsLoadingPublicSettings(false);
-        setIsLoadingAuth(false);
-      }
-    } catch (error) {
-      console.error('Unexpected error:', error);
-      setAuthError({
-        type: 'unknown',
-        message: error.message || 'An unexpected error occurred'
-      });
-      clearTimeout(safetyTimeout);
-      setIsLoadingPublicSettings(false);
-      setIsLoadingAuth(false);
-    }
-  };
-
-  const checkUserAuth = async (publicSettings) => {
-    try {
-      // Now check if the user is authenticated
-      setIsLoadingAuth(true);
-      const currentUser = await base44.auth.me();
-      setUser(currentUser);
+      const u = await Promise.race([
+        base44.auth.me(),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Auth check timed out')), AUTH_TIMEOUT_MS)
+        ),
+      ]);
+      setUser(u);
       setIsAuthenticated(true);
-      setIsLoadingAuth(false);
-      setAuthChecked(true);
-    } catch (error) {
-      console.error('User auth check failed:', error);
-      setIsLoadingAuth(false);
+    } catch {
       setIsAuthenticated(false);
+    } finally {
+      setIsLoadingAuth(false);
       setAuthChecked(true);
-      
-      // If user auth fails, it might be an expired token.
-      // Only redirect to login if the app actually requires auth —
-      // a public app should render normally with an expired/stale token.
-      if ((error.status === 401 || error.status === 403) && publicSettings?.public_settings !== 'public_without_login') {
-        setAuthError({
-          type: 'auth_required',
-          message: 'Authentication required'
-        });
-      }
     }
   };
 
   const logout = (shouldRedirect = true) => {
     setUser(null);
     setIsAuthenticated(false);
-    
     if (shouldRedirect) {
-      // Use the SDK's logout method which handles token cleanup and redirect
       base44.auth.logout(window.location.href);
     } else {
-      // Just remove the token without redirect
       base44.auth.logout();
     }
   };
 
   const navigateToLogin = () => {
-    // Use the SDK's redirectToLogin method
     base44.auth.redirectToLogin(window.location.href);
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      isAuthenticated, 
+    <AuthContext.Provider value={{
+      user,
+      isAuthenticated,
       isLoadingAuth,
-      isLoadingPublicSettings,
       authError,
-      appPublicSettings,
       authChecked,
       logout,
       navigateToLogin,
       checkUserAuth,
-      checkAppState
     }}>
       {children}
     </AuthContext.Provider>

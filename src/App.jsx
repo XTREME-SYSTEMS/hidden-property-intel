@@ -61,39 +61,22 @@ import { Navigate } from 'react-router-dom';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, appPublicSettings } = useAuth();
-
-  const isPublicApp = appPublicSettings?.public_settings === 'public_without_login';
+  const { authError, navigateToLogin } = useAuth();
   const onLoginPage = window.location.pathname.startsWith('/login');
 
-  // Redirect to login only for non-public apps that require auth — never for
-  // public apps, and never when already on /login (prevents redirect loop).
+  // Redirect to login if auth is required and we're not already there.
   useEffect(() => {
-    if (authError?.type === 'auth_required' && !isPublicApp && !onLoginPage) {
+    if (authError?.type === 'auth_required' && !onLoginPage) {
       navigateToLogin();
     }
-  }, [authError, isPublicApp, onLoginPage, navigateToLogin]);
+  }, [authError, onLoginPage, navigateToLogin]);
 
-  // Show loading spinner while checking app public settings or auth
-  if (isLoadingPublicSettings || isLoadingAuth) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-black/10 border-t-black rounded-full animate-spin"></div>
-      </div>
-    );
+  if (authError?.type === 'user_not_registered') {
+    return <UserNotRegisteredError />;
   }
 
-  // Handle authentication errors
-  if (authError) {
-    if (authError.type === 'user_not_registered') {
-      return <UserNotRegisteredError />;
-    }
-    // For auth_required or unknown errors, fall through and render the app.
-    // ProtectedRoute handles gating for auth-only pages, and this is a public
-    // app — returning null here caused a white screen in the preview iframe.
-  }
-
-  // Render the main app
+  // Render immediately — no blocking loading spinner. Auth state updates
+  // asynchronously via AuthContext; ProtectedRoute gates protected pages.
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
