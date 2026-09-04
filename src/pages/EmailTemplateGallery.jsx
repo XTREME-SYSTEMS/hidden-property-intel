@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { EMAIL_TEMPLATES, getCategories } from "../../base44/shared/emailTemplates";
+import { EMAIL_TEMPLATES, getCategories } from "@/lib/emailTemplates";
 import { Search, Mail, ShieldCheck, AlertTriangle, CheckCircle2, Loader2, X, Eye, Copy } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
