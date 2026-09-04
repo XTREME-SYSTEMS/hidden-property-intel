@@ -40,6 +40,9 @@ import AdminTricksOfTrade from '@/pages/AdminTricksOfTrade';
 import AdminSourcesDirectory from '@/pages/AdminSourcesDirectory';
 import AdminDistressEducation from '@/pages/AdminDistressEducation';
 import ShadowCommandCenter from '@/pages/ShadowCommandCenter';
+import EdenSkyeProfile from '@/pages/EdenSkyeProfile';
+import EdenSkyeChat from '@/pages/EdenSkyeChat';
+import EmailTemplateGallery from '@/pages/EmailTemplateGallery';
 import PortalRouter from '@/pages/PortalRouter';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
@@ -126,7 +129,10 @@ const AuthenticatedApp = () => {
         <Route path="/admin/sources-directory" element={<AdminSourcesDirectory />} />
         <Route path="/admin/distress-education" element={<AdminDistressEducation />} />
         <Route path="/admin/shadow" element={<ShadowCommandCenter />} />
+        <Route path="/admin/email-gallery" element={<EmailTemplateGallery />} />
         </Route>
+        <Route path="/eden-skye" element={<EdenSkyeProfile />} />
+        <Route path="/eden-skye/chat" element={<EdenSkyeChat />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

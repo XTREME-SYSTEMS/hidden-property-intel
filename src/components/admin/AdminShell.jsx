@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   LayoutDashboard, Database, Mail, FlaskConical, Search, Cpu, Target, Users, Home, Blocks, Calculator, Scale, TrendingUp, BarChart3,
-  ArrowRight, X, ArrowLeft, Lightbulb, BookOpen, Globe, Building2, Handshake, Stamp, Radar
+  ArrowRight, X, ArrowLeft, Lightbulb, BookOpen, Globe, Building2, Handshake, Stamp, Radar, Sparkles
 } from "lucide-react";
 import AdminOverview from "@/components/admin/AdminOverview";
 import AdminChatBar from "@/components/admin/AdminChatBar";
@@ -29,6 +29,8 @@ import AdminTricksOfTrade from "@/pages/AdminTricksOfTrade";
 import AdminSourcesDirectory from "@/pages/AdminSourcesDirectory";
 import AdminDistressEducation from "@/pages/AdminDistressEducation";
 import ShadowCommandCenter from "@/pages/ShadowCommandCenter";
+import EdenSkyeProfile from "@/pages/EdenSkyeProfile";
+import EmailTemplateGallery from "@/pages/EmailTemplateGallery";
 import TitleEscrowDashboard from "@/pages/TitleEscrowDashboard";
 import WholesalerDashboard from "@/pages/WholesalerDashboard";
 import NotaryDashboard from "@/pages/NotaryDashboard";
@@ -61,6 +63,8 @@ const NAV_ITEMS = [
   { id: "industry-intel", icon: TrendingUp, label: "Industry Intel", desc: "Financial & market intelligence", component: IndustryIntelligence },
   { id: "capabilities", icon: Target, label: "Capabilities", desc: "Capability map & prompts", component: AdminCapabilities },
   { id: "shadow", icon: Radar, label: "Shadow Command", desc: "Autonomous intelligence & self-healing", component: ShadowCommandCenter },
+  { id: "eden-skye", icon: Sparkles, label: "Eden Skye", desc: "AI agent profile & chat", component: EdenSkyeProfile },
+  { id: "email-gallery", icon: Mail, label: "Email Gallery", desc: "Template gallery & QA validation", component: EmailTemplateGallery },
   { id: "architecture", icon: Cpu, label: "Architecture", desc: "System DNA & roadmap", component: AdminArchitecture },
   { id: "search-console", icon: Search, label: "Search Console", desc: "SEO indexing", component: AdminSearchConsole },
   { id: "system-test", icon: Cpu, label: "System Test Engine", desc: "Autonomous test, score & gap analysis", component: AdminSystemTest },
