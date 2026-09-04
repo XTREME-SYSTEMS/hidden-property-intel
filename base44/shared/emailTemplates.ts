@@ -1,5 +1,6 @@
 /**
  * Hidden Property Intel — Complete Email Template Gallery
+ * @redeploy 2026-09-04
  *
  * Every type of outgoing, outreach, response, and follow-up email used across
  * the platform, organized by audience and purpose. Each template is branded,
