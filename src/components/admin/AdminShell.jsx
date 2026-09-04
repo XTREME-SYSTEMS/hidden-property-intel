@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   LayoutDashboard, Database, Mail, FlaskConical, Search, Cpu, Target, Users, Home, Blocks, Calculator, Scale, TrendingUp, BarChart3,
-  ArrowRight, X, ArrowLeft, Lightbulb, BookOpen, Globe
+  ArrowRight, X, ArrowLeft, Lightbulb, BookOpen, Globe, Building2, Handshake, Stamp
 } from "lucide-react";
 import AdminOverview from "@/components/admin/AdminOverview";
 import AdminChatBar from "@/components/admin/AdminChatBar";
@@ -28,6 +28,11 @@ import AdminStrategy from "@/pages/AdminStrategy";
 import AdminTricksOfTrade from "@/pages/AdminTricksOfTrade";
 import AdminSourcesDirectory from "@/pages/AdminSourcesDirectory";
 import AdminDistressEducation from "@/pages/AdminDistressEducation";
+import TitleEscrowDashboard from "@/pages/TitleEscrowDashboard";
+import WholesalerDashboard from "@/pages/WholesalerDashboard";
+import NotaryDashboard from "@/pages/NotaryDashboard";
+import PropertyManagerDashboard from "@/pages/PropertyManagerDashboard";
+import AdminSystemTest from "@/pages/AdminSystemTest";
 
 const NAV_ITEMS = [
   { id: "overview", icon: LayoutDashboard, label: "Dashboard", desc: "Overview & metrics" },
@@ -46,12 +51,17 @@ const NAV_ITEMS = [
   { id: "mirror-investor", icon: TrendingUp, label: "Investor Mirror", desc: "View investor dashboard", component: InvestorDashboard },
   { id: "mirror-seller", icon: Home, label: "Seller Mirror", desc: "View seller dashboard", component: SellerDashboard },
   { id: "agent-portal", icon: Users, label: "Agent Portal", desc: "Licensed agent tools", component: AgentDashboard },
+  { id: "title-escrow", icon: Building2, label: "Title & Escrow", desc: "Closing & title risk management", component: TitleEscrowDashboard },
+  { id: "wholesaler", icon: Handshake, label: "Wholesaler Portal", desc: "Deal assignment & buyer matching", component: WholesalerDashboard },
+  { id: "notary", icon: Stamp, label: "Notary Portal", desc: "Digital signature management", component: NotaryDashboard },
+  { id: "property-mgr", icon: Home, label: "Property Manager", desc: "Portfolio & maintenance management", component: PropertyManagerDashboard },
   { id: "test-lab", icon: FlaskConical, label: "Test Lab", desc: "Full system test suite", component: AdminTestLab },
   { id: "legal-compliance", icon: Scale, label: "Legal Compliance", desc: "FL & federal regulations", component: LegalCompliance },
   { id: "industry-intel", icon: TrendingUp, label: "Industry Intel", desc: "Financial & market intelligence", component: IndustryIntelligence },
   { id: "capabilities", icon: Target, label: "Capabilities", desc: "Capability map & prompts", component: AdminCapabilities },
   { id: "architecture", icon: Cpu, label: "Architecture", desc: "System DNA & roadmap", component: AdminArchitecture },
   { id: "search-console", icon: Search, label: "Search Console", desc: "SEO indexing", component: AdminSearchConsole },
+  { id: "system-test", icon: Cpu, label: "System Test Engine", desc: "Autonomous test, score & gap analysis", component: AdminSystemTest },
   { id: "system-dna", icon: Target, label: "System DNA", desc: "Competitive benchmark", component: SystemDNA },
 ];
 
