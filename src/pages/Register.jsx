@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import AuthLayout from "@/components/AuthLayout";
 import GoogleIcon from "@/components/GoogleIcon";
 import { toast } from "@/components/ui/use-toast";
 import { safeReturnTo } from "@/lib/authReturnTo";
+import { startGoogleLogin, isInIframe } from "@/lib/googleAuth";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -67,8 +68,18 @@ export default function Register() {
     }
   };
 
+  const returnTo = safeReturnTo();
+
+  // Auto-trigger Google OAuth when opened in a new tab via ?google_auth=1
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("google_auth") === "1" && !isInIframe()) {
+      base44.auth.loginWithProvider("google", returnTo);
+    }
+  }, []);
+
   const handleGoogle = () => {
-    base44.auth.loginWithProvider("google", safeReturnTo());
+    startGoogleLogin(returnTo);
   };
 
   if (showOtp) {
