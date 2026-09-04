@@ -19,11 +19,19 @@ export default function Login() {
   // with returnTo so the grant flow can resume). Same-origin paths only.
   const returnTo = safeReturnTo();
 
-  // Auto-trigger Google OAuth when opened in a new tab via ?google_auth=1
+  // Auto-trigger Google OAuth when opened in a new tab via ?google_auth=1.
+  // Strip the param first so a blocked-popup or failed redirect can't loop.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("google_auth") === "1" && !isInIframe()) {
-      base44.auth.loginWithProvider("google", returnTo);
+      params.delete("google_auth");
+      const cleanUrl = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ""}${window.location.hash}`;
+      window.history.replaceState({}, document.title, cleanUrl);
+      try {
+        base44.auth.loginWithProvider("google", returnTo);
+      } catch (e) {
+        console.error("Google login failed:", e);
+      }
     }
   }, []);
 
