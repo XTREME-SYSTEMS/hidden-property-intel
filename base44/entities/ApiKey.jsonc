@@ -1,0 +1,119 @@
+{
+  "name": "ApiKey",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Human-readable label for this key"
+    },
+    "key_prefix": {
+      "type": "string",
+      "description": "First 12 chars of the key for identification without exposing the secret"
+    },
+    "key_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of the full API key \u2014 never store the raw key"
+    },
+    "tenant_id": {
+      "type": "string",
+      "description": "Owner/user ID this key authenticates as"
+    },
+    "scopes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "lookups",
+          "provisioning",
+          "numbers:read",
+          "numbers:write",
+          "admin"
+        ]
+      },
+      "default": [
+        "lookups",
+        "numbers:read"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "rolled",
+        "revoked"
+      ],
+      "default": "active"
+    },
+    "last_used": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_used_ip": {
+      "type": "string"
+    },
+    "request_count": {
+      "type": "number",
+      "default": 0
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "name",
+    "key_prefix",
+    "key_hash",
+    "tenant_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "data.tenant_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

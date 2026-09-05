@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   LayoutDashboard, Database, Mail, FlaskConical, Search, Cpu, Target, Users, Home, Blocks, Calculator, Scale, TrendingUp, BarChart3,
-  ArrowRight, X, ArrowLeft, Lightbulb, BookOpen, Globe, Building2, Handshake, Stamp, Radar, Sparkles
+  ArrowRight, X, ArrowLeft, Lightbulb, BookOpen, Globe, Building2, Handshake, Stamp, Radar, Sparkles, Key, Phone
 } from "lucide-react";
 import AdminOverview from "@/components/admin/AdminOverview";
 import AdminChatBar from "@/components/admin/AdminChatBar";
@@ -36,6 +36,8 @@ import WholesalerDashboard from "@/pages/WholesalerDashboard";
 import NotaryDashboard from "@/pages/NotaryDashboard";
 import PropertyManagerDashboard from "@/pages/PropertyManagerDashboard";
 import AdminSystemTest from "@/pages/AdminSystemTest";
+import AdminApiKeys from "@/pages/AdminApiKeys";
+import AdminNumbers from "@/pages/AdminNumbers";
 
 const NAV_ITEMS = [
   { id: "overview", icon: LayoutDashboard, label: "Dashboard", desc: "Overview & metrics" },
@@ -69,6 +71,8 @@ const NAV_ITEMS = [
   { id: "search-console", icon: Search, label: "Search Console", desc: "SEO indexing", component: AdminSearchConsole },
   { id: "system-test", icon: Cpu, label: "System Test Engine", desc: "Autonomous test, score & gap analysis", component: AdminSystemTest },
   { id: "system-dna", icon: Target, label: "System DNA", desc: "Competitive benchmark", component: SystemDNA },
+  { id: "api-keys", icon: Key, label: "API Keys", desc: "Gateway auth tokens", component: AdminApiKeys },
+  { id: "numbers", icon: Phone, label: "Number Gateway", desc: "Import & provision numbers", component: AdminNumbers },
 ];
 
 export default function AdminShell() {

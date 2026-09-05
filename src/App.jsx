@@ -43,6 +43,8 @@ import ShadowCommandCenter from '@/pages/ShadowCommandCenter';
 import EdenSkyeProfile from '@/pages/EdenSkyeProfile';
 import EdenSkyeChat from '@/pages/EdenSkyeChat';
 import EmailTemplateGallery from '@/pages/EmailTemplateGallery';
+import AdminApiKeys from '@/pages/AdminApiKeys';
+import AdminNumbers from '@/pages/AdminNumbers';
 import PortalRouter from '@/pages/PortalRouter';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
@@ -130,6 +132,8 @@ const AuthenticatedApp = () => {
         <Route path="/admin/distress-education" element={<AdminDistressEducation />} />
         <Route path="/admin/shadow" element={<ShadowCommandCenter />} />
         <Route path="/admin/email-gallery" element={<EmailTemplateGallery />} />
+        <Route path="/admin/api-keys" element={<AdminApiKeys />} />
+        <Route path="/admin/numbers" element={<AdminNumbers />} />
         </Route>
         <Route path="/eden-skye" element={<EdenSkyeProfile />} />
         <Route path="/eden-skye/chat" element={<EdenSkyeChat />} />
