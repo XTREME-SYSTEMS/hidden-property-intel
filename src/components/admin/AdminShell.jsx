@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   LayoutDashboard, Database, Mail, FlaskConical, Search, Cpu, Target, Users, Home, Blocks, Calculator, Scale, TrendingUp, BarChart3,
-  ArrowRight, X, ArrowLeft, Lightbulb, BookOpen, Globe, Building2, Handshake, Stamp, Radar, Sparkles, Key, Phone
+  ArrowRight, X, ArrowLeft, Lightbulb, BookOpen, Globe, Building2, Handshake, Stamp, Radar, Sparkles, Key, Phone, Mic, Calendar
 } from "lucide-react";
 import AdminOverview from "@/components/admin/AdminOverview";
 import AdminChatBar from "@/components/admin/AdminChatBar";
@@ -38,6 +38,8 @@ import PropertyManagerDashboard from "@/pages/PropertyManagerDashboard";
 import AdminSystemTest from "@/pages/AdminSystemTest";
 import AdminApiKeys from "@/pages/AdminApiKeys";
 import AdminNumbers from "@/pages/AdminNumbers";
+import AdminEdenVoice from "@/pages/AdminEdenVoice";
+import AdminCalendar from "@/pages/AdminCalendar";
 
 const NAV_ITEMS = [
   { id: "overview", icon: LayoutDashboard, label: "Dashboard", desc: "Overview & metrics" },
@@ -73,6 +75,8 @@ const NAV_ITEMS = [
   { id: "system-dna", icon: Target, label: "System DNA", desc: "Competitive benchmark", component: SystemDNA },
   { id: "api-keys", icon: Key, label: "API Keys", desc: "Gateway auth tokens", component: AdminApiKeys },
   { id: "numbers", icon: Phone, label: "Number Gateway", desc: "Import & provision numbers", component: AdminNumbers },
+  { id: "eden-voice", icon: Mic, label: "Eden Voice", desc: "AI voice config & orchestration", component: AdminEdenVoice },
+  { id: "calendar", icon: Calendar, label: "Calendar Sync", desc: "Google Calendar scheduling", component: AdminCalendar },
 ];
 
 export default function AdminShell() {

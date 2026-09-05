@@ -45,6 +45,8 @@ import EdenSkyeChat from '@/pages/EdenSkyeChat';
 import EmailTemplateGallery from '@/pages/EmailTemplateGallery';
 import AdminApiKeys from '@/pages/AdminApiKeys';
 import AdminNumbers from '@/pages/AdminNumbers';
+import AdminEdenVoice from '@/pages/AdminEdenVoice';
+import AdminCalendar from '@/pages/AdminCalendar';
 import PortalRouter from '@/pages/PortalRouter';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
@@ -134,6 +136,8 @@ const AuthenticatedApp = () => {
         <Route path="/admin/email-gallery" element={<EmailTemplateGallery />} />
         <Route path="/admin/api-keys" element={<AdminApiKeys />} />
         <Route path="/admin/numbers" element={<AdminNumbers />} />
+        <Route path="/admin/eden-voice" element={<AdminEdenVoice />} />
+        <Route path="/admin/calendar" element={<AdminCalendar />} />
         </Route>
         <Route path="/eden-skye" element={<EdenSkyeProfile />} />
         <Route path="/eden-skye/chat" element={<EdenSkyeChat />} />

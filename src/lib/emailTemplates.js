@@ -620,6 +620,264 @@ export const EMAIL_TEMPLATES = [
     variables: [],
     tone: "Educational, engaging, community-building",
   },
+
+  // 9. AGENTIC AI — INBOUND RESPONSE HANDLING
+  {
+    id: "agentic_inbound_classifier",
+    category: "Agentic AI Inbound",
+    name: "Inbound Classifier — Intent Detection",
+    description: "System prompt template for Eden's AI to classify inbound replies and route to the right response flow.",
+    audience: "system",
+    type: "system",
+    subject: "",
+    body: `CLASSIFY the following inbound email into one of these intents:
+- interested (wants to learn more, see properties, talk)
+- question (asks a specific question about the platform, a property, or process)
+- objection (raises a concern — price, trust, timing, competition)
+- opt_out (asks to stop contact)
+- referral (mentions someone else)
+- spam (irrelevant or automated)
+- other (anything else)
+
+INBOUND EMAIL:
+{{inbound_email}}
+
+Return JSON: { "intent": "...", "confidence": 0.0-1.0, "suggested_response_type": "...", "key_points": ["..."] }`,
+    variables: ["inbound_email"],
+    tone: "Analytical, precise, routing logic",
+  },
+  {
+    id: "agentic_inbound_interested",
+    category: "Agentic AI Inbound",
+    name: "Inbound — Interested Response",
+    description: "Eden's response when a lead replies with interest. Moves them to a call or property review immediately.",
+    audience: "investor",
+    type: "response",
+    subject: "Re: {{original_subject}}",
+    body: WRAPPER(`<p>Hi {{name}},</p>
+<p>Great to hear from you — glad this resonated.</p>
+<p>Based on what you mentioned, I think the fastest way to be useful is a quick 15-minute call. I can pull up the specific properties in {{target_market}} that match what you're looking for, walk you through the scoring, and answer any questions in real time.</p>
+<p>I have openings {{slot_options}}. Do any of those work, or is there a better time for you?</p>
+<p>If you'd rather just see properties first, I can send over 3-5 that match your criteria right now — just say the word.</p>
+<p>Eden</p>`),
+    variables: ["name", "original_subject", "target_market", "slot_options"],
+    tone: "Warm, direct, momentum-building",
+  },
+  {
+    id: "agentic_inbound_objection_price",
+    category: "Agentic AI Inbound",
+    name: "Inbound — Price Objection",
+    description: "Eden's response when an investor objects to pricing. Reframes value without being defensive.",
+    audience: "investor",
+    type: "response",
+    subject: "Re: {{original_subject}}",
+    body: WRAPPER(`<p>Hi {{name}},</p>
+<p>That's a fair question — and I appreciate you being direct about it.</p>
+<p>Here's how I'd think about it: {{pricing_reframe}}</p>
+<p>Most of our investors find that one deal pays for the subscription many times over. And if you join and don't find value in the first 30 days, I'll personally make sure you're taken care of.</p>
+<p>Would it help if I showed you a specific deal one of our investors closed last month using the platform? The numbers speak for themselves.</p>
+<p>Eden</p>`),
+    variables: ["name", "original_subject", "pricing_reframe"],
+    tone: "Calm, confident, value-reframing",
+  },
+  {
+    id: "agentic_inbound_optout",
+    category: "Agentic AI Inbound",
+    name: "Inbound — Opt-Out Acknowledgment",
+    description: "Respectful acknowledgment when someone asks to stop contact. Immediately updates their status.",
+    audience: "investor",
+    type: "response",
+    subject: "Re: {{original_subject}}",
+    body: WRAPPER(`<p>Hi {{name}},</p>
+<p>Of course — I've removed you from our outreach list immediately. You won't hear from me again unless you reach out first.</p>
+<p>I appreciate you letting me know, and I wish you all the best with your investing.</p>
+<p>Eden</p>`),
+    variables: ["name", "original_subject"],
+    tone: "Respectful, immediate, no guilt",
+  },
+  {
+    id: "agentic_inbound_owner_urgent",
+    category: "Agentic AI Inbound",
+    name: "Inbound — Owner in Urgent Situation",
+    description: "When a distressed owner replies with urgency. Prioritizes empathy and immediate help over business.",
+    audience: "owner",
+    type: "response",
+    subject: "Re: {{original_subject}}",
+    body: WRAPPER(`<p>Dear {{name}},</p>
+<p>Thank you for reaching out — I'm glad you did.</p>
+<p>I can hear that this is time-sensitive, and I want you to know I'm here to help right now, not later. You don't have to figure this out alone.</p>
+<p>{{situation_acknowledgment}}</p>
+<p>Here's what I can do today: {{immediate_help_options}}</p>
+<p>If you'd like to talk through this right now, call me at 772-812-3930 — I answer personally. Or if it's easier, tell me a good time and I'll call you.</p>
+<p>You're not alone in this, {{name}}. Let's figure out the best path forward together.</p>
+<p>Warmly,<br>Eden</p>`),
+    variables: ["name", "original_subject", "situation_acknowledgment", "immediate_help_options"],
+    tone: "Urgent empathy, immediate availability, zero pressure",
+  },
+
+  // 10. NURTURE SEQUENCES — MULTI-TOUCH
+  {
+    id: "nurture_inv_touch1",
+    category: "Nurture Sequences",
+    name: "Nurture — Investor Touch 1 (Value Drop)",
+    description: "First in a 5-touch nurture sequence. Pure value, no ask. Builds trust before any pitch.",
+    audience: "investor",
+    type: "follow_up",
+    subject: "3 off-market deals in {{market}} you might not have seen",
+    body: WRAPPER(`<p>Hi {{name}},</p>
+<p>No pitch today — just wanted to share something useful.</p>
+<p>We're tracking {{property_count}} distressed properties in {{market}} right now. Three stood out this week:</p>
+<ul>
+<li><strong>{{address_1}}</strong> — {{distress_1}}, est. value \${{value_1}}, score {{score_1}}/100</li>
+<li><strong>{{address_2}}</strong> — {{distress_2}}, est. value \${{value_2}}, score {{score_2}}/100</li>
+<li><strong>{{address_3}}</strong> — {{distress_3}}, est. value \${{value_3}}, score {{score_3}}/100</li>
+</ul>
+<p>Thought you might find this interesting. No strings — just sharing what we're seeing on the ground.</p>
+<p>Eden</p>`),
+    variables: ["name", "property_count", "market", "address_1", "distress_1", "value_1", "score_1", "address_2", "distress_2", "value_2", "score_2", "address_3", "distress_3", "value_3", "score_3"],
+    tone: "Pure value, no ask, trust-building",
+  },
+  {
+    id: "nurture_inv_touch2",
+    category: "Nurture Sequences",
+    name: "Nurture — Investor Touch 2 (Social Proof)",
+    description: "Second touch — a recent deal story. Shows the platform works without selling.",
+    audience: "investor",
+    type: "follow_up",
+    subject: "How an investor closed {{market}} deal in {{days}} days",
+    body: WRAPPER(`<p>Hi {{name}},</p>
+<p>Following up on my last note — wanted to share a quick story.</p>
+<p>One of our investors, {{investor_name}}, found a {{distress_type}} property in {{market}} through our platform last month. Here's what happened:</p>
+<ul>
+<li>Found the property on day 1 — score {{score}}/100</li>
+<li>Made contact with the owner on day 3</li>
+<li>Under contract by day {{days}}</li>
+<li>Projected profit: \${{profit}}</li>
+</ul>
+<p>I'm not sharing this to sell you anything — just thought you'd want to see what's possible when you move fast on the right data.</p>
+<p>If you ever want to see what we're tracking in real time, I'm here.</p>
+<p>Eden</p>`),
+    variables: ["name", "market", "days", "investor_name", "distress_type", "score", "profit"],
+    tone: "Storytelling, social proof, no pressure",
+  },
+  {
+    id: "nurture_inv_touch3",
+    category: "Nurture Sequences",
+    name: "Nurture — Investor Touch 3 (Soft Invite)",
+    description: "Third touch — first soft invitation to engage. Low-friction.",
+    audience: "investor",
+    type: "follow_up",
+    subject: "Quick question, {{name}}",
+    body: WRAPPER(`<p>Hi {{name}},</p>
+<p>I've sent a couple of notes your way — hope they've been useful.</p>
+<p>Quick question: are you actively looking for deals in {{market}} right now, or more in research mode?</p>
+<p>Either answer is perfect — it just helps me send you the right stuff. If you're actively looking, I can set you up with live alerts. If you're researching, I'll keep sending market intel.</p>
+<p>Just reply with "active" or "researching" — that's all I need.</p>
+<p>Eden</p>`),
+    variables: ["name", "market"],
+    tone: "Low-friction, binary choice, respectful",
+  },
+
+  // 11. SCHEDULING & COORDINATION
+  {
+    id: "sched_call_invite",
+    category: "Scheduling",
+    name: "Call Invitation — Investor",
+    description: "Invites an investor to schedule a call with specific time options.",
+    audience: "investor",
+    type: "transactional",
+    subject: "15 minutes to walk through {{market}} deals?",
+    body: WRAPPER(`<p>Hi {{name}},</p>
+<p>I'd love to spend 15 minutes showing you exactly what we're tracking in {{market}} — real properties, real numbers, real opportunities.</p>
+<p>Here are a few times that work for me this week:</p>
+<ul>
+<li>{{slot_1}}</li>
+<li>{{slot_2}}</li>
+<li>{{slot_3}}</li>
+</ul>
+<p>Just reply with the one that works, or suggest another time. I'll send a calendar invite right away.</p>
+<p>If now's not the right time, no worries — just say so and I'll circle back next month.</p>
+<p>Eden</p>`),
+    variables: ["name", "market", "slot_1", "slot_2", "slot_3"],
+    tone: "Direct, specific, low-friction",
+  },
+  {
+    id: "sched_call_confirm",
+    category: "Scheduling",
+    name: "Call Confirmation + Calendar Invite",
+    description: "Confirms a scheduled call and references the calendar invite sent.",
+    audience: "investor",
+    type: "transactional",
+    subject: "Confirmed: Our call on {{call_date}}",
+    body: WRAPPER(`<p>Hi {{name}},</p>
+<p>You're confirmed for our call on <strong>{{call_date}}</strong> at <strong>{{call_time}}</strong>.</p>
+<p>I've sent a calendar invite to {{email}} — it includes a Google Meet link if you'd prefer to do this virtually, or you can call me directly at 772-812-3930.</p>
+<p>I'll have the properties in {{market}} pulled up and ready. Looking forward to it.</p>
+<p>Eden</p>`),
+    variables: ["name", "call_date", "call_time", "email", "market"],
+    tone: "Warm, organized, confirmed",
+  },
+  {
+    id: "sched_closing_coord",
+    category: "Scheduling",
+    name: "Closing Coordination — All Parties",
+    description: "Coordinates the closing date with buyer, seller, and title company.",
+    audience: "agent",
+    type: "transactional",
+    subject: "Closing coordination — {{property_address}} (target {{target_date}})",
+    body: WRAPPER(`<p>Hi everyone,</p>
+<p>I'm coordinating the closing for {{property_address}} and wanted to get us all on the same page.</p>
+<p><strong>Target closing date:</strong> {{target_date}}</p>
+<p><strong>Parties:</strong></p>
+<ul>
+<li>Seller: {{seller_name}}</li>
+<li>Buyer: {{buyer_name}}</li>
+<li>Title: {{title_company}}</li>
+</ul>
+<p>I've proposed the following times for the closing — please reply with what works for you:</p>
+<ul>
+<li>{{slot_1}}</li>
+<li>{{slot_2}}</li>
+</ul>
+<p>Once we lock in a time, I'll send calendar invites to everyone and coordinate the smart contract escrow funding.</p>
+<p>Eden</p>`),
+    variables: ["property_address", "target_date", "seller_name", "buyer_name", "title_company", "slot_1", "slot_2"],
+    tone: "Organized, inclusive, efficient",
+  },
+
+  // 12. VOICEMAIL FOLLOW-UP
+  {
+    id: "vm_followup_investor",
+    category: "Voicemail Follow-Up",
+    name: "Voicemail Follow-Up — Investor",
+    description: "Email follow-up after leaving a voicemail for an investor. References the call.",
+    audience: "investor",
+    type: "follow_up",
+    subject: "Left you a voicemail, {{name}}",
+    body: WRAPPER(`<p>Hi {{name}},</p>
+<p>I just left you a quick voicemail — wanted to follow up in writing in case it's easier to reply here.</p>
+<p>The short version: I came across a few off-market deals in {{market}} that looked like they'd fit your criteria, and I wanted to make sure you saw them before someone else does.</p>
+<p>If you'd like me to send the details, just reply "yes" and I'll get them over immediately. Or call me back at 772-812-3930 — I'm around today.</p>
+<p>Eden</p>`),
+    variables: ["name", "market"],
+    tone: "Casual, references the call, easy to reply",
+  },
+  {
+    id: "vm_followup_owner",
+    category: "Voicemail Follow-Up",
+    name: "Voicemail Follow-Up — Owner",
+    description: "Gentle email follow-up after leaving a voicemail for a property owner.",
+    audience: "owner",
+    type: "follow_up",
+    subject: "Following up on my call about {{property_address}}",
+    body: WRAPPER(`<p>Dear {{name}},</p>
+<p>I left you a brief voicemail today — I hope you're doing okay.</p>
+<p>I don't want to be a bother, so I'll keep this short. If you'd like to talk about options for your property at {{property_address}}, I'm here whenever you're ready. There's no rush and no pressure — I just want you to know the help is available.</p>
+<p>You can reach me at 772-812-3930, or just reply to this email. Even if it's just to ask a question, I'm happy to help.</p>
+<p>Warmly,<br>Eden</p>`),
+    variables: ["name", "property_address"],
+    tone: "Gentle, no pressure, availability without pushiness",
+  },
 ];
 
 export function getCategories() {
