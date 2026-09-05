@@ -14,7 +14,7 @@ import { matchPropertyToAlerts } from '../../shared/alerts.ts';
  * Runs nightly after the scrape pipeline.
  */
 
-const BATCH_SIZE = 3;
+const BATCH_SIZE = 20;
 const TIME_LIMIT_MS = 250000; // stop before the 300s serverless timeout
 
 export default async function(req) {
@@ -72,8 +72,8 @@ export default async function(req) {
           const attempts = (p.image_fetch_attempts || 0) + 1;
           stillDraft++;
 
-          // After 3 failed attempts, promote to active anyway (visible > invisible)
-          if (attempts >= 3) {
+          // After 1 failed attempt, promote to active anyway (visible > invisible)
+          if (attempts >= 1) {
             await base44.asServiceRole.entities.Property.update(p.id, { status: 'active', image_fetch_attempts: attempts });
             promoted++;
             try {

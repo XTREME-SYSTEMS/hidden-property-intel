@@ -2,7 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { scrapeSource } from '../../shared/scraper.ts';
 import { scorePropertyRecord } from '../../shared/scoring.ts';
 
-const SOURCES_PER_RUN = 5; // each source = 1 LLM web-search call (~4s); 5 per run stays within time limits
+const SOURCES_PER_RUN = 15; // each source = 1 LLM web-search call (~4s); 15 per run stays within time limits
 
 export default async function(req) {
   try {
