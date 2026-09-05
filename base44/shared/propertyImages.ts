@@ -4,8 +4,8 @@
  * Two-step process:
  *  1. InvokeLLM web-search finds the real listing page URL for the address
  *     (prefers Redfin, Homes.com, Trulia, Auction.com, propertyonion.com —
- *      Zillow and Realtor.com block Browserbase extraction).
- *  2. Browserbase Fetch renders the page and extracts real <img> URLs.
+ *      Zillow and Realtor.com block extraction).
+ *  2. The self-hosted cloudbrowser engine renders the page and extracts real <img> URLs.
  *
  * Used by:
  *  - fetchPropertyImages backend function (admin batch tool)
@@ -14,6 +14,7 @@
  */
 
 import { secrets } from 'base44:runtime';
+import { fetchRenderedHtml } from './browserEngine.ts';
 
 const LISTING_AND_IMAGE_SCHEMA = {
   type: 'object',
@@ -100,21 +101,8 @@ function resolveUrl(url, base) {
 }
 
 async function fetchImagesFromPage(listingUrl) {
-  const apiKey = secrets.get('BROWSERBASE_API_KEY');
-  if (!apiKey) throw new Error('BROWSERBASE_API_KEY not set');
-
-  // Fetch the raw rendered HTML (no format = raw content, cheapest option)
-  const res = await fetch('https://api.browserbase.com/v1/fetch', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-bb-api-key': apiKey },
-    body: JSON.stringify({ url: listingUrl })
-  });
-  const text = await res.text();
-  let j = {};
-  try { j = JSON.parse(text); } catch { j = { content: text }; }
-  if (!res.ok) throw new Error(j.error?.message || 'Browserbase fetch failed');
-
-  const html = typeof j === 'string' ? j : (j.content || j.html || '');
+  // Self-hosted cloudbrowser engine renders the page and returns full HTML.
+  const { html } = await fetchRenderedHtml(listingUrl, { timeout: 45000 });
   if (!html || html.length < 100) return [];
 
   const images = [];
@@ -214,12 +202,12 @@ export async function fetchPropertyImages(base44, property) {
 
     let images = llmImages;
 
-    // Step 2: If LLM didn't find direct images, fall back to Browserbase HTML parsing
+    // Step 2: If LLM didn't find direct images, fall back to cloudbrowser HTML parsing
     if (images.length === 0 && listingUrl) {
       try {
         images = await fetchImagesFromPage(listingUrl);
       } catch (e) {
-        // Browserbase failed — continue with whatever we have
+        // cloudbrowser failed — continue with whatever we have
       }
     }
 

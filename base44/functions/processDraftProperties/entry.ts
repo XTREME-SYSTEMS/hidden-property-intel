@@ -6,7 +6,7 @@ import { matchPropertyToAlerts } from '../../shared/alerts.ts';
 /**
  * Batch processor for draft properties (scraped but not yet image-verified/scored).
  *
- * 1. Fetches real listing images for draft properties via Browserbase
+ * 1. Fetches real listing images for draft properties via the self-hosted cloudbrowser engine
  * 2. If images found, promotes to 'active' and scores via LLM
  * 3. Properties that can't get real photos stay as 'draft' (hidden from listings)
  *

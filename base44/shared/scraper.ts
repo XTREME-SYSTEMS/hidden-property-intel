@@ -5,14 +5,15 @@
  *  - "ai" (default): uses the built-in LLM web-search (Gemini + live web) to harvest
  *    REAL current distressed listings for a target region. Works for JS-rendered
  *    county portals and aggregator sites alike, because the LLM searches the live web.
- *  - "browser": uses Browserbase Fetch for sources that expose a direct static
- *    listing URL (structured-JSON extraction).
+ *  - "browser": uses the owner's self-hosted cloudbrowser engine to render the
+ *    listing URL, then LLM extracts structured-JSON from the HTML.
  *
  * Both paths upsert Property + Owner records with address+zip dedupe.
  */
 
 import { fetchPropertyImages, hasRealImages } from './propertyImages.ts';
 import { normalizeAddress, dedupeKey } from './addressUtils.ts';
+import { fetchRenderedHtml } from './browserEngine.ts';
 
 const VALID_DISTRESS = new Set([
   'pre-foreclosure', 'foreclosure', 'probate_inherited', 'tax_delinquent',
@@ -107,22 +108,18 @@ async function harvestViaAI(base44, source, cfg, overrides) {
   return [];
 }
 
-async function harvestViaBrowser(source, url, cfg) {
-  const apiKey = (await import('base44:runtime')).secrets.get('BROWSERBASE_API_KEY');
+async function harvestViaBrowser(base44, source, url, cfg) {
+  // Self-hosted cloudbrowser engine renders the page, then LLM extracts listings.
   const targetUrl = url || source?.url;
-  const fetchRes = await fetch('https://api.browserbase.com/v1/fetch', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-bb-api-key': apiKey },
-    body: JSON.stringify({ url: targetUrl, format: 'json', schema: BROWSER_SCHEMA })
+  if (!targetUrl) throw new Error('No URL to scrape for this source');
+  const { html } = await fetchRenderedHtml(targetUrl, { timeout: 45000 });
+  if (!html || html.length < 200) return [];
+  const r = await base44.asServiceRole.integrations.Core.InvokeLLM({
+    prompt: `You are a distressed-property data harvester. Extract real property listings present in the following rendered HTML from ${source?.name || targetUrl}. Return ONLY properties that actually appear in the HTML — do NOT invent any.\n\nHTML:\n${html.slice(0, 45000)}`,
+    response_json_schema: BROWSER_SCHEMA,
   });
-  const text = await fetchRes.text();
-  let fetchJson = {};
-  try { fetchJson = JSON.parse(text); } catch (e) { fetchJson = { error: { message: text.slice(0, 200) } }; }
-  if (!fetchRes.ok) throw new Error(fetchJson.error?.message || 'Browserbase fetch failed');
-  let content = fetchJson.content;
-  if (typeof content === 'string') { try { content = JSON.parse(content); } catch (e) {} }
-  if (content && Array.isArray(content.properties)) return content.properties;
-  if (Array.isArray(content)) return content;
+  if (Array.isArray(r?.properties)) return r.properties;
+  if (Array.isArray(r)) return r;
   return [];
 }
 
@@ -198,7 +195,7 @@ export async function scrapeSource(base44, { source, url, distress_type, state }
     if (method === 'cloudbrowser') {
       props = await harvestViaCloudBrowser(source, url, cfg);
     } else if (method === 'browser') {
-      props = await harvestViaBrowser(source, url, cfg);
+      props = await harvestViaBrowser(base44, source, url, cfg);
     } else {
       props = await harvestViaAI(base44, source, cfg, { distress_type, state });
     }

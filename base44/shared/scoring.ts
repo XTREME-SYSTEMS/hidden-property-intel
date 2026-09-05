@@ -139,7 +139,7 @@ Find comparable sales within 1 mile in the last 12 months, estimate current mark
     property_score: r.overall_score
   });
 
-  // fetch REAL listing photos via Browserbase (no AI-generated images)
+  // fetch REAL listing photos via the self-hosted cloudbrowser engine (no AI-generated images)
   if (!hasRealImages(property)) {
     try {
       await fetchPropertyImages(base44, property);

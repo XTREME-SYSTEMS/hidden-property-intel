@@ -10,7 +10,7 @@ import { fetchPropertyImages, hasRealImages } from '../../shared/propertyImages.
  * them in the correct property.images field.
  *
  * - Uses LLM web-search to find the real listing page (Redfin, Homes.com, etc.)
- * - Uses Browserbase to extract real <img> URLs from the page
+ * - Uses the self-hosted cloudbrowser engine to extract real <img> URLs from the page
  * - Validates each URL is reachable and is an image (HEAD/GET check)
  * - No AI-generated images — only real scraped photos
  *
