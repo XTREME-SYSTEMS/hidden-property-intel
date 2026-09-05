@@ -10,7 +10,7 @@ const BROKER = {
   name: "Steve Giordano",
   title: "Licensed Real Estate Broker",
   company: "Giordano Customs",
-  phone: "772-812-3930",
+  phone: "833-484-3799",
   address: "951 SW Country Club Dr, Suite 102, Port St. Lucie, FL",
 };
 

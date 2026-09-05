@@ -72,10 +72,10 @@ export default function Contact() {
         <div>
           <p className="text-[10px] uppercase tracking-[0.3em] text-black/40">Direct contact</p>
           <div className="mt-6 space-y-6">
-            <a href="tel:+17728123930" className="flex items-start gap-4 group">
+            <a href="tel:+18334843799" className="flex items-start gap-4 group">
               <Phone className="mt-0.5 h-5 w-5 text-black/60" />
               <div>
-                <p className="font-display text-base">772-812-3930</p>
+                <p className="font-display text-base">833-484-3799</p>
                 <p className="text-xs text-black/50">Steve Giordano, Licensed Real Estate Broker</p>
               </div>
             </a>
