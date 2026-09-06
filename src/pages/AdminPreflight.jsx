@@ -12,14 +12,17 @@ export default function AdminPreflight() {
 
   const runAudit = useCallback(async () => {
     setRunning(true);
+    setLoading(true);
     setError(null);
     try {
       const res = await base44.functions.invoke("systemPreflight", {});
       setReport(res.data);
     } catch (e) {
       setError(e.response?.data?.error || e.message);
+    } finally {
+      setLoading(false);
+      setRunning(false);
     }
-    setRunning(false);
   }, []);
 
   useEffect(() => { runAudit(); }, [runAudit]);
