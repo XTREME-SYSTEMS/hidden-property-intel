@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   LayoutDashboard, Database, Mail, FlaskConical, Search, Cpu, Target, Users, Home, Blocks, Calculator, Scale, TrendingUp, BarChart3,
-  ArrowRight, X, ArrowLeft, Lightbulb, BookOpen, Globe, Building2, Handshake, Stamp, Radar, Sparkles, Key, Phone, Mic, Calendar
+  ArrowRight, X, ArrowLeft, Lightbulb, BookOpen, Globe, Building2, Handshake, Stamp, Radar, Sparkles, Key, Phone, Mic, Calendar, Rocket
 } from "lucide-react";
 import AdminOverview from "@/components/admin/AdminOverview";
 import AdminChatBar from "@/components/admin/AdminChatBar";
@@ -40,8 +40,10 @@ import AdminApiKeys from "@/pages/AdminApiKeys";
 import AdminNumbers from "@/pages/AdminNumbers";
 import AdminEdenVoice from "@/pages/AdminEdenVoice";
 import AdminCalendar from "@/pages/AdminCalendar";
+import AdminPreflight from "@/pages/AdminPreflight";
 
 const NAV_ITEMS = [
+  { id: "preflight", icon: Rocket, label: "Pre-Flight Audit", desc: "End-to-end system score & status", component: AdminPreflight },
   { id: "overview", icon: LayoutDashboard, label: "Dashboard", desc: "Overview & metrics" },
   { id: "analytics", icon: BarChart3, label: "Analytics", desc: "Performance & intelligence", component: AdminAnalytics },
   { id: "sources", icon: Database, label: "Data Sources", desc: "Scrape pipeline", component: AdminSources },
