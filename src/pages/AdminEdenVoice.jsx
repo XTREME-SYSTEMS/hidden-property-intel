@@ -13,7 +13,7 @@ const VOICE_OPTIONS = [
 export default function AdminEdenVoice() {
   const [tab, setTab] = useState("test");
   const [voice, setVoice] = useState("honey");
-  const [testText, setTestText] = useState("Hi, this is Eden Skye with Hidden Property Intel. I'm calling about a property in your area — is this a good time to talk for just a couple of minutes?");
+  const [testText, setTestText] = useState("Hi, this is Eden Skye with Hidden Property Intel, calling from 954-884-8885. I'm calling about a property in your area — is this a good time to talk for just a couple of minutes?");
   const [audioUrl, setAudioUrl] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
@@ -96,9 +96,22 @@ export default function AdminEdenVoice() {
             <Mic className="h-5 w-5 text-black/60" />
             <h2 className="font-display text-xl">Eden Skye Voice Configuration</h2>
           </div>
-          <p className="mt-1 text-xs text-black/50">
-            Autonomous AI voice — ultra-humanistic outbound calls, voicemail transcription, and call orchestration.
-          </p>
+          <div>
+            <p className="mt-1 text-xs text-black/50">
+              Autonomous AI voice — ultra-humanistic outbound calls, voicemail transcription, and call orchestration.
+            </p>
+            <div className="mt-2 flex items-center gap-3 text-[11px]">
+              <span className="inline-flex items-center gap-1.5 rounded-sm border border-black/10 bg-black/[0.02] px-2.5 py-1">
+                <Phone className="h-3 w-3 text-black/50" />
+                <span className="font-medium">Caller ID:</span>
+                <span className="text-black/70">954-884-8885</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-sm border border-black/10 bg-black/[0.02] px-2.5 py-1">
+                <span className="font-medium">Entity:</span>
+                <span className="text-black/70">Strategic Minds AI LLC</span>
+              </span>
+            </div>
+          </div>
         </div>
         <div className="flex items-center gap-1 rounded-sm border border-black/10 p-1">
           <button onClick={() => setTab("test")} className={`rounded-sm px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] ${tab === "test" ? "bg-black text-white" : "text-black/50"}`}>Voice Test</button>

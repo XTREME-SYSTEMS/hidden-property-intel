@@ -15,6 +15,11 @@ const VOICES = {
 // Eden's default voice — warm, intelligent, calm (matches her profile)
 const DEFAULT_VOICE = 'honey';
 
+// Business identity — Strategic Minds AI LLC (fully legal, EIN established)
+const COMPANY = 'Strategic Minds AI LLC';
+const BRAND = 'Hidden Property Intel';
+const CALLER_ID = '+19548848885';
+
 export default async function(req: Request): Promise<Response> {
   try {
     const base44 = createClientFromRequest(req);
@@ -56,7 +61,7 @@ export default async function(req: Request): Promise<Response> {
         return Response.json({ error: 'contact_name and call_purpose are required' }, { status: 400 });
       }
 
-      const prompt = `You are Eden Skye, Executive Assistant at Hidden Property Intel. You are about to make a ${call_purpose} phone call to ${contact_name}, a ${contact_type || 'contact'}.
+      const prompt = `You are Eden Skye, Executive Assistant at ${BRAND} (operated by ${COMPANY}). You are about to make a ${call_purpose} phone call to ${contact_name}, a ${contact_type || 'contact'}.
 
 Context: ${context || 'No additional context provided.'}
 
@@ -95,6 +100,8 @@ Return JSON: { "script": "the full voice script" }`;
         voice: voice || DEFAULT_VOICE,
         contact_name,
         call_purpose,
+        caller_id: CALLER_ID,
+        company: COMPANY,
       });
     }
 
@@ -102,6 +109,7 @@ Return JSON: { "script": "the full voice script" }`;
     if (action === 'test') {
       const { voice } = body;
       const sampleText = body.text || `Hi, this is Eden Skye with Hidden Property Intel. I'm calling about a property in your area — is this a good time to talk for just a couple of minutes?`;
+      // Note: outbound caller ID is ${CALLER_ID} (${COMPANY})
       const res = await base44.asServiceRole.integrations.Core.GenerateSpeech({
         text: sampleText,
         voice: voice || DEFAULT_VOICE,
@@ -111,6 +119,8 @@ Return JSON: { "script": "the full voice script" }`;
         url: res.url,
         voice: voice || DEFAULT_VOICE,
         text: sampleText,
+        caller_id: CALLER_ID,
+        company: COMPANY,
       });
     }
 
