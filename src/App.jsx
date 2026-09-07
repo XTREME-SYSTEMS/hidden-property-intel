@@ -48,6 +48,7 @@ import AdminNumbers from '@/pages/AdminNumbers';
 import AdminEdenVoice from '@/pages/AdminEdenVoice';
 import AdminCalendar from '@/pages/AdminCalendar';
 import AdminPreflight from '@/pages/AdminPreflight';
+import FloridaSourceDirectory from '@/pages/FloridaSourceDirectory';
 import PortalRouter from '@/pages/PortalRouter';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
@@ -140,6 +141,7 @@ const AuthenticatedApp = () => {
         <Route path="/admin/eden-voice" element={<AdminEdenVoice />} />
         <Route path="/admin/calendar" element={<AdminCalendar />} />
         <Route path="/admin/preflight" element={<AdminPreflight />} />
+        <Route path="/admin/florida-sources" element={<FloridaSourceDirectory />} />
         </Route>
         <Route path="/eden-skye" element={<EdenSkyeProfile />} />
         <Route path="/eden-skye/chat" element={<EdenSkyeChat />} />
