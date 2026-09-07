@@ -14,8 +14,8 @@ import { matchPropertyToAlerts } from '../../shared/alerts.ts';
  * Runs nightly after the scrape pipeline.
  */
 
-const BATCH_SIZE = 20;
-const TIME_LIMIT_MS = 250000; // stop before the 300s serverless timeout
+const BATCH_SIZE = 5; // reduced from 20 — image fetch + LLM scoring per property was causing 504 timeouts
+const TIME_LIMIT_MS = 200000; // stop before the 300s serverless timeout (wider safety margin)
 
 export default async function(req) {
   try {

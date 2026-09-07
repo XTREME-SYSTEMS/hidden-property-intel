@@ -78,6 +78,8 @@ export default async function(req: Request): Promise<Response> {
           days_on_market: p.days_on_market,
           images: p.images || [],
           is_featured: p.is_featured || false,
+          created_date: p.created_date,
+          updated_date: p.updated_date,
         }));
         await supabaseUpsert('properties', rows, 'base44_id');
         stats.properties = rows.length;
@@ -158,6 +160,8 @@ export default async function(req: Request): Promise<Response> {
           follow_up_frequency_days: l.follow_up_frequency_days,
           next_follow_up_date: l.next_follow_up_date,
           automation_enabled: l.automation_enabled,
+          created_date: l.created_date,
+          updated_date: l.updated_date,
         }));
         await supabaseUpsert('investor_leads', rows, 'base44_id');
         stats.leads = rows.length;
@@ -190,10 +194,12 @@ export default async function(req: Request): Promise<Response> {
     } catch (e: any) { errors.push(`deals: ${e.message}`); }
 
     // 7. Update sync_state
-    const newSyncTime = maxUpdated || new Date().toISOString();
-    try {
-      await supabaseUpsert('sync_state', { id: 'default', last_synced_at: newSyncTime, last_property_count: stats.properties }, 'id');
-    } catch (e: any) { errors.push(`sync_state: ${e.message}`); }
+    const newSyncTime = maxUpdated || lastSync || null;
+    if (newSyncTime) {
+      try {
+        await supabaseUpsert('sync_state', { id: 'default', last_synced_at: newSyncTime, last_property_count: stats.properties }, 'id');
+      } catch (e: any) { errors.push(`sync_state: ${e.message}`); }
+    }
 
     return Response.json({
       synced: stats,
