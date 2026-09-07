@@ -193,6 +193,279 @@
       "type": "string",
       "format": "date-time",
       "description": "When data enrichment was last run"
+    },
+    "arv": {
+      "type": "number",
+      "description": "After Repair Value (USD)"
+    },
+    "property_condition_score": {
+      "type": "number",
+      "description": "AI condition assessment 1-10"
+    },
+    "predictive_distress_score": {
+      "type": "number",
+      "description": "ML predicted distress likelihood 0-100"
+    },
+    "investment_opportunity_score": {
+      "type": "number",
+      "description": "Blended opportunity score 0-100"
+    },
+    "optimal_offer_price": {
+      "type": "number",
+      "description": "ML-recommended optimal offer (USD)"
+    },
+    "str_rental_estimate": {
+      "type": "number",
+      "description": "Short-term rental income estimate (USD/month)"
+    },
+    "str_occupancy_rate": {
+      "type": "number",
+      "description": "STR occupancy rate %"
+    },
+    "flood_insurance_cost": {
+      "type": "number",
+      "description": "Annual flood insurance estimate (USD)"
+    },
+    "hazard_insurance_cost": {
+      "type": "number",
+      "description": "Annual hazard insurance estimate (USD)"
+    },
+    "cdd_fees": {
+      "type": "number",
+      "description": "Annual CDD fees (USD)"
+    },
+    "hoa_fee": {
+      "type": "number",
+      "description": "Monthly HOA fee (USD)"
+    },
+    "hoa_name": {
+      "type": "string"
+    },
+    "mortgage_balance": {
+      "type": "number",
+      "description": "Estimated mortgage payoff (USD)"
+    },
+    "mortgage_lender": {
+      "type": "string"
+    },
+    "mortgage_type": {
+      "type": "string"
+    },
+    "tax_delinquent_amount": {
+      "type": "number",
+      "description": "Total delinquent taxes (USD)"
+    },
+    "tax_sale_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "foreclosure_status": {
+      "type": "string",
+      "enum": [
+        "none",
+        "pre_foreclosure",
+        "lis_pendens",
+        "judgment",
+        "auction_scheduled",
+        "sold",
+        "reo"
+      ],
+      "default": "none"
+    },
+    "foreclosure_auction_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "probate_status": {
+      "type": "string",
+      "description": "Probate case status if applicable"
+    },
+    "vacancy_detected": {
+      "type": "boolean",
+      "default": false
+    },
+    "maintenance_neglect_score": {
+      "type": "number",
+      "description": "0-100 neglect indicator from imagery"
+    },
+    "foundation_type": {
+      "type": "string"
+    },
+    "roof_material": {
+      "type": "string"
+    },
+    "roof_age": {
+      "type": "number"
+    },
+    "hvac_age": {
+      "type": "number"
+    },
+    "has_solar": {
+      "type": "boolean",
+      "default": false
+    },
+    "has_impact_windows": {
+      "type": "boolean",
+      "default": false
+    },
+    "energy_rating": {
+      "type": "string",
+      "description": "HERS score or equivalent"
+    },
+    "walk_score": {
+      "type": "number"
+    },
+    "transit_score": {
+      "type": "number"
+    },
+    "bike_score": {
+      "type": "number"
+    },
+    "sinkhole_risk": {
+      "type": "string",
+      "enum": [
+        "none",
+        "low",
+        "moderate",
+        "high",
+        "severe"
+      ],
+      "default": "none"
+    },
+    "str_legality": {
+      "type": "string",
+      "enum": [
+        "legal",
+        "restricted",
+        "prohibited",
+        "unknown"
+      ],
+      "default": "unknown"
+    },
+    "building_code_compliance": {
+      "type": "string"
+    },
+    "aerial_imagery_url": {
+      "type": "string"
+    },
+    "neighborhood_visual_score": {
+      "type": "number",
+      "description": "AI-rated street appeal 1-10"
+    },
+    "permits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string"
+          },
+          "contractor": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "code_violations_detail": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "fine_amount": {
+            "type": "number"
+          },
+          "hearing_date": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "comparable_sales": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "sale_price": {
+            "type": "number"
+          },
+          "sale_date": {
+            "type": "string"
+          },
+          "sqft": {
+            "type": "number"
+          },
+          "beds": {
+            "type": "number"
+          },
+          "baths": {
+            "type": "number"
+          },
+          "distance_miles": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "environmental_hazards": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "distress_signals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "date_detected": {
+            "type": "string"
+          },
+          "details": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "enrichment_data": {
+      "type": "object",
+      "description": "Comprehensive master enrichment payload \u2014 all 15 categories"
+    },
+    "enrichment_completeness": {
+      "type": "number",
+      "description": "0-100 percentage of enrichment fields populated",
+      "default": 0
+    },
+    "master_enriched_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When master enrichment was last run"
     }
   },
   "required": [
