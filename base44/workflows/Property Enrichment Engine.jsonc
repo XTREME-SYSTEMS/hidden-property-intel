@@ -1,0 +1,44 @@
+{
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "property_enrichment_engine",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "enrich_properties": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "enrichProperties"
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Enrich property data",
+            "description": "Add investor-relevant data to unenriched properties"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 */6 * * *",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "name": "Property Enrichment Engine",
+  "description": "Enriches active properties with investor-relevant data: rental estimates, neighborhood/school ratings, crime, flood zone, zoning, tax value, equity, occupancy, and investor summary. Runs every 6 hours."
+}

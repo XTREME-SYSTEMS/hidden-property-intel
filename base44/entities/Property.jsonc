@@ -137,6 +137,62 @@
     "is_featured": {
       "type": "boolean",
       "default": false
+    },
+    "rental_estimate": {
+      "type": "number",
+      "description": "Estimated monthly rent (USD)"
+    },
+    "neighborhood_rating": {
+      "type": "number",
+      "description": "Neighborhood quality 1-10"
+    },
+    "school_rating": {
+      "type": "number",
+      "description": "Nearby public school rating 1-10"
+    },
+    "crime_level": {
+      "type": "string",
+      "enum": [
+        "low",
+        "moderate",
+        "high",
+        "unknown"
+      ],
+      "default": "unknown"
+    },
+    "flood_zone": {
+      "type": "string",
+      "description": "FEMA flood zone designation (e.g. X, AE, VE)"
+    },
+    "zoning": {
+      "type": "string",
+      "description": "Zoning designation (e.g. RS-1, RM-2, commercial)"
+    },
+    "tax_assessed_value": {
+      "type": "number",
+      "description": "Current tax assessed value (USD)"
+    },
+    "equity_estimate": {
+      "type": "number",
+      "description": "Estimated equity: market value minus liens (USD)"
+    },
+    "occupancy_status": {
+      "type": "string",
+      "enum": [
+        "vacant",
+        "occupied",
+        "unknown"
+      ],
+      "default": "unknown"
+    },
+    "investor_summary": {
+      "type": "string",
+      "description": "AI-generated investor analysis narrative"
+    },
+    "enriched_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When data enrichment was last run"
     }
   },
   "required": [
