@@ -1,0 +1,8 @@
+{
+  "name": "property-intel-orchestrator",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Vercel cron orchestrator — triggers Railway scrapers and mirrors Base44 data into Supabase",
+  "dependencies": {}
+}
