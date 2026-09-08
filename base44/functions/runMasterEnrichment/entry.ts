@@ -36,7 +36,7 @@ export default async function(req: Request): Promise<Response> {
       const all = await base44.asServiceRole.entities.Property.filter(
         { status: 'active' },
         '-created_date',
-        50
+        200
       );
       candidates = all
         .filter(p => (p.enrichment_completeness ?? 0) < threshold)

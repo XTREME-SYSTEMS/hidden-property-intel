@@ -1,0 +1,125 @@
+{
+  "name": "Conversation",
+  "type": "object",
+  "properties": {
+    "lead_id": {
+      "type": "string",
+      "description": "Linked InvestorLead or Seller ID"
+    },
+    "lead_name": {
+      "type": "string"
+    },
+    "lead_type": {
+      "type": "string",
+      "enum": [
+        "investor",
+        "owner",
+        "heir",
+        "agent"
+      ],
+      "default": "investor"
+    },
+    "channel": {
+      "type": "string",
+      "enum": [
+        "email",
+        "sms",
+        "voice",
+        "whatsapp",
+        "linkedin",
+        "in_app"
+      ],
+      "default": "email"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "waiting_reply",
+        "responded",
+        "opted_out",
+        "closed",
+        "converted"
+      ],
+      "default": "active"
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "direction": {
+            "type": "string",
+            "enum": [
+              "outbound",
+              "inbound"
+            ]
+          },
+          "sender": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "ai_generated": {
+            "type": "boolean",
+            "default": false
+          },
+          "sent_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "ai_persona": {
+      "type": "string",
+      "description": "Eden Skye, etc."
+    },
+    "sentiment": {
+      "type": "string",
+      "enum": [
+        "positive",
+        "neutral",
+        "negative",
+        "unknown"
+      ],
+      "default": "unknown"
+    },
+    "next_action": {
+      "type": "string"
+    },
+    "next_action_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "campaign_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "lead_name"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

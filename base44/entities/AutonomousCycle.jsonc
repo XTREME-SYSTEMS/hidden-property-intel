@@ -1,0 +1,116 @@
+{
+  "name": "AutonomousCycle",
+  "type": "object",
+  "properties": {
+    "cycle_id": {
+      "type": "string",
+      "description": "Unique cycle identifier"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "running",
+        "complete",
+        "failed",
+        "skipped"
+      ],
+      "default": "running"
+    },
+    "phase": {
+      "type": "string",
+      "enum": [
+        "forensic_audit",
+        "self_reflection",
+        "architect",
+        "implement",
+        "validate",
+        "harden",
+        "optimize",
+        "push",
+        "done"
+      ],
+      "default": "forensic_audit"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "items_audited": {
+      "type": "integer",
+      "default": 0
+    },
+    "items_identified": {
+      "type": "integer",
+      "default": 0
+    },
+    "items_architected": {
+      "type": "integer",
+      "default": 0
+    },
+    "items_implemented": {
+      "type": "integer",
+      "default": 0
+    },
+    "items_validated": {
+      "type": "integer",
+      "default": 0
+    },
+    "health_before": {
+      "type": "number",
+      "default": 0
+    },
+    "health_after": {
+      "type": "number",
+      "default": 0
+    },
+    "report": {
+      "type": "object",
+      "description": "Full cycle report with phases and findings"
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "trigger_source": {
+      "type": "string",
+      "enum": [
+        "cron",
+        "manual",
+        "workflow"
+      ],
+      "default": "manual"
+    }
+  },
+  "required": [
+    "cycle_id"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

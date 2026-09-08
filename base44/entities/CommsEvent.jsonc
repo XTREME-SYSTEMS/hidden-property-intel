@@ -1,0 +1,96 @@
+{
+  "name": "CommsEvent",
+  "type": "object",
+  "properties": {
+    "conversation_id": {
+      "type": "string"
+    },
+    "campaign_id": {
+      "type": "string"
+    },
+    "lead_id": {
+      "type": "string"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "sent",
+        "delivered",
+        "opened",
+        "clicked",
+        "replied",
+        "failed",
+        "opt_out",
+        "bounced",
+        "voicemail",
+        "call_connected",
+        "call_ended"
+      ],
+      "default": "sent"
+    },
+    "channel": {
+      "type": "string",
+      "enum": [
+        "email",
+        "sms",
+        "mms",
+        "voice",
+        "whatsapp",
+        "rcs"
+      ],
+      "default": "email"
+    },
+    "direction": {
+      "type": "string",
+      "enum": [
+        "outbound",
+        "inbound"
+      ],
+      "default": "outbound"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "success",
+        "failed",
+        "pending"
+      ],
+      "default": "success"
+    },
+    "message_snippet": {
+      "type": "string",
+      "description": "First 200 chars of message"
+    },
+    "error_detail": {
+      "type": "string"
+    },
+    "metadata": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "event_type"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

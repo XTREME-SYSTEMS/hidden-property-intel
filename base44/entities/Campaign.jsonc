@@ -1,0 +1,129 @@
+{
+  "name": "Campaign",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "channel": {
+      "type": "string",
+      "enum": [
+        "sms",
+        "mms",
+        "voice",
+        "whatsapp",
+        "email",
+        "rcs",
+        "multi"
+      ],
+      "default": "email"
+    },
+    "message_template": {
+      "type": "string"
+    },
+    "voice_script": {
+      "type": "string"
+    },
+    "target_audience": {
+      "type": "string",
+      "description": "investors, owners, heirs, agents"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "scheduled",
+        "running",
+        "paused",
+        "completed",
+        "cancelled"
+      ],
+      "default": "draft"
+    },
+    "schedule_type": {
+      "type": "string",
+      "enum": [
+        "immediate",
+        "scheduled",
+        "recurring"
+      ],
+      "default": "immediate"
+    },
+    "scheduled_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "throttle_per_sec": {
+      "type": "integer",
+      "default": 10
+    },
+    "total_recipients": {
+      "type": "integer",
+      "default": 0
+    },
+    "sent_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "delivered_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "failed_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "opt_out_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "response_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "ai_persona": {
+      "type": "string",
+      "description": "Eden Skye, etc."
+    },
+    "compliance_verified": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
