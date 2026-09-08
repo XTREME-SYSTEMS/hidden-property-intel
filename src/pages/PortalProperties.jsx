@@ -3,7 +3,7 @@ import { useOutletContext } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import {
   Search, Users, Heart, Building2, RefreshCw, Loader2, ChevronDown, ChevronRight,
-  Calendar, Bell, Sparkles, ExternalLink, CheckCircle2,
+  Calendar, Bell, Sparkles, ExternalLink, CheckCircle2, UserSearch,
 } from "lucide-react";
 import CommsBar from "@/components/portal/CommsBar";
 import EnrichedPropertyPanel from "@/components/portal/EnrichedPropertyPanel";
@@ -26,19 +26,24 @@ export default function PortalProperties() {
   const [syncing, setSyncing] = useState(false);
   const [sheetUrl, setSheetUrl] = useState(null);
   const [followBusy, setFollowBusy] = useState(null);
+  const [chains, setChains] = useState([]);
+  const [scraping, setScraping] = useState(false);
+  const [scrapeMsg, setScrapeMsg] = useState(null);
 
   useEffect(() => {
     (async () => {
       setLoading(true);
       try {
-        const [inv, own, props] = await Promise.all([
+        const [inv, own, props, ch] = await Promise.all([
           base44.entities.InvestorLead.list("-created_date", 200).catch(() => []),
           base44.entities.Owner.list("-created_date", 300).catch(() => []),
           base44.entities.Property.filter({ status: "active" }, "-created_date", 300).catch(() => []),
+          base44.entities.OwnershipChain.list("-created_date", 300).catch(() => []),
         ]);
         setInvestors(inv);
         setOwners(own);
         setProperties(props);
+        setChains(ch);
       } catch {}
       setLoading(false);
     })();
@@ -56,6 +61,15 @@ export default function PortalProperties() {
     owners.filter((o) => o.owner_type === "current").forEach((o) => { if (o.property_id) m.set(o.property_id, o); });
     return m;
   }, [owners]);
+  const chainByProp = useMemo(() => {
+    const m = new Map();
+    chains.forEach((c) => {
+      if (!c.property_id) return;
+      const transfers = (c.transfers || []).filter((t) => t.to_owner);
+      if (transfers.length) m.set(c.property_id, transfers[transfers.length - 1].to_owner);
+    });
+    return m;
+  }, [chains]);
   const distressedProps = useMemo(() => properties.filter((p) => p.distress_type), [properties]);
 
   const filtered = useMemo(() => {
@@ -73,6 +87,18 @@ export default function PortalProperties() {
       setSheetUrl(res.spreadsheet_url);
     } catch (e) { alert(e.message || "Sync failed"); }
     setSyncing(false);
+  };
+
+  const scrapeNames = async () => {
+    setScraping(true);
+    setScrapeMsg(null);
+    try {
+      const res = await base44.functions.invoke("populateOwnershipChains", {});
+      setScrapeMsg(`Scraped owner names — ${res.populated || 0} populated of ${res.processed || 0} processed (${res.needing_chains || 0} remaining).`);
+      const ch = await base44.entities.OwnershipChain.list("-created_date", 300).catch(() => []);
+      setChains(ch);
+    } catch (e) { setScrapeMsg(e.message || "Scrape failed"); }
+    setScraping(false);
   };
 
   const toggleFollow = async (entity, id, current) => {
@@ -113,6 +139,11 @@ export default function PortalProperties() {
         <button onClick={syncSheets} disabled={syncing} className="inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold" style={{ background: "var(--ink)", color: "var(--gold-2)" }}>
           {syncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />} Sync to Sheets
         </button>
+        {tab === "owners" && (
+          <button onClick={scrapeNames} disabled={scraping} className="inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold" style={{ border: "1px solid var(--border)", background: "#fff", color: "var(--ink)" }}>
+            {scraping ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserSearch className="h-4 w-4" />} Scrape Names
+          </button>
+        )}
       </div>
 
       {sheetUrl && (
@@ -120,6 +151,12 @@ export default function PortalProperties() {
           <CheckCircle2 className="h-4 w-4" style={{ color: "var(--success)" }} />
           <span className="text-sm" style={{ color: "var(--ink)" }}>Google Sheet ready.</span>
           <a href={sheetUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm font-semibold" style={{ color: "var(--gold-3)" }}>Open sheet <ExternalLink className="h-3.5 w-3.5" /></a>
+        </div>
+      )}
+      {scrapeMsg && (
+        <div className="mb-4 flex items-center gap-2 rounded-lg p-3" style={{ background: "#eef2fb", border: "1px solid var(--border)" }}>
+          <UserSearch className="h-4 w-4" style={{ color: "var(--gold-3)" }} />
+          <span className="text-sm" style={{ color: "var(--ink)" }}>{scrapeMsg}</span>
         </div>
       )}
 
@@ -136,7 +173,7 @@ export default function PortalProperties() {
             const owner = isHeir ? rec : tab === "owners" ? ownerByProp.get(rec.id) : null;
             const id = rec.id;
             const open = expanded === id;
-            const name = rec.name || (tab === "owners" ? owner?.name : "");
+            const name = rec.name || (tab === "owners" ? (owner?.name || chainByProp.get(rec.id) || "") : "");
             const phone = rec.contact_phone || (tab === "owners" ? owner?.contact_phone : "");
             const email = rec.contact_email || (tab === "owners" ? owner?.contact_email : "");
             const address = tab === "owners" ? `${rec.address}, ${rec.city}, ${rec.state}` : prop ? `${prop.address}, ${prop.city}, ${prop.state}` : rec.contact_address || "";
