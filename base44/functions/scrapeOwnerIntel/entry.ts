@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.46';
 import { fetchRenderedHtml } from '../../shared/browserEngine.ts';
+import { fetchPropertyImages, hasRealImages } from '../../shared/propertyImages.ts';
 
 /**
  * Cloud-browser owner intelligence scraper.
@@ -28,7 +29,7 @@ const SCHEMA = {
   },
 };
 
-const BATCH_SIZE = 6;
+const BATCH_SIZE = 4;
 const TIME_LIMIT_MS = 240000;
 
 function stripHtml(html) {
@@ -74,6 +75,7 @@ export default async function(req: Request): Promise<Response> {
 
     const results = [];
     let foundNames = 0;
+    let foundImages = 0;
     const startedAt = Date.now();
 
     for (const p of toProcess) {
@@ -144,7 +146,19 @@ CRITICAL: Only return an owner_name you actually found in public records. Do NOT
           }
         }
 
-        results.push({ id: p.id, address: p.address, owner: r.owner_name || null, confidence: r.owner_confidence, value: r.estimated_value, score: r.investment_score });
+        // Best-effort real listing photo fetch (cloud browser) for properties without images
+        let imagesFound = 0;
+        if (!hasRealImages(p)) {
+          try {
+            const imgRes = await fetchPropertyImages(base44, p);
+            imagesFound = imgRes.found || 0;
+          } catch (e) {
+            console.error('image fetch failed', p.id, e?.message);
+          }
+        }
+
+        foundImages += imagesFound;
+        results.push({ id: p.id, address: p.address, owner: r.owner_name || null, confidence: r.owner_confidence, value: r.estimated_value, score: r.investment_score, images: imagesFound });
       } catch (e) {
         console.error('scrapeOwnerIntel property failed', p.id, e?.message);
         results.push({ id: p.id, address: p.address, error: e.message });
@@ -154,6 +168,7 @@ CRITICAL: Only return an owner_name you actually found in public records. Do NOT
     return Response.json({
       processed: results.length,
       found_names: foundNames,
+      found_images: foundImages,
       remaining: Math.max(0, distressed.length - results.length),
       results,
     });

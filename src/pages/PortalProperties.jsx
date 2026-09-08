@@ -94,7 +94,7 @@ export default function PortalProperties() {
     setScrapeMsg(null);
     try {
       const res = await base44.functions.invoke("scrapeOwnerIntel", {});
-      setScrapeMsg(`Cloud-browser scrape complete — ${res.found_names || 0} owner names found of ${res.processed || 0} processed (${res.remaining || 0} remaining).`);
+      setScrapeMsg(`Cloud-browser scrape complete — ${res.found_names || 0} owner names, ${res.found_images || 0} photos found of ${res.processed || 0} processed (${res.remaining || 0} remaining).`);
       const [own, props, ch] = await Promise.all([
         base44.entities.Owner.list("-created_date", 300).catch(() => []),
         base44.entities.Property.filter({ status: "active" }, "-created_date", 300).catch(() => []),
