@@ -2,7 +2,6 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { X } from "lucide-react";
 import { PORTAL_NAV } from "@/lib/portalNav";
-import Logo from "@/components/luxury/Logo";
 
 export default function PortalSidebar({ role, user, mobileOpen, onClose }) {
   const location = useLocation();
@@ -18,11 +17,8 @@ export default function PortalSidebar({ role, user, mobileOpen, onClose }) {
         }`}
         style={{ borderColor: "var(--border)" }}
       >
-        <div className="flex h-[72px] items-center justify-between border-b px-5" style={{ borderColor: "var(--border)" }}>
-          <Link to="/" onClick={onClose} className="flex items-center">
-            <Logo />
-          </Link>
-          <button className="lg:hidden" onClick={onClose} aria-label="Close menu">
+        <div className="flex items-center justify-end border-b px-4 py-3 lg:hidden" style={{ borderColor: "var(--border)" }}>
+          <button onClick={onClose} aria-label="Close menu">
             <X className="h-5 w-5" style={{ color: "var(--ink)" }} />
           </button>
         </div>
