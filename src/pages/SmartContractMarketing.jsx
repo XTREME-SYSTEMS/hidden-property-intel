@@ -3,8 +3,9 @@ import { Link } from "react-router-dom";
 import {
   ShieldCheck, Clock, Wallet, FileSignature, Scale, Lock, Gavel,
   CheckCircle2, XCircle, ArrowRight, AlertTriangle, BadgeCheck,
-  Handshake, Building2, TrendingDown, Sparkles, Phone,
+  Handshake, Building2, TrendingDown, Sparkles, Phone, PlayCircle,
 } from "lucide-react";
+import SmartContractSimulator from "@/components/SmartContractSimulator";
 
 const BROKER = {
   name: "Steve Giordano",
@@ -231,6 +232,26 @@ export default function SmartContractMarketing() {
               The smart contract is the escrow instrument; the recorded deed is the legal transfer of ownership. Both work
               together — the blockchain proves what happened, the county record proves who owns the property.
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* SMART CONTRACT SIMULATOR */}
+      <section className="bg-[#f7f5f0] px-6 py-20 lg:px-12 lg:py-28">
+        <div className="mx-auto max-w-[1400px]">
+          <div className="flex items-center gap-3">
+            <PlayCircle className="h-6 w-6 text-gold" />
+            <p className="text-[11px] uppercase tracking-[0.4em] text-black/40">Try it live</p>
+          </div>
+          <h2 className="mt-3 max-w-3xl font-display text-3xl font-light tracking-tight sm:text-5xl">
+            See a smart-contract close run in real time.
+          </h2>
+          <p className="mt-5 max-w-2xl text-sm leading-relaxed text-black/60">
+            Enter your deal numbers below and watch the contract deploy, fund, collect signatures, clear contingencies,
+            and release funds — exactly as it would on the Polygon blockchain. No wallet needed. This is a live simulation.
+          </p>
+          <div className="mt-12">
+            <SmartContractSimulator />
           </div>
         </div>
       </section>

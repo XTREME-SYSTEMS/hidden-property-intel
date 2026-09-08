@@ -186,16 +186,18 @@ export default function Pricing() {
       </div>
 
       {/* TIER CARDS */}
-      <div className="mt-16 grid gap-6 lg:grid-cols-5">
+      <div className="mt-16 grid items-start gap-6 lg:grid-cols-5">
         {TIERS.map((t) => (
           <div
             key={t.name}
-            className={`relative flex flex-col rounded-sm border p-6 ${
-              t.highlight ? "border-black bg-white shadow-2xl lg:scale-105" : "border-black/10 bg-white"
+            className={`relative flex flex-col rounded-lg border p-6 transition-all duration-300 ease-out ${
+              t.highlight
+                ? "border-black bg-white shadow-xl lg:-mt-3 lg:mb-3 hover:-translate-y-2 hover:shadow-2xl"
+                : "border-black/10 bg-white hover:-translate-y-2 hover:border-black/30 hover:shadow-xl"
             }`}
           >
             {t.badge && (
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gold px-4 py-1 text-[9px] uppercase tracking-[0.2em] text-black">
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-gold px-4 py-1 text-[9px] font-bold uppercase tracking-[0.2em] text-black shadow-md">
                 {t.badge}
               </span>
             )}
@@ -254,35 +256,48 @@ export default function Pricing() {
           <h2 className="mt-3 font-display text-3xl font-light tracking-tight sm:text-4xl">
             How we stack up against the market.
           </h2>
+          <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-black/50">
+            Feature-by-feature, platform-by-platform. HPI matches or beats every competitor — at a lower price.
+          </p>
         </div>
-        <div className="mt-12 overflow-x-auto">
+        <div className="mt-10 overflow-x-auto rounded-lg border border-black/10">
           <table className="w-full border-collapse text-sm">
             <thead>
-              <tr className="border-b border-black/15 text-left text-[10px] uppercase tracking-[0.3em] text-black/40">
-                <th className="pb-4 pr-4">Feature</th>
-                <th className="pb-4 pr-4 text-center">
-                  <span className="flex flex-col items-center gap-1">
-                    <Shield className="h-4 w-4 text-gold" />
-                    HPI
+              <tr className="border-b border-black/10 bg-black/[0.02]">
+                <th className="sticky left-0 bg-black/[0.02] px-5 py-5 text-left text-[10px] uppercase tracking-[0.25em] text-black/40">Feature</th>
+                <th className="px-5 py-5 text-center">
+                  <span className="flex flex-col items-center gap-1.5">
+                    <span className="grid h-9 w-9 place-items-center rounded-full bg-black text-gold">
+                      <Shield className="h-4 w-4" />
+                    </span>
+                    <span className="font-display text-sm font-medium text-black">HPI</span>
+                    <span className="text-[9px] uppercase tracking-[0.15em] text-gold">Best value</span>
                   </span>
                 </th>
-                <th className="pb-4 pr-4 text-center">PropStream</th>
-                <th className="pb-4 pr-4 text-center">DealMachine</th>
-                <th className="pb-4 text-center">PropertyRadar</th>
+                <th className="px-5 py-5 text-center text-[10px] uppercase tracking-[0.25em] text-black/40">PropStream</th>
+                <th className="px-5 py-5 text-center text-[10px] uppercase tracking-[0.25em] text-black/40">DealMachine</th>
+                <th className="px-5 py-5 text-center text-[10px] uppercase tracking-[0.25em] text-black/40">PropertyRadar</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-black/10">
-              {COMPETITOR_TABLE.map((row) => (
-                <tr key={row.feature} className="align-middle">
-                  <td className="py-4 pr-4 font-medium text-black/80">{row.feature}</td>
-                  <td className="py-4 pr-4 text-center"><Mark val={row.us} /></td>
-                  <td className="py-4 pr-4 text-center"><Mark val={row.propstream} /></td>
-                  <td className="py-4 pr-4 text-center"><Mark val={row.dealmachine} /></td>
-                  <td className="py-4 text-center"><Mark val={row.propertyradar} /></td>
+            <tbody>
+              {COMPETITOR_TABLE.map((row, i) => (
+                <tr key={row.feature} className={`align-middle ${i % 2 === 0 ? "bg-white" : "bg-black/[0.015]"}`}>
+                  <td className="sticky left-0 border-r border-black/5 px-5 py-4 font-medium text-black/80">{row.feature}</td>
+                  <td className="bg-gold/[0.04] px-5 py-4 text-center">
+                    <div className="flex justify-center"><Mark val={row.us} /></div>
+                  </td>
+                  <td className="px-5 py-4 text-center"><div className="flex justify-center"><Mark val={row.propstream} /></div></td>
+                  <td className="px-5 py-4 text-center"><div className="flex justify-center"><Mark val={row.dealmachine} /></div></td>
+                  <td className="px-5 py-4 text-center"><div className="flex justify-center"><Mark val={row.propertyradar} /></div></td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+        <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-black/50">
+          <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-600" /> Included</span>
+          <span className="flex items-center gap-1.5"><span className="text-amber-600">Partial</span> Limited or restricted</span>
+          <span className="flex items-center gap-1.5"><X className="h-3.5 w-3.5 text-black/20" /> Not available</span>
         </div>
       </section>
 
