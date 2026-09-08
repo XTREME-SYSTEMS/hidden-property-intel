@@ -6,6 +6,10 @@
       "type": "string",
       "description": "Human-readable label for this key"
     },
+    "description": {
+      "type": "string",
+      "description": "Optional notes about what this key connects to"
+    },
     "key_prefix": {
       "type": "string",
       "description": "First 12 chars of the key for identification without exposing the secret"
@@ -23,17 +27,47 @@
       "items": {
         "type": "string",
         "enum": [
+          "admin",
+          "users",
+          "agent",
+          "investor",
+          "seller",
+          "properties",
+          "properties:read",
+          "deals",
+          "bids",
+          "smart_contracts",
+          "outreach",
+          "enrichment",
+          "scraping",
+          "analytics",
+          "owners",
+          "leads",
+          "shadow",
+          "comms",
+          "vision_cortex",
+          "xtreme_comms",
+          "cloud_browser",
           "lookups",
           "provisioning",
           "numbers:read",
-          "numbers:write",
-          "admin"
+          "numbers:write"
         ]
       },
       "default": [
-        "lookups",
-        "numbers:read"
+        "properties:read"
       ]
+    },
+    "system_type": {
+      "type": "string",
+      "enum": [
+        "general",
+        "vision_cortex",
+        "xtreme_comms",
+        "cloud_browser"
+      ],
+      "default": "general",
+      "description": "Special system connector type \u2014 enables bi-directional live connection"
     },
     "status": {
       "type": "string",

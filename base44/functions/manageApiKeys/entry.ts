@@ -43,15 +43,17 @@ export default async function(req: Request): Promise<Response> {
 
     // GENERATE — create a new API key, return the raw key ONCE
     if (action === 'generate') {
-      const { name, scopes } = body;
+      const { name, scopes, description, system_type } = body;
       if (!name) return Response.json({ error: 'Name is required' }, { status: 400 });
       const { rawKey, keyHash, keyPrefix } = await generateKey();
       const key = await base44.entities.ApiKey.create({
         name,
+        description: description || '',
         key_prefix: keyPrefix,
         key_hash: keyHash,
         tenant_id: user.id,
-        scopes: scopes || ['lookups', 'numbers:read'],
+        scopes: scopes || ['properties:read'],
+        system_type: system_type || 'general',
         status: 'active',
         request_count: 0
       });
@@ -61,7 +63,132 @@ export default async function(req: Request): Promise<Response> {
         key_prefix: keyPrefix,
         name: key.name,
         scopes: key.scopes,
+        system_type: key.system_type,
         message: 'Save this key now — it will not be shown again.'
+      });
+    }
+
+    // UPDATE — edit name, description, or scopes on an existing key
+    if (action === 'update') {
+      const { key_id, name, description, scopes } = body;
+      if (!key_id) return Response.json({ error: 'key_id is required' }, { status: 400 });
+      const existing = await base44.entities.ApiKey.get(key_id);
+      if (!existing) return Response.json({ error: 'Key not found' }, { status: 404 });
+      if (user.role !== 'admin' && existing.tenant_id !== user.id) {
+        return Response.json({ error: 'Forbidden' }, { status: 403 });
+      }
+      const updates = {};
+      if (name !== undefined) updates.name = name;
+      if (description !== undefined) updates.description = description;
+      if (scopes !== undefined) updates.scopes = scopes;
+      await base44.entities.ApiKey.update(key_id, updates);
+      return Response.json({ success: true, message: 'Key updated' });
+    }
+
+    // PRESETS — return the special system connector configurations
+    if (action === 'presets') {
+      return Response.json({
+        system_connectors: [
+          {
+            system_type: 'vision_cortex',
+            name: 'Vision Cortex — Autonomous AI Management',
+            description: 'Full bi-directional live connection for the autonomous AI orchestrator. Enables insight, enrichment, analysis, fix, heal, harden, optimize, and continuous management oversight.',
+            scopes: ['vision_cortex', 'properties', 'enrichment', 'analytics', 'shadow', 'scraping'],
+            capabilities: [
+              'Run forensic audits across all properties',
+              'Trigger master enrichment cycles',
+              'Analyze and score property data',
+              'Auto-heal incomplete records',
+              'Harden and optimize system state',
+              'Continuous oversight & self-reflection',
+              'Read/write property entities',
+              'Invoke shadow orchestrator cycles',
+              'Access analytics and reporting'
+            ],
+            endpoints: [
+              'POST /functions/autonomousMasterLoop',
+              'POST /functions/runMasterEnrichment',
+              'POST /functions/validateEnrichment',
+              'POST /functions/shadowOrchestrator',
+              'POST /functions/shadowDealHunt',
+              'POST /functions/scoreAllActiveProperties',
+              'POST /functions/predictDistress',
+              'GET  /functions/validateSystem'
+            ]
+          },
+          {
+            system_type: 'xtreme_comms',
+            name: 'Xtreme Communication — Multi-Channel Orchestration',
+            description: 'Full bi-directional live connection for the unified communication system. Enables campaigns, conversations, templates, events, and multi-channel messaging across email, SMS, voice, WhatsApp, and social.',
+            scopes: ['xtreme_comms', 'comms', 'outreach', 'leads', 'owners', 'investor'],
+            capabilities: [
+              'Create and manage campaigns',
+              'Track conversations and sentiment',
+              'Generate and manage communication templates',
+              'Log communication events',
+              'Send outreach across all channels',
+              'AI-powered reply generation',
+              'Manage investor and owner leads',
+              'Autonomous follow-up engine'
+            ],
+            endpoints: [
+              'POST /functions/xtremeComms',
+              'POST /functions/generateInvestorOutreach',
+              'POST /functions/generateOwnerOutreach',
+              'POST /functions/generateReplyEmail',
+              'POST /functions/validateEmailQuality',
+              'POST /functions/runDailyOutreach',
+              'POST /functions/autonomousFollowUp',
+              'POST /functions/processFollowUps'
+            ]
+          },
+          {
+            system_type: 'cloud_browser',
+            name: 'Cloud Browser — Autonomous Scraping Engine',
+            description: 'Full bi-directional live connection for the self-hosted cloud browser engine. Enables property scraping, image capture, JS-rendered page browsing, and data extraction with LLM-powered enrichment.',
+            scopes: ['cloud_browser', 'scraping', 'properties', 'enrichment'],
+            capabilities: [
+              'Scrape distressed property listings',
+              'Capture and ingest property images',
+              'Browse JS-rendered pages',
+              'Extract structured data via LLM',
+              'Sync scraped data to Base44',
+              'Process draft properties',
+              'Run daily scrape pipeline',
+              'Geocode and normalize addresses'
+            ],
+            endpoints: [
+              'POST /functions/scrapeProperties',
+              'POST /functions/scrapePropertyImages',
+              'POST /functions/ingestPropertyImages',
+              'POST /functions/processDraftProperties',
+              'POST /functions/runDailyScrapePipeline',
+              'POST /functions/manualScrapeTargets',
+              'POST /functions/geocodeProperties',
+              'POST /functions/normalizeAddresses'
+            ]
+          }
+        ],
+        platform_scopes: [
+          { scope: 'admin', label: 'Admin', description: 'Full platform administrator access' },
+          { scope: 'users', label: 'Users', description: 'User management and invitations' },
+          { scope: 'agent', label: 'Agent', description: 'Agent dashboard, documents, commissions' },
+          { scope: 'investor', label: 'Investor', description: 'Investor profiles, pipeline, bids' },
+          { scope: 'seller', label: 'Seller', description: 'Seller dashboard and property posting' },
+          { scope: 'properties', label: 'Properties', description: 'Full property CRUD access' },
+          { scope: 'properties:read', label: 'Properties (Read)', description: 'Read-only property access' },
+          { scope: 'deals', label: 'Deals', description: 'Deal management and pipeline' },
+          { scope: 'bids', label: 'Bids', description: 'Bidding system access' },
+          { scope: 'smart_contracts', label: 'Smart Contracts', description: 'Blockchain contract operations' },
+          { scope: 'outreach', label: 'Outreach', description: 'Outreach and campaign management' },
+          { scope: 'enrichment', label: 'Enrichment', description: 'Data enrichment engine access' },
+          { scope: 'scraping', label: 'Scraping', description: 'Scraping engine control' },
+          { scope: 'analytics', label: 'Analytics', description: 'Analytics and reporting data' },
+          { scope: 'owners', label: 'Owners', description: 'Property owner records' },
+          { scope: 'leads', label: 'Leads', description: 'Investor lead management' },
+          { scope: 'shadow', label: 'Shadow Orchestrator', description: 'Shadow audit and deal hunt' },
+          { scope: 'comms', label: 'Communications', description: 'Xtreme comms entities access' }
+        ]
       });
     }
 
