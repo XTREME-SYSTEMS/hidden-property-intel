@@ -93,9 +93,15 @@ export default function PortalProperties() {
     setScraping(true);
     setScrapeMsg(null);
     try {
-      const res = await base44.functions.invoke("populateOwnershipChains", {});
-      setScrapeMsg(`Scraped owner names — ${res.populated || 0} populated of ${res.processed || 0} processed (${res.needing_chains || 0} remaining).`);
-      const ch = await base44.entities.OwnershipChain.list("-created_date", 300).catch(() => []);
+      const res = await base44.functions.invoke("scrapeOwnerIntel", {});
+      setScrapeMsg(`Cloud-browser scrape complete — ${res.found_names || 0} owner names found of ${res.processed || 0} processed (${res.remaining || 0} remaining).`);
+      const [own, props, ch] = await Promise.all([
+        base44.entities.Owner.list("-created_date", 300).catch(() => []),
+        base44.entities.Property.filter({ status: "active" }, "-created_date", 300).catch(() => []),
+        base44.entities.OwnershipChain.list("-created_date", 300).catch(() => []),
+      ]);
+      setOwners(own);
+      setProperties(props);
       setChains(ch);
     } catch (e) { setScrapeMsg(e.message || "Scrape failed"); }
     setScraping(false);
