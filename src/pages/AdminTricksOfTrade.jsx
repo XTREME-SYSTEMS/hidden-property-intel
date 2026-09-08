@@ -1,7 +1,8 @@
 import React, { useState } from "react";
+import { base44 } from "@/api/base44Client";
 import {
   Lightbulb, Eye, Key, Award, ChevronDown, ChevronUp, TrendingUp,
-  Users, Home, DollarSign, AlertTriangle, Zap, Target, Brain,
+  Users, Home, DollarSign, AlertTriangle, Zap, Target, Brain, Rocket, Loader2,
 } from "lucide-react";
 
 const TRICKS = [
@@ -259,8 +260,28 @@ const TRICKS = [
 
 export default function AdminTricksOfTrade() {
   const [expandedItems, setExpandedItems] = useState({});
+  const [implementing, setImplementing] = useState({});
+  const [implementMsg, setImplementMsg] = useState("");
 
   const toggleItem = (id) => setExpandedItems((prev) => ({ ...prev, [id]: !prev[id] }));
+
+  const implementTrick = async (item, id) => {
+    setImplementing(prev => ({ ...prev, [id]: true }));
+    setImplementMsg("");
+    try {
+      const res = await base44.functions.invoke("autonomousMasterLoop", {
+        action: "run",
+        focus: "implement",
+        trick: item.trick,
+        secret: item.secret,
+        trigger_source: "tricks_of_trade",
+      });
+      setImplementMsg(`Implemented "${item.trick}" — autonomous cycle triggered.`);
+    } catch (e) {
+      setImplementMsg(`Error implementing: ${e.response?.data?.error || e.message}`);
+    }
+    setImplementing(prev => ({ ...prev, [id]: false }));
+  };
 
   return (
     <div className="mx-auto max-w-[1400px] px-6 py-8">

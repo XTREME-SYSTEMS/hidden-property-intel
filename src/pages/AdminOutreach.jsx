@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Search, Mail, Building2, ShieldCheck, FlaskConical, Dna, Send, Reply, Clock, X } from "lucide-react";
+import { Search, Mail, Building2, ShieldCheck, FlaskConical, Dna, Send, Reply, Clock, X, Phone, MessageSquare, Calendar, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function AdminOutreach() {
@@ -108,6 +108,37 @@ export default function AdminOutreach() {
     setBusy("");
   };
 
+  const contactLead = async (lead) => {
+    setMsg(""); setBusy(`contact-${lead.id}`);
+    try {
+      if (!lead.email) { setMsg(`${lead.name} has no email on file.`); setBusy(""); return; }
+      const res = await base44.functions.invoke("generateInvestorOutreach", {
+        lead_id: lead.id,
+        lead_name: lead.name,
+        lead_company: lead.company,
+        lead_email: lead.email,
+      });
+      if (res.data?.error) setMsg(`Error: ${res.data.error}`);
+      else setMsg(`Contact email generated and sent to ${lead.name} (${lead.email}).`);
+      await load();
+    } catch (e) { setMsg(e.response?.data?.error || e.message); }
+    setBusy("");
+  };
+
+  const followUpLead = async (lead) => {
+    setMsg(""); setBusy(`followup-${lead.id}`);
+    try {
+      await base44.entities.InvestorLead.update(lead.id, {
+        follow_up_enabled: true,
+        next_follow_up_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        automation_enabled: true,
+      });
+      setMsg(`Follow-up enabled for ${lead.name}. Next follow-up in 7 days.`);
+      await load();
+    } catch (e) { setMsg(e.response?.data?.error || e.message); }
+    setBusy("");
+  };
+
   const generateReply = async () => {
     if (!replyLead || !replyContent) return;
     setReplyBusy(true);
@@ -174,10 +205,25 @@ export default function AdminOutreach() {
       </div>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-4">
-        {[["Total leads", leads.length], ["New", newCount], ["Contacted", contactedCount], ["Last run", "3 AM ET daily"]].map(([l, v]) => (
-          <div key={l} className="rounded-sm border border-black/10 p-5">
-            <p className="text-[10px] uppercase tracking-[0.3em] text-black/40">{l}</p>
-            <p className="mt-2 font-display text-2xl font-light tabular-nums">{v}</p>
+        {[
+          { label: "Total leads", value: leads.length, icon: Search, action: { label: "Scrape", fn: scrape, busy: "scrape" } },
+          { label: "New", value: newCount, icon: Mail, action: { label: "Email new", fn: emailInvestors, busy: "emailInv" } },
+          { label: "Contacted", value: contactedCount, icon: Building2, action: { label: "Email sellers", fn: emailSellers, busy: "emailSell" } },
+          { label: "Follow-ups due", value: leads.filter(l => l.follow_up_enabled).length, icon: Clock, action: { label: "Process", fn: processFollowups, busy: "followup" } },
+        ].map(({ label, value, icon: Icon, action }) => (
+          <div key={label} className="rounded-sm border border-black/10 bg-white p-5">
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] uppercase tracking-[0.3em] text-black/40">{label}</p>
+              <Icon className="h-4 w-4 text-black/30" />
+            </div>
+            <p className="mt-2 font-display text-2xl font-light tabular-nums">{value}</p>
+            <button
+              onClick={action.fn}
+              disabled={busy === action.busy}
+              className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-sm bg-black px-3 py-2 text-[9px] uppercase tracking-[0.2em] text-white transition hover:bg-black/80 disabled:opacity-50"
+            >
+              {busy === action.busy ? "Running…" : <><Zap className="h-3 w-3" /> {action.label}</>}
+            </button>
           </div>
         ))}
       </div>
@@ -302,7 +348,7 @@ export default function AdminOutreach() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-black/10 text-left text-[10px] uppercase tracking-[0.3em] text-black/40">
-                <th className="pb-3">Name</th><th className="pb-3">Company</th><th className="pb-3">Region</th><th className="pb-3">Contact</th><th className="pb-3">Status</th><th className="pb-3">Last contacted</th><th className="pb-3">Action</th>
+                <th className="pb-3">Name</th><th className="pb-3">Company</th><th className="pb-3">Region</th><th className="pb-3">Contact</th><th className="pb-3">Status</th><th className="pb-3">Last contacted</th><th className="pb-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-black/10">
@@ -316,12 +362,35 @@ export default function AdminOutreach() {
                   <td className="py-3"><span className={`rounded-full px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] ${l.outreach_status === "new" ? "border border-black/15 text-black/60" : "bg-black text-white"}`}>{l.outreach_status}</span></td>
                   <td className="py-3 text-black/50">{l.last_contacted ? new Date(l.last_contacted).toLocaleDateString() : "—"}</td>
                   <td className="py-3">
-                    <button
-                      onClick={() => { setReplyLead(l); setReplyContent(""); setReplyResult(null); }}
-                      className="inline-flex items-center gap-1.5 rounded-sm border border-black/15 px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] text-black/70 hover:bg-black hover:text-white"
-                    >
-                      <Reply className="h-3 w-3" /> Reply
-                    </button>
+                    <div className="flex items-center justify-end gap-1.5">
+                      <button
+                        onClick={() => contactLead(l)}
+                        disabled={busy === `contact-${l.id}`}
+                        title="Generate & send contact email"
+                        className="inline-flex items-center gap-1.5 rounded-sm bg-black px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] text-white transition hover:bg-black/80 disabled:opacity-50"
+                      >
+                        <Mail className="h-3 w-3" /> Contact
+                      </button>
+                      <button
+                        onClick={() => followUpLead(l)}
+                        disabled={busy === `followup-${l.id}`}
+                        title="Enable automated follow-up"
+                        className={`inline-flex items-center gap-1.5 rounded-sm border px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] transition disabled:opacity-50 ${
+                          l.follow_up_enabled
+                            ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                            : "border-black/15 text-black/70 hover:bg-black hover:text-white"
+                        }`}
+                      >
+                        <Clock className="h-3 w-3" /> {l.follow_up_enabled ? "Following" : "Follow up"}
+                      </button>
+                      <button
+                        onClick={() => { setReplyLead(l); setReplyContent(""); setReplyResult(null); }}
+                        title="Generate AI reply"
+                        className="inline-flex items-center gap-1.5 rounded-sm border border-black/15 px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] text-black/70 hover:bg-black hover:text-white"
+                      >
+                        <Reply className="h-3 w-3" /> Reply
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

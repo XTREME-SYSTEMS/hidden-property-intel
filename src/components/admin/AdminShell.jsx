@@ -5,7 +5,7 @@ import {
   ArrowRight, X, ArrowLeft, Lightbulb, BookOpen, Globe, Building2, Handshake, Stamp, Radar, Sparkles, Key, Phone, Mic, Calendar, Rocket
 } from "lucide-react";
 import AdminOverview from "@/components/admin/AdminOverview";
-import AdminChatBar from "@/components/admin/AdminChatBar";
+import AdminCopilot from "@/components/admin/AdminCopilot";
 import AdminSources from "@/pages/AdminSources";
 import AdminOutreach from "@/pages/AdminOutreach";
 import AdminTestLab from "@/pages/AdminTestLab";
@@ -84,6 +84,7 @@ const NAV_ITEMS = [
 export default function AdminShell() {
   const [activeId, setActiveId] = useState("overview");
   const [history, setHistory] = useState([]);
+  const [copilotOpen, setCopilotOpen] = useState(true);
 
   const activeItem = NAV_ITEMS.find((n) => n.id === activeId);
   const ActiveComponent = activeItem?.component;
@@ -109,7 +110,7 @@ export default function AdminShell() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-112px)] overflow-hidden border border-black/10">
+    <div className="relative flex h-[calc(100vh-112px)] overflow-hidden border border-black/10">
       {/* Left sidebar */}
       <aside className="flex w-60 shrink-0 flex-col bg-[#0c0d0e] text-white">
         <div className="flex items-center gap-2.5 border-b border-white/10 px-5 py-4">
@@ -150,12 +151,11 @@ export default function AdminShell() {
         </div>
       </aside>
 
-      {/* Right content area */}
-      <div className="flex flex-1 flex-col gap-3 bg-[#f7f5f0] p-4">
-        {/* Top 2/3 — content card */}
-        <div className="flex min-h-0 flex-[2] flex-col overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm">
+      {/* Center content area — full height */}
+      <div className="flex flex-1 flex-col bg-[#f7f5f0]">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
           {/* Card header */}
-          <div className="flex items-center justify-between border-b border-black/10 px-4 py-2.5">
+          <div className="flex items-center justify-between border-b border-black/10 bg-white px-4 py-2.5">
             <button
               onClick={goBack}
               disabled={!canGoBack}
@@ -183,12 +183,10 @@ export default function AdminShell() {
             ) : null}
           </div>
         </div>
-
-        {/* Bottom 1/3 — chat bar */}
-        <div className="flex min-h-0 flex-[1] flex-col overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm">
-          <AdminChatBar />
-        </div>
       </div>
+
+      {/* Right copilot panel */}
+      <AdminCopilot open={copilotOpen} onToggle={() => setCopilotOpen(!copilotOpen)} />
     </div>
   );
 }

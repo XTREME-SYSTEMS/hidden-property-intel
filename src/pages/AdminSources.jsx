@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Plus, Play, Trash2, Power, Pencil, X } from "lucide-react";
+import { Plus, Play, Trash2, Power, Pencil, X, Zap, Loader2 } from "lucide-react";
 import { DISTRESS_TYPES as DISTRESS } from "@/lib/constants";
 
 const TYPES = ["county_assessor", "tax_records", "probate_court", "foreclosure", "auction", "obituary", "mls"];
@@ -99,6 +99,23 @@ export default function AdminSources() {
     setBusy("");
   };
 
+  const runAll = async () => {
+    const activeSources = sources.filter((s) => s.status === "active");
+    if (activeSources.length === 0) { setMsg("No active sources to run."); return; }
+    setMsg(""); setBusy("runAll");
+    let totalFound = 0, totalNew = 0, errors = 0;
+    for (const s of activeSources) {
+      try {
+        const res = await base44.functions.invoke("scrapeProperties", { source_id: s.id });
+        if (res.data?.error) errors++;
+        else { totalFound += res.data.found || 0; totalNew += res.data.new || 0; }
+      } catch (e) { errors++; }
+    }
+    setMsg(`Run All complete: ${activeSources.length} sources scraped · ${totalFound} found · ${totalNew} new · ${errors} errors.`);
+    await load();
+    setBusy("");
+  };
+
   if (loading) return <div className="px-6 py-32 text-center text-sm text-black/50">Loading…</div>;
   if (!user || user.role !== "admin") {
     return (
@@ -119,13 +136,23 @@ export default function AdminSources() {
           <p className="text-[11px] uppercase tracking-[0.4em] text-black/40">Admin</p>
           <h1 className="mt-3 font-display text-4xl font-light tracking-tight">Scrape Source Manager</h1>
         </div>
-        <button
-          onClick={() => { setForm(empty); setEditingId(null); setShowForm(!showForm); }}
-          className="inline-flex items-center gap-2 rounded-sm bg-black px-5 py-3 text-[11px] uppercase tracking-[0.3em] text-white"
-        >
-          {showForm ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-          {showForm ? "Close" : "Add source"}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={runAll}
+            disabled={busy === "runAll" || active === 0}
+            className="inline-flex items-center gap-2 rounded-sm bg-amber-600 px-5 py-3 text-[11px] uppercase tracking-[0.3em] text-white transition hover:bg-amber-700 disabled:opacity-50"
+          >
+            {busy === "runAll" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
+            {busy === "runAll" ? "Running all…" : `Run All (${active})`}
+          </button>
+          <button
+            onClick={() => { setForm(empty); setEditingId(null); setShowForm(!showForm); }}
+            className="inline-flex items-center gap-2 rounded-sm bg-black px-5 py-3 text-[11px] uppercase tracking-[0.3em] text-white"
+          >
+            {showForm ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+            {showForm ? "Close" : "Add source"}
+          </button>
+        </div>
       </div>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-4">
