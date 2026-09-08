@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import {
   Key, Plus, Copy, RefreshCw, Trash2, Shield, AlertCircle, Check, Loader2, X,
-  Brain, MessageSquare, Globe, Pencil, Zap, ArrowRight, Code2, Activity
+  Brain, MessageSquare, Globe, Pencil, Zap, ArrowRight, Code2
 } from "lucide-react";
 
 const SYSTEM_ICONS = {
@@ -36,16 +36,28 @@ export default function AdminApiGenerator() {
   const loadData = useCallback(async () => {
     setLoading(true);
     setError(null);
+    let listError = null;
+    let presetsError = null;
+
+    // Load keys
     try {
-      const [keysRes, presetsRes] = await Promise.all([
-        base44.functions.invoke("manageApiKeys", { action: "list" }),
-        base44.functions.invoke("manageApiKeys", { action: "presets" }),
-      ]);
-      setKeys(keysRes.data.keys || []);
-      setPresets(presetsRes.data || { system_connectors: [], platform_scopes: [] });
+      const keysRes = await base44.functions.invoke("manageApiKeys", { action: "list" });
+      const keysData = keysRes.data || keysRes;
+      setKeys(keysData?.keys || []);
     } catch (e) {
-      setError(e.response?.data?.error || e.message);
+      listError = e.response?.data?.error || e.message;
     }
+
+    // Load presets
+    try {
+      const presetsRes = await base44.functions.invoke("manageApiKeys", { action: "presets" });
+      const presetsData = presetsRes.data || presetsRes;
+      setPresets(presetsData || { system_connectors: [], platform_scopes: [] });
+    } catch (e) {
+      presetsError = e.response?.data?.error || e.message;
+    }
+
+    setError(listError || presetsError);
     setLoading(false);
   }, []);
 

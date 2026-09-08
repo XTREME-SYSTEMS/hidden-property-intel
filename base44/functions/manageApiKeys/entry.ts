@@ -272,7 +272,7 @@ export default async function(req: Request): Promise<Response> {
       });
     }
 
-    return Response.json({ error: 'Unknown action' }, { status: 400 });
+    return Response.json({ error: `Unknown action: ${action}` }, { status: 400 });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
