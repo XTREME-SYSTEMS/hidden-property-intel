@@ -53,7 +53,10 @@ import AdminPreflight from '@/pages/AdminPreflight';
 import FloridaSourceDirectory from '@/pages/FloridaSourceDirectory';
 import AdminEnrichmentUpgrades from '@/pages/AdminEnrichmentUpgrades';
 import AdminXtremeVision from '@/pages/AdminXtremeVision';
-import PortalRouter from '@/pages/PortalRouter';
+import PortalLayout from '@/components/portal/PortalLayout';
+import PortalHome from '@/pages/PortalHome';
+import PortalOnboarding from '@/pages/PortalOnboarding';
+import PortalSettings from '@/pages/PortalSettings';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
 import TheProcess from '@/pages/TheProcess';
@@ -122,7 +125,11 @@ const AuthenticatedApp = () => {
           <Route path="/seller/negotiation/:propertyId" element={<NegotiationChat />} />
           <Route path="/negotiation/:propertyId" element={<NegotiationChat />} />
           <Route path="/contracts/:id" element={<SmartContractDetail />} />
-          <Route path="/portal" element={<PortalRouter />} />
+          <Route element={<PortalLayout />}>
+            <Route path="/portal" element={<PortalHome />} />
+            <Route path="/portal/onboarding" element={<PortalOnboarding />} />
+            <Route path="/portal/settings" element={<PortalSettings />} />
+          </Route>
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/sources" element={<AdminSources />} />
           <Route path="/admin/outreach" element={<AdminOutreach />} />
