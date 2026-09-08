@@ -293,7 +293,14 @@ export default function AdminTricksOfTrade() {
       <p className="mt-2 max-w-3xl text-sm text-black/50">
         The secrets, methods, and between-the-lines intelligence that 100 years of distressed real estate investing
         has taught us. Every trick includes the reasoning behind it and 3 real-world examples of how to profit.
+        Click "Implement This Trick" to trigger the autonomous system to action it.
       </p>
+
+      {implementMsg && (
+        <div className="mt-4 rounded-sm border border-black/10 bg-black/5 px-4 py-3 text-sm text-black/70">
+          {implementMsg}
+        </div>
+      )}
 
       <div className="mt-8 space-y-10">
         {TRICKS.map((cat, ci) => (
@@ -332,6 +339,14 @@ export default function AdminTricksOfTrade() {
                             </div>
                           ))}
                         </div>
+                        <button
+                          onClick={() => implementTrick(item, id)}
+                          disabled={implementing[id]}
+                          className="mt-4 inline-flex items-center gap-2 rounded-sm bg-black px-5 py-2.5 text-[10px] uppercase tracking-[0.3em] text-white transition hover:bg-black/80 disabled:opacity-50"
+                        >
+                          {implementing[id] ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Rocket className="h-3.5 w-3.5" />}
+                          {implementing[id] ? "Implementing…" : "Implement This Trick"}
+                        </button>
                       </div>
                     )}
                   </div>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { RefreshCw, Zap, FileText, Radar, Activity, ChevronRight } from "lucide-react";
+import { RefreshCw, Zap, FileText, Radar, Activity, ChevronRight, Wrench, Heart, Shield } from "lucide-react";
 import ShadowScoreGauge from "@/components/shadow/ShadowScoreGauge";
 import ShadowDimensions from "@/components/shadow/ShadowDimensions";
 import ShadowFindings from "@/components/shadow/ShadowFindings";
