@@ -60,7 +60,7 @@ const FAQS = [
   },
   {
     q: "How much does smart contract escrow cost?",
-    a: "HPI charges a flat 1.5% platform fee on the earnest money amount — far less than the $1,500–$4,000 in traditional escrow and attorney drafting fees on a typical $200K deal. You also pay Polygon gas (network fees), which typically run under $1 per transaction. There are no hidden fees, no wire fees, no notary fees, and no document storage fees. Elite and Enterprise HPI plans include smart-contract escrow at no additional platform cost.",
+    a: "HPI charges a flat 3% platform fee on the earnest money amount — far less than the $1,500–$4,000 in traditional escrow and attorney drafting fees on a typical $200K deal. You also pay Polygon gas (network fees), which typically run under $1 per transaction. There are no hidden fees, no wire fees, no notary fees, and no document storage fees. Elite and Enterprise HPI plans include smart-contract escrow at no additional platform cost.",
     category: "cost",
   },
   {

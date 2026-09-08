@@ -46,7 +46,7 @@ export default function SmartContractSimulator() {
 
   const earnestAmount = Math.round((form.purchasePrice * form.earnestPct) / 100);
   const gasCost = 0.42; // simulated Polygon gas in MATIC
-  const platformFee = Math.round(earnestAmount * 0.015); // 1.5% flat
+  const platformFee = Math.round(earnestAmount * 0.03); // 3% flat
   const traditionalEscrowFee = Math.round(form.purchasePrice * 0.015); // ~1.5%
   const savings = traditionalEscrowFee - platformFee;
 

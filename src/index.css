@@ -75,3 +75,13 @@
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}.property-card:hover,.btn:hover{transform:none}}
 
 .route-loader{min-height:60vh;display:grid;place-items:center;color:var(--muted);font-weight:700}
+
+/* ===== HPI Interactive Effects (light theme, additive) ===== */
+@keyframes hpi-float-in{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.hpi-float-in{opacity:0;will-change:transform,opacity}
+.hpi-float-in.is-visible{animation:hpi-float-in .7s cubic-bezier(.22,1,.36,1) forwards}
+.hpi-hover{transition:border-color .28s ease,box-shadow .28s ease,transform .28s ease}
+.hpi-hover:hover{border-color:rgba(195,138,27,.7);box-shadow:0 0 0 1px rgba(195,138,27,.4),0 14px 34px -12px rgba(195,138,27,.28);transform:translateY(-3px)}
+.hpi-hover:hover .hpi-pop{transform:translateY(-2px) scale(1.02)}
+.hpi-pop{transition:transform .28s ease}
+@media (prefers-reduced-motion:reduce){.hpi-float-in{opacity:1;animation:none}.hpi-hover:hover{transform:none}.hpi-hover:hover .hpi-pop{transform:none}}

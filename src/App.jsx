@@ -56,6 +56,8 @@ import AdminXtremeVision from '@/pages/AdminXtremeVision';
 import PortalRouter from '@/pages/PortalRouter';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
+import TheProcess from '@/pages/TheProcess';
+import LaunchElite from '@/pages/LaunchElite';
 import Pricing from '@/pages/Pricing';
 import Blog from '@/pages/Blog';
 import NegotiationChat from '@/pages/NegotiationChat';
@@ -108,6 +110,8 @@ const AuthenticatedApp = () => {
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/process" element={<TheProcess />} />
+        <Route path="/launch" element={<LaunchElite />} />
         <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
           <Route path="/investor/signup" element={<InvestorSignup />} />
           <Route path="/investor/dashboard" element={<InvestorDashboard />} />

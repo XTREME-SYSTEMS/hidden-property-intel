@@ -45,6 +45,18 @@ export default async function(req) {
     params.append('subscription_data[metadata][plan]', plan);
     if (user_id) params.append('subscription_data[metadata][user_id]', user_id);
 
+    // Optional promotion code (e.g. ELITE30 launch offer)
+    if (body.promotion_code) {
+      const pcRes = await fetch(`https://api.stripe.com/v1/promotion_codes?code=${encodeURIComponent(body.promotion_code)}&active=true`, {
+        headers: { Authorization: `Bearer ${key}` }
+      });
+      const pcJson = await pcRes.json();
+      const pc = (pcJson.data || [])[0];
+      if (pc) {
+        params.append('discounts[0][promotion_code]', pc.id);
+      }
+    }
+
     const res = await fetch('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',
       headers: {

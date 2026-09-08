@@ -9,6 +9,7 @@ import PWAInstall from "@/components/PWAInstall";
 import SellerFreeCTA from "@/components/luxury/SellerFreeCTA";
 import PortalShowcase from "@/components/luxury/PortalShowcase";
 import SmartContractShowcase from "@/components/luxury/SmartContractShowcase";
+import FloatIn from "@/components/FloatIn";
 import { ArrowRight, Radar, Brain, FileSignature, Building2, Users, Scale, BadgeCheck, Search, Sparkles, Plus } from "lucide-react";
 import Seo from "@/components/Seo";
 
@@ -255,7 +256,7 @@ export default function LuxuryHome() {
           <h3 className="mt-3 font-display text-3xl font-light tracking-tight">Choose your access level.</h3>
           <div className="mt-10 grid gap-6 lg:grid-cols-3">
             {PLANS.map((p) => (
-              <div key={p.name} className={`flex flex-col rounded-sm p-8 ${p.featured ? "bg-white text-black" : "border border-white/20"}`}>
+              <div key={p.name} className={`flex flex-col rounded-sm p-8 hpi-hover ${p.featured ? "bg-white text-black" : "border border-white/20"}`}>
                 <div className="flex items-center justify-between">
                   <p className="text-[11px] uppercase tracking-[0.3em] text-white/60">{p.name}</p>
                   {p.featured && <span className="rounded-sm bg-black px-2.5 py-1 text-[9px] uppercase tracking-[0.25em] text-white">Popular</span>}
@@ -301,15 +302,15 @@ export default function LuxuryHome() {
               List your property — free <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-          <div className="grid gap-6 sm:grid-cols-2">
+          <FloatIn className="grid gap-6 sm:grid-cols-2">
             {SELLER_PERKS.map((p) => (
-              <div key={p.t} className="rounded-sm border border-black/10 p-6">
+              <div key={p.t} className="rounded-sm border border-black/10 p-6 hpi-hover">
                 <p.icon className="h-6 w-6 text-black/70" />
-                <p className="mt-5 font-display text-lg tracking-tight">{p.t}</p>
+                <p className="mt-5 font-display text-lg tracking-tight hpi-pop">{p.t}</p>
                 <p className="mt-2 text-sm leading-relaxed text-black/55">{p.d}</p>
               </div>
             ))}
-          </div>
+          </FloatIn>
         </div>
       </section>
 
@@ -321,15 +322,15 @@ export default function LuxuryHome() {
         <div className="mx-auto max-w-[1400px] px-6 py-24 lg:px-12 lg:py-32">
           <p className="text-[11px] uppercase tracking-[0.4em] text-black/40">Why Hidden Property Intel</p>
           <h2 className="mt-3 max-w-2xl font-display text-4xl font-light tracking-tight sm:text-5xl">Four things no competitor does.</h2>
-          <div className="mt-14 grid gap-px overflow-hidden rounded-sm border border-black/10 bg-black/10 sm:grid-cols-2">
+          <FloatIn className="mt-14 grid gap-px overflow-hidden rounded-sm border border-black/10 bg-black/10 sm:grid-cols-2">
             {DIFFERENTIATORS.map((d) => (
-              <div key={d.t} className="bg-white p-8 lg:p-10">
+              <div key={d.t} className="bg-white p-8 lg:p-10 hpi-hover">
                 <d.icon className="h-7 w-7 text-black/70" />
-                <p className="mt-6 font-display text-xl tracking-tight">{d.t}</p>
+                <p className="mt-6 font-display text-xl tracking-tight hpi-pop">{d.t}</p>
                 <p className="mt-3 text-sm leading-relaxed text-black/60">{d.d}</p>
               </div>
             ))}
-          </div>
+          </FloatIn>
         </div>
       </section>
 
