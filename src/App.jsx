@@ -125,11 +125,6 @@ const AuthenticatedApp = () => {
           <Route path="/seller/negotiation/:propertyId" element={<NegotiationChat />} />
           <Route path="/negotiation/:propertyId" element={<NegotiationChat />} />
           <Route path="/contracts/:id" element={<SmartContractDetail />} />
-          <Route element={<PortalLayout />}>
-            <Route path="/portal" element={<PortalHome />} />
-            <Route path="/portal/onboarding" element={<PortalOnboarding />} />
-            <Route path="/portal/settings" element={<PortalSettings />} />
-          </Route>
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/sources" element={<AdminSources />} />
           <Route path="/admin/outreach" element={<AdminOutreach />} />
@@ -164,6 +159,13 @@ const AuthenticatedApp = () => {
         </Route>
         <Route path="/eden-skye" element={<EdenSkyeProfile />} />
         <Route path="/eden-skye/chat" element={<EdenSkyeChat />} />
+      </Route>
+      <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
+        <Route element={<PortalLayout />}>
+          <Route path="/portal" element={<PortalHome />} />
+          <Route path="/portal/onboarding" element={<PortalOnboarding />} />
+          <Route path="/portal/settings" element={<PortalSettings />} />
+        </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
