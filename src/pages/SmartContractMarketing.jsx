@@ -6,6 +6,7 @@ import {
   Handshake, Building2, TrendingDown, Sparkles, Phone, PlayCircle,
 } from "lucide-react";
 import SmartContractSimulator from "@/components/SmartContractSimulator";
+import SmartContractFAQ from "@/components/SmartContractFAQ";
 
 const BROKER = {
   name: "Steve Giordano",
@@ -460,6 +461,23 @@ export default function SmartContractMarketing() {
               everything the way it's always been done, the old escrow process is still available — we just think you
               deserve the choice.
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* EXHAUSTIVE AEO FAQ */}
+      <section className="px-6 py-20 lg:px-12 lg:py-28">
+        <div className="mx-auto max-w-[1100px]">
+          <p className="text-[11px] uppercase tracking-[0.4em] text-black/40">Everything you want to know</p>
+          <h2 className="mt-3 font-display text-3xl font-light tracking-tight sm:text-5xl">
+            Smart contract escrow — every question answered.
+          </h2>
+          <p className="mt-5 max-w-2xl text-sm leading-relaxed text-black/60">
+            The fastest close, the accounts you need, the cost, the legal foundation, the security model — all in one place.
+            If your question isn't here, call Steve Giordano directly at 833-484-3799.
+          </p>
+          <div className="mt-12">
+            <SmartContractFAQ />
           </div>
         </div>
       </section>
