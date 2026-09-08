@@ -29,7 +29,7 @@ export default function PortalHome() {
   const roleLabel = role?.charAt(0).toUpperCase() + role?.slice(1);
 
   const quickActions = [
-    { label: "Browse properties", to: "/listings", icon: Search, roles: ["investor", "seller", "agent", "wholesaler", "manager", "partner", "admin"] },
+    { label: "Property Command Center", to: "/portal/properties", icon: Search, roles: ["investor", "seller", "agent", "wholesaler", "manager", "partner", "admin"] },
     { label: "Run deal calculator", to: "/deal-calculator", icon: Calculator, roles: ["investor", "agent", "wholesaler", "admin"] },
     { label: "Smart-contract escrow", to: "/smart-contracts", icon: FileSignature, roles: ["investor", "seller", "agent", "admin"] },
     { label: "Set up alerts", to: "/alerts", icon: Bell, roles: ["investor", "seller", "agent", "wholesaler", "admin"] },
@@ -39,7 +39,7 @@ export default function PortalHome() {
     <div className="mx-auto max-w-5xl">
       {/* Onboarding banner */}
       {!onboardingComplete && (
-        <div className="mb-6 flex flex-wrap items-center gap-3 rounded-xl p-5" style={{ border: "1px solid var(--gold)", background: "#fff8e9" }}>
+        <div className="mb-6 flex flex-wrap items-center gap-3 rounded-xl p-5" style={{ border: "1px solid var(--gold)", background: "#eef2fb" }}>
           <AlertCircle className="h-5 w-5 shrink-0" style={{ color: "var(--gold-3)" }} />
           <div className="flex-1">
             <p className="font-semibold" style={{ color: "var(--ink)" }}>Complete your onboarding</p>
@@ -87,7 +87,7 @@ export default function PortalHome() {
       <div>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="font-heading text-lg font-bold" style={{ color: "var(--ink)" }}>Latest properties</h2>
-          <Link to="/listings" className="text-xs font-semibold" style={{ color: "var(--gold-3)" }}>View all →</Link>
+          <Link to="/portal/properties" className="text-xs font-semibold" style={{ color: "var(--gold-3)" }}>View all →</Link>
         </div>
         {loading ? (
           <div className="rounded-xl p-8 text-center text-sm" style={{ border: "1px solid var(--border)", background: "#fff", color: "var(--muted)" }}>Loading…</div>
@@ -98,8 +98,8 @@ export default function PortalHome() {
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
             {props.map((p) => (
-              <Link key={p.id} to={`/properties/${p.id}`} className="hpi-hover flex gap-3 rounded-xl p-3 transition" style={{ border: "1px solid var(--border)", background: "#fff" }}>
-                <div className="grid h-16 w-16 shrink-0 place-items-center rounded-lg" style={{ background: "#f7f5f0" }}>
+              <Link key={p.id} to="/portal/properties" className="hpi-hover flex gap-3 rounded-xl p-3 transition" style={{ border: "1px solid var(--border)", background: "#fff" }}>
+                <div className="grid h-16 w-16 shrink-0 place-items-center rounded-lg" style={{ background: "#f4f6fb" }}>
                   <Building2 className="h-6 w-6" style={{ color: "var(--gold-3)" }} />
                 </div>
                 <div className="min-w-0">
@@ -120,7 +120,7 @@ function StatCard({ icon: Icon, label, value, to, show = true }) {
   if (!show) return null;
   const inner = (
     <div className="hpi-hover flex items-center gap-3 rounded-xl p-4 transition" style={{ border: "1px solid var(--border)", background: "#fff" }}>
-      <div className="grid h-10 w-10 place-items-center rounded-lg" style={{ background: "#fff8e9" }}>
+      <div className="grid h-10 w-10 place-items-center rounded-lg" style={{ background: "#eef2fb" }}>
         <Icon className="h-5 w-5" style={{ color: "var(--gold-3)" }} />
       </div>
       <div>

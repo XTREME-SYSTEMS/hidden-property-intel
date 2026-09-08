@@ -57,6 +57,7 @@ import PortalLayout from '@/components/portal/PortalLayout';
 import PortalHome from '@/pages/PortalHome';
 import PortalOnboarding from '@/pages/PortalOnboarding';
 import PortalSettings from '@/pages/PortalSettings';
+import PortalProperties from '@/pages/PortalProperties';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
 import TheProcess from '@/pages/TheProcess';
@@ -165,6 +166,7 @@ const AuthenticatedApp = () => {
           <Route path="/portal" element={<PortalHome />} />
           <Route path="/portal/onboarding" element={<PortalOnboarding />} />
           <Route path="/portal/settings" element={<PortalSettings />} />
+          <Route path="/portal/properties" element={<PortalProperties />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

@@ -58,8 +58,8 @@
 
 /* ===== Hidden Property Intel Design System ===== */
 :root{
-  --bg:#ffffff; --surface:#ffffff; --surface-2:#f7f5f0; --surface-dark:#0b0b0b; --ink:#12110f; --muted:#6f6a60; --border:#e7e1d6;
-  --gold:#c38a1b; --gold-2:#e4b653; --gold-3:#8f6110; --success:#247a45; --warning:#a6640b; --danger:#b33a31; --info:#375a7f;
+  --bg:#ffffff; --surface:#ffffff; --surface-2:#f4f6fb; --surface-dark:#0a1124; --ink:#0b1220; --muted:#5b6478; --border:#e2e8f0;
+  --gold:#c9a96e; --gold-2:#e6cf9c; --gold-3:#8a7445; --success:#247a45; --warning:#a6640b; --danger:#b33a31; --info:#375a7f;
   --radius:14px; --radius-sm:9px; --shadow:0 14px 40px rgba(25,20,10,.08); --container:1360px; --header-h:74px;
   --font:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }

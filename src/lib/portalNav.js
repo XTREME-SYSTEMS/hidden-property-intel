@@ -8,7 +8,7 @@ const ALL = ["investor", "seller", "agent", "wholesaler", "manager", "partner", 
 export const PORTAL_NAV = [
   { label: "Dashboard", path: "/portal", icon: LayoutDashboard, roles: ALL },
   { label: "Onboarding", path: "/portal/onboarding", icon: Sparkles, roles: ALL, badge: "Start here" },
-  { label: "Browse Properties", path: "/listings", icon: Building2, roles: ALL },
+  { label: "Property Command Center", path: "/portal/properties", icon: Building2, roles: ALL },
   { label: "My Deals", path: "/investor/pipeline", icon: TrendingUp, roles: ["investor", "agent", "wholesaler", "admin"] },
   { label: "Seller Dashboard", path: "/seller/dashboard", icon: Home, roles: ["seller", "admin"] },
   { label: "Alerts", path: "/alerts", icon: Bell, roles: ALL },
