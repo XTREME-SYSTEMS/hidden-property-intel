@@ -22,7 +22,7 @@ export default function PortalLayout() {
       <PortalSidebar role={role} user={user} mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
       <div className="flex min-w-0 flex-1 flex-col">
         <header
-          className="sticky top-0 z-30 flex h-[72px] items-center gap-3 border-b px-5"
+          className="sticky top-20 md:top-28 z-30 flex h-[72px] items-center gap-3 border-b px-5"
           style={{ borderColor: "var(--border)", background: "rgba(255,255,255,0.95)", backdropFilter: "blur(8px)" }}
         >
           <button className="lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Open menu">

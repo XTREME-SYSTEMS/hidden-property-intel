@@ -12,7 +12,7 @@ export default function PortalSidebar({ role, user, mobileOpen, onClose }) {
     <>
       {mobileOpen && <div className="fixed inset-0 z-40 bg-black/30 lg:hidden" onClick={onClose} />}
       <aside
-        className={`fixed top-0 z-50 h-screen w-[260px] shrink-0 border-r bg-white transition-transform lg:sticky lg:translate-x-0 ${
+        className={`fixed top-0 z-50 h-screen w-[260px] shrink-0 border-r bg-white transition-transform lg:sticky lg:top-28 lg:h-[calc(100vh-7rem)] lg:translate-x-0 ${
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         style={{ borderColor: "var(--border)" }}
