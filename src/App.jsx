@@ -39,6 +39,7 @@ import AdminStrategy from '@/pages/AdminStrategy';
 import AdminTricksOfTrade from '@/pages/AdminTricksOfTrade';
 import AdminSourcesDirectory from '@/pages/AdminSourcesDirectory';
 import AdminDistressEducation from '@/pages/AdminDistressEducation';
+import AdminDistressTracker from '@/pages/AdminDistressTracker';
 import ShadowCommandCenter from '@/pages/ShadowCommandCenter';
 import EdenSkyeProfile from '@/pages/EdenSkyeProfile';
 import EdenSkyeChat from '@/pages/EdenSkyeChat';
@@ -137,6 +138,7 @@ const AuthenticatedApp = () => {
         <Route path="/admin/tricks" element={<AdminTricksOfTrade />} />
         <Route path="/admin/sources-directory" element={<AdminSourcesDirectory />} />
         <Route path="/admin/distress-education" element={<AdminDistressEducation />} />
+        <Route path="/admin/distress-tracker" element={<AdminDistressTracker />} />
         <Route path="/admin/shadow" element={<ShadowCommandCenter />} />
         <Route path="/admin/email-gallery" element={<EmailTemplateGallery />} />
         <Route path="/admin/api-keys" element={<AdminApiKeys />} />

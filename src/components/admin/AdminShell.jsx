@@ -6,6 +6,9 @@ import {
 } from "lucide-react";
 import AdminOverview from "@/components/admin/AdminOverview";
 import AdminCopilot from "@/components/admin/AdminCopilot";
+import DashboardStrip from "@/components/admin/DashboardStrip";
+import WorkflowCreator from "@/components/admin/WorkflowCreator";
+import AdminDistressTracker from "@/pages/AdminDistressTracker";
 import AdminSources from "@/pages/AdminSources";
 import AdminOutreach from "@/pages/AdminOutreach";
 import AdminTestLab from "@/pages/AdminTestLab";
@@ -55,6 +58,7 @@ const NAV_ITEMS = [
   { id: "tricks", icon: Lightbulb, label: "Tricks of the Trade", desc: "Insider secrets & niches", component: AdminTricksOfTrade },
   { id: "sources", icon: Globe, label: "Sources Directory", desc: "Every data source online", component: AdminSourcesDirectory },
   { id: "distress-edu", icon: BookOpen, label: "Distress Education", desc: "Causes, warning signs & data", component: AdminDistressEducation },
+  { id: "distress-tracker", icon: Radar, label: "Distress Tracker", desc: "Automated tracking & scraping", component: AdminDistressTracker },
   { id: "smart-contracts", icon: Blocks, label: "Smart Contracts", desc: "On-chain escrow", component: AdminSmartContracts },
   { id: "deal-calculator", icon: Calculator, label: "Deal Calculator", desc: "Profit split & fairness", component: DealCalculator },
   { id: "mirror-investor", icon: TrendingUp, label: "Investor Mirror", desc: "View investor dashboard", component: InvestorDashboard },
@@ -153,6 +157,8 @@ export default function AdminShell() {
 
       {/* Center content area — full height */}
       <div className="flex flex-1 flex-col bg-[#f7f5f0]">
+        {/* Dashboard quick-access strip — always visible at top */}
+        <DashboardStrip onNavigate={selectTool} activeId={activeId} />
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
           {/* Card header */}
           <div className="flex items-center justify-between border-b border-black/10 bg-white px-4 py-2.5">
@@ -177,7 +183,12 @@ export default function AdminShell() {
           {/* Card content */}
           <div className="min-h-0 flex-1 overflow-y-auto">
             {activeId === "overview" ? (
-              <AdminOverview />
+              <div>
+                <div className="p-6">
+                  <WorkflowCreator />
+                </div>
+                <AdminOverview />
+              </div>
             ) : ActiveComponent ? (
               <ActiveComponent />
             ) : null}

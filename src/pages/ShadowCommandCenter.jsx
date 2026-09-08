@@ -80,6 +80,35 @@ export default function ShadowCommandCenter() {
     setRunning(null);
   };
 
+  const runFix = async () => {
+    setRunning("fix");
+    try {
+      await base44.functions.invoke("autonomousMasterLoop", { action: "run", focus: "fix", trigger_source: "shadow_command" });
+      await load();
+    } catch (e) { /* ignore */ }
+    setRunning(null);
+  };
+
+  const runHeal = async () => {
+    setRunning("heal");
+    try {
+      await base44.functions.invoke("autonomousMasterLoop", { action: "run", focus: "heal", trigger_source: "shadow_command" });
+      await load();
+    } catch (e) { /* ignore */ }
+    setRunning(null);
+  };
+
+  const runHarden = async () => {
+    setRunning("harden");
+    try {
+      await base44.functions.invoke("autonomousMasterLoop", { action: "run", focus: "harden", trigger_source: "shadow_command" });
+      await load();
+    } catch (e) { /* ignore */ }
+    setRunning(null);
+  };
+
+  const onDimensionAction = () => { load(); };
+
   if (loading) return <div className="px-6 py-32 text-center text-sm text-black/50">Loading Shadow Command Center…</div>;
 
   const score = orchReport?.overall_score || 0;
@@ -101,6 +130,18 @@ export default function ShadowCommandCenter() {
           <button onClick={runAll} disabled={!!running} className="inline-flex items-center gap-2 rounded-sm bg-black px-5 py-2.5 text-[11px] uppercase tracking-[0.3em] text-white disabled:opacity-50">
             {running === "all" ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
             {running === "all" ? "Running…" : "Run Full Cycle"}
+          </button>
+          <button onClick={runFix} disabled={!!running} className="inline-flex items-center gap-2 rounded-sm border border-blue-300 bg-blue-50 px-4 py-2.5 text-[11px] uppercase tracking-[0.3em] text-blue-700 transition hover:bg-blue-100 disabled:opacity-50">
+            {running === "fix" ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Wrench className="h-4 w-4" />}
+            {running === "fix" ? "Fixing…" : "Fix"}
+          </button>
+          <button onClick={runHeal} disabled={!!running} className="inline-flex items-center gap-2 rounded-sm border border-rose-300 bg-rose-50 px-4 py-2.5 text-[11px] uppercase tracking-[0.3em] text-rose-700 transition hover:bg-rose-100 disabled:opacity-50">
+            {running === "heal" ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Heart className="h-4 w-4" />}
+            {running === "heal" ? "Healing…" : "Heal"}
+          </button>
+          <button onClick={runHarden} disabled={!!running} className="inline-flex items-center gap-2 rounded-sm border border-emerald-300 bg-emerald-50 px-4 py-2.5 text-[11px] uppercase tracking-[0.3em] text-emerald-700 transition hover:bg-emerald-100 disabled:opacity-50">
+            {running === "harden" ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Shield className="h-4 w-4" />}
+            {running === "harden" ? "Hardening…" : "Harden"}
           </button>
         </div>
       </div>
@@ -136,7 +177,7 @@ export default function ShadowCommandCenter() {
           <div className="space-y-6">
             <div>
               <h2 className="mb-4 font-display text-lg font-light">System Dimensions</h2>
-              <ShadowDimensions scores={orchReport?.dimension_scores} />
+              <ShadowDimensions scores={orchReport?.dimension_scores} onAction={onDimensionAction} />
             </div>
             {orchReport?.metrics && (
               <div>
