@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, Sparkles, Building2, TrendingUp, Home, Bell,
-  Calculator, ShieldCheck, Settings, Crown,
+  Calculator, ShieldCheck, Settings,
 } from "lucide-react";
 
 const ALL = ["investor", "seller", "agent", "wholesaler", "manager", "partner", "admin"];
@@ -8,14 +8,13 @@ const ALL = ["investor", "seller", "agent", "wholesaler", "manager", "partner", 
 export const PORTAL_NAV = [
   { label: "Dashboard", path: "/portal", icon: LayoutDashboard, roles: ALL },
   { label: "Onboarding", path: "/portal/onboarding", icon: Sparkles, roles: ALL, badge: "Start here" },
-  { label: "Property Command Center", path: "/portal/properties", icon: Building2, roles: ALL },
+  { label: "Browse Properties", path: "/listings", icon: Building2, roles: ALL },
   { label: "My Deals", path: "/investor/pipeline", icon: TrendingUp, roles: ["investor", "agent", "wholesaler", "admin"] },
   { label: "Seller Dashboard", path: "/seller/dashboard", icon: Home, roles: ["seller", "admin"] },
   { label: "Alerts", path: "/alerts", icon: Bell, roles: ALL },
   { label: "Deal Calculator", path: "/deal-calculator", icon: Calculator, roles: ["investor", "agent", "wholesaler", "admin"] },
   { label: "Smart Contracts", path: "/smart-contracts", icon: ShieldCheck, roles: ALL },
   { label: "Settings", path: "/portal/settings", icon: Settings, roles: ALL },
-  { label: "Admin Dashboard", path: "/admin", icon: Crown, roles: ["admin"] },
 ];
 
 export const PORTAL_ROLES = [

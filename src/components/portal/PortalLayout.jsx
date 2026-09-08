@@ -17,7 +17,7 @@ export default function PortalLayout() {
   }, []);
   useEffect(() => setMobileOpen(false), [location.pathname]);
 
-  const role = user?.portal_role || (user?.role === "admin" ? "admin" : "investor");
+  const role = user?.portal_role || "investor";
   const firstName = user?.full_name ? user.full_name.split(" ")[0] : "";
 
   return (

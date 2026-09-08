@@ -18,7 +18,7 @@ const DEFAULT_VOICE = 'honey';
 // Business identity — Strategic Minds AI LLC (fully legal, EIN established)
 const COMPANY = 'Strategic Minds AI LLC';
 const BRAND = 'Hidden Property Intel';
-const CALLER_ID = '+18337001239';
+const CALLER_ID = '+19548848885';
 
 export default async function(req: Request): Promise<Response> {
   try {

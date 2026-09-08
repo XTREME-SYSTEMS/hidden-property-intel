@@ -22,7 +22,7 @@ export default function PortalSidebar({ role, user, mobileOpen, onClose }) {
               className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition"
               style={
                 active
-                  ? { backgroundColor: "#eef2fb", color: "var(--gold-3)", fontWeight: 600, borderLeft: "2px solid var(--gold)" }
+                  ? { backgroundColor: "#fff8e9", color: "var(--gold-3)", fontWeight: 600, borderLeft: "2px solid var(--gold)" }
                   : { color: "var(--muted)" }
               }
               onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = "rgba(0,0,0,0.04)"; }}
