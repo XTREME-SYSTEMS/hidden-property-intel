@@ -29,8 +29,10 @@ export default async function(req: Request): Promise<Response> {
       const safe = keys.map(k => ({
         id: k.id,
         name: k.name,
+        description: k.description,
         key_prefix: k.key_prefix,
         scopes: k.scopes,
+        system_type: k.system_type,
         status: k.status,
         last_used: k.last_used,
         request_count: k.request_count,
@@ -204,10 +206,12 @@ export default async function(req: Request): Promise<Response> {
       const { rawKey, keyHash, keyPrefix } = await generateKey();
       const newKey = await base44.entities.ApiKey.create({
         name: existing.name,
+        description: existing.description,
         key_prefix: keyPrefix,
         key_hash: keyHash,
         tenant_id: existing.tenant_id,
         scopes: existing.scopes,
+        system_type: existing.system_type || 'general',
         status: 'active',
         request_count: 0
       });
