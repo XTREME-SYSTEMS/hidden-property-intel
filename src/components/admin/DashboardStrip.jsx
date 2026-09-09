@@ -84,12 +84,12 @@ export default function DashboardStrip({ onNavigate, activeId }) {
     <div className="border-b border-white/10 bg-[#0c0d0e] px-4 py-2.5">
       <div className="flex items-center gap-2 pb-2">
         <LayoutDashboard className="h-3.5 w-3.5 text-[#e4b653]" />
-        <p className="text-[9px] uppercase tracking-[0.3em] text-white/40">Quick Access</p>
+        <p className="text-[9px] uppercase tracking-[0.3em] text-white">Quick Access</p>
       </div>
       <div className="flex gap-4 overflow-x-auto pb-1 [scrollbar-width:thin]">
         {GROUPS.map((group) => (
           <div key={group.label} className="flex shrink-0 items-stretch gap-2">
-            <span className="flex items-center pr-1 text-[9px] font-semibold uppercase tracking-[0.2em] text-white/25">
+            <span className="flex items-center pr-1 text-[9px] font-semibold uppercase tracking-[0.2em] text-white/80">
               {group.label}
             </span>
             <div className="flex gap-1.5">
@@ -102,7 +102,7 @@ export default function DashboardStrip({ onNavigate, activeId }) {
                     className={`inline-flex items-center gap-1.5 rounded border px-2 py-1 text-[10px] font-medium transition whitespace-nowrap ${
                       isActive
                         ? "border-[#e4b653] bg-[#e4b653]/10 text-[#e4b653]"
-                        : "border-white/10 bg-white/5 text-white/55 hover:bg-white/10 hover:text-white"
+                        : "border-white/10 bg-white/5 text-white hover:bg-white/10 hover:text-white"
                     }`}
                   >
                     <Icon className="h-3 w-3 shrink-0" />

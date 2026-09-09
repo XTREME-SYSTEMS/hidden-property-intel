@@ -180,7 +180,7 @@ export default function AdminShell() {
             <LayoutDashboard className="h-4 w-4 text-[#e4b653]" />
           </div>
           <div>
-            <p className="text-[9px] uppercase tracking-[0.3em] text-white/40">Admin Portal</p>
+            <p className="text-[9px] uppercase tracking-[0.3em] text-white">Admin Portal</p>
             <p className="font-display text-sm font-light text-white">Hidden Property Intel</p>
           </div>
         </div>
@@ -192,7 +192,7 @@ export default function AdminShell() {
               <div key={cat.id} data-cat={cat.id} className="mb-1">
                 <button
                   onClick={() => toggleCat(cat.id)}
-                  className={`group flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left transition ${hasActive ? "text-[#e4b653]" : "text-white/60 hover:text-white"}`}
+                  className={`group flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left transition ${hasActive ? "text-[#e4b653]" : "text-white hover:text-white"}`}
                 >
                   <cat.icon className="h-3.5 w-3.5 shrink-0" />
                   <span className="flex-1 text-[10px] font-semibold uppercase tracking-[0.18em]">{cat.label}</span>
@@ -205,13 +205,13 @@ export default function AdminShell() {
                         key={item.id}
                         onClick={() => selectTool(item.id)}
                         className={`group flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left transition ${
-                          activeId === item.id ? "bg-white/10 text-[#e4b653]" : "text-white/70 hover:bg-white/5 hover:text-white"
+                          activeId === item.id ? "bg-white/10 text-[#e4b653]" : "text-white hover:bg-white/5 hover:text-white"
                         }`}
                       >
                         <item.icon className="h-3.5 w-3.5 shrink-0" />
                         <div className="min-w-0">
                           <p className="truncate text-xs font-medium">{item.label}</p>
-                          <p className="truncate text-[10px] text-white/40">{item.desc}</p>
+                          <p className="truncate text-[10px] text-white">{item.desc}</p>
                         </div>
                       </button>
                     ))}
@@ -222,7 +222,7 @@ export default function AdminShell() {
           })}
         </nav>
         <div className="border-t border-white/10 p-3">
-          <Link to="/" className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-white/50 transition hover:bg-white/5 hover:text-white">
+          <Link to="/" className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-white transition hover:bg-white/5 hover:text-white">
             <ArrowRight className="h-3 w-3" /> View Site
           </Link>
         </div>
