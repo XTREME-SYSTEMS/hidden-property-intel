@@ -88,6 +88,7 @@
 .hpi-v2 .v2-link:hover { text-decoration: underline; }
 
 /* ===== Hero ===== */
+.hpi-v2 .v2-eyebrow { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--v2-accent); margin-bottom: 12px; }
 .hpi-v2 .v2-hero {
   position: relative; padding: 56px 0 40px; overflow: hidden;
   background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
@@ -185,6 +186,81 @@
 }
 .hpi-v2 .v2-cta h2 { color: #fff; font-size: 30px; font-weight: 800; }
 .hpi-v2 .v2-cta p { color: #cbd5e1; margin-top: 8px; max-width: 520px; }
+
+/* ===== Polished Hero (with image) ===== */
+.hpi-v2 .v2-hero { padding: 64px 0 56px; }
+.hpi-v2 .v2-hero-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px; align-items: center; }
+.hpi-v2 .v2-hero-visual {
+  position: relative; border-radius: 18px; overflow: hidden; aspect-ratio: 4/3;
+  box-shadow: var(--v2-shadow-lg); border: 1px solid var(--v2-border);
+}
+.hpi-v2 .v2-hero-visual img { width: 100%; height: 100%; object-fit: cover; }
+.hpi-v2 .v2-hero-visual::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 50%, rgba(15,23,42,.45)); }
+.hpi-v2 .v2-hero-float {
+  position: absolute; left: 18px; bottom: 18px; z-index: 2;
+  background: rgba(255,255,255,.96); backdrop-filter: blur(8px);
+  border-radius: 14px; padding: 14px 18px; box-shadow: var(--v2-shadow);
+  display: flex; align-items: center; gap: 12px;
+}
+.hpi-v2 .v2-hero-float .ring { width: 42px; height: 42px; border-radius: 50%; background: conic-gradient(var(--v2-accent) 82%, #e2e8f0 0); display: grid; place-items: center; }
+.hpi-v2 .v2-hero-float .ring::after { content: ""; width: 30px; height: 30px; border-radius: 50%; background: #fff; position: absolute; }
+.hpi-v2 .v2-hero-float .ring b { position: relative; z-index: 1; font-size: 13px; }
+.hpi-v2 .v2-hero-float .txt b { display: block; font-size: 14px; }
+.hpi-v2 .v2-hero-float .txt span { font-size: 12px; color: var(--v2-muted); }
+
+/* ===== App Download Section ===== */
+.hpi-v2 .v2-app-download {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  border-radius: 20px; padding: 56px 48px; color: #fff;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;
+  position: relative; overflow: hidden;
+}
+.hpi-v2 .v2-app-download::before {
+  content: ""; position: absolute; top: -40px; right: -40px; width: 280px; height: 280px;
+  border-radius: 50%; background: radial-gradient(circle, rgba(22,163,74,.25), transparent 70%);
+}
+.hpi-v2 .v2-app-download .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #4ade80; }
+.hpi-v2 .v2-app-download h2 { color: #fff; font-size: clamp(28px,3.5vw,40px); font-weight: 800; margin-top: 10px; }
+.hpi-v2 .v2-app-download > div:first-child p { color: #cbd5e1; font-size: 16px; margin-top: 14px; max-width: 460px; }
+.hpi-v2 .v2-store-badges { display: flex; gap: 14px; margin-top: 28px; flex-wrap: wrap; }
+.hpi-v2 .v2-store-badge {
+  display: flex; align-items: center; gap: 12px; padding: 12px 22px;
+  background: #000; border: 1px solid rgba(255,255,255,.15); border-radius: 14px;
+  transition: .15s; min-width: 180px;
+}
+.hpi-v2 .v2-store-badge:hover { border-color: #fff; transform: translateY(-2px); }
+.hpi-v2 .v2-store-badge svg { flex-shrink: 0; }
+.hpi-v2 .v2-store-badge small { display: block; font-size: 10px; color: #94a3b8; }
+.hpi-v2 .v2-store-badge b { display: block; font-size: 15px; color: #fff; font-weight: 600; }
+.hpi-v2 .v2-app-benefits { display: grid; gap: 14px; margin-top: 28px; }
+.hpi-v2 .v2-app-benefit { display: flex; align-items: center; gap: 12px; color: #e2e8f0; font-size: 15px; }
+.hpi-v2 .v2-app-benefit .ck { width: 24px; height: 24px; border-radius: 50%; background: rgba(22,163,74,.2); color: #4ade80; display: grid; place-items: center; flex-shrink: 0; }
+.hpi-v2 .v2-phone-mockup {
+  position: relative; z-index: 1; justify-self: center;
+  width: 260px; height: 540px; border-radius: 36px; background: #1e293b;
+  border: 8px solid #0f172a; box-shadow: 0 24px 60px rgba(0,0,0,.4); overflow: hidden;
+}
+.hpi-v2 .v2-phone-screen { width: 100%; height: 100%; background: var(--v2-surface-2); display: flex; flex-direction: column; }
+.hpi-v2 .v2-phone-notch { width: 100px; height: 22px; background: #0f172a; border-radius: 0 0 14px 14px; margin: 0 auto; }
+.hpi-v2 .v2-phone-bar { padding: 10px 16px; display: flex; align-items: center; gap: 8px; background: #fff; border-bottom: 1px solid var(--v2-border); }
+.hpi-v2 .v2-phone-bar .av { width: 28px; height: 28px; border-radius: 50%; background: var(--v2-ink); }
+.hpi-v2 .v2-phone-bar b { font-size: 12px; }
+.hpi-v2 .v2-phone-body { flex: 1; padding: 14px; overflow: hidden; }
+.hpi-v2 .v2-phone-card { background: #fff; border: 1px solid var(--v2-border); border-radius: 10px; padding: 10px; margin-bottom: 10px; }
+.hpi-v2 .v2-phone-card .img { height: 70px; border-radius: 8px; background: linear-gradient(135deg,#dcfce7,#86efac); margin-bottom: 8px; }
+.hpi-v2 .v2-phone-card b { font-size: 13px; }
+.hpi-v2 .v2-phone-card span { font-size: 11px; color: var(--v2-muted); }
+.hpi-v2 .v2-phone-nav { display: grid; grid-template-columns: repeat(5,1fr); padding: 8px; background: #fff; border-top: 1px solid var(--v2-border); }
+.hpi-v2 .v2-phone-nav div { display: grid; place-items: center; height: 32px; color: var(--v2-muted); }
+.hpi-v2 .v2-phone-nav div:first-child { color: var(--v2-accent); }
+
+/* ===== Benefits grid (general) ===== */
+.hpi-v2 .v2-benefits { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+.hpi-v2 .v2-benefit { padding: 26px; border: 1px solid var(--v2-border); border-radius: var(--v2-radius); background: #fff; transition: .2s; }
+.hpi-v2 .v2-benefit:hover { border-color: var(--v2-accent); box-shadow: var(--v2-shadow); transform: translateY(-2px); }
+.hpi-v2 .v2-benefit-icon { width: 44px; height: 44px; border-radius: 10px; display: grid; place-items: center; margin-bottom: 14px; }
+.hpi-v2 .v2-benefit h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+.hpi-v2 .v2-benefit p { font-size: 14px; color: var(--v2-muted); }
 
 /* ===== Footer ===== */
 .hpi-v2 .v2-footer { background: #0f172a; color: #cbd5e1; padding: 48px 0 24px; margin-top: 48px; }

@@ -1,6 +1,6 @@
 import React from "react";
 import { Outlet, Link } from "react-router-dom";
-import { Search, MapPin, Building2, Sparkles, Phone, Menu } from "lucide-react";
+import { Search, MapPin, Building2, Sparkles, Phone, Menu, Smartphone } from "lucide-react";
 import "../../styles/v2.css";
 
 export default function V2Layout() {
@@ -21,6 +21,9 @@ export default function V2Layout() {
             <Link to="/v2">About</Link>
           </div>
           <div className="v2-nav-actions">
+            <Link to="/v2/app" className="v2-btn v2-btn-ghost v2-btn-sm" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <Smartphone size={15} /> App
+            </Link>
             <button className="v2-btn v2-btn-ghost v2-btn-sm">Sign in</button>
             <button className="v2-btn v2-btn-primary v2-btn-sm">Join free</button>
           </div>
