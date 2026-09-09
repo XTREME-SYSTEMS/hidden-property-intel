@@ -185,13 +185,21 @@ Return JSON: { "action": "short label", "specialist_agent": "one of SENTINEL|ARC
           report.actions_taken.push(`❌ ${decision.function_to_call} failed: ${e.message}`);
           report.errors.push(`${decision.function_to_call}: ${e.message}`);
         }
+        // Sanitize exec result — Axios responses carry circular refs that break JSON
+        let safeExec: any;
+        try {
+          const raw = execResult?.data ?? execResult;
+          safeExec = JSON.parse(JSON.stringify(raw, (k, v) =>
+            ["_currentRequest", "_redirectable", "request", "response", "socket"].includes(k) || typeof v === "function" ? "[redacted]" : v
+          ));
+        } catch { safeExec = { ok: !execResult?.error, note: "result too large to serialize" }; }
 
         // ── PHASE 4: LOG ──
         await sr.SwarmCycle.update(cycle.id, {
           status: "complete", phase: "done",
           completed_at: new Date().toISOString(),
           national_coverage: coverage,
-          decision, execution_result: execResult,
+          decision, execution_result: safeExec,
           actions_taken: report.actions_taken, errors: report.errors,
         });
 
@@ -199,7 +207,7 @@ Return JSON: { "action": "short label", "specialist_agent": "one of SENTINEL|ARC
           cycle_id: cycleId,
           coverage,
           decision,
-          execution: execResult,
+          execution: safeExec,
           actions: report.actions_taken,
           ai_gateway: isGatewayConfigured(),
         });
