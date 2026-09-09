@@ -112,7 +112,6 @@ const AuthenticatedApp = () => {
         <Route path="/admin" element={<AdminDashboard />} />
       </Route>
       <Route element={<LuxLayout />}>
-        <Route path="/" element={<LuxuryHome />} />
         <Route path="/listings" element={<Listings />} />
         <Route path="/properties/:id" element={<PropertyDetail />} />
         <Route path="/properties/:id/bid" element={<Bidding />} />
@@ -168,8 +167,9 @@ const AuthenticatedApp = () => {
         <Route path="/eden-skye" element={<EdenSkyeProfile />} />
         <Route path="/eden-skye/chat" element={<EdenSkyeChat />} />
       </Route>
-      {/* V2 — parallel Zillow/Redfin-clean redesign (preview only) */}
+      {/* V2 — Zillow/Redfin-clean redesign (now the home page) */}
       <Route element={<V2Layout />}>
+        <Route path="/" element={<V2Home />} />
         <Route path="/v2" element={<V2Home />} />
       </Route>
       {/* V2 PWA — persona dashboards with bottom nav */}
