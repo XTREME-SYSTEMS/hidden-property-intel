@@ -249,7 +249,7 @@ export default function AdminShell() {
             <div className="flex items-center gap-3">
               <p className="text-[11px] font-medium uppercase tracking-[0.25em] text-black/40">{activeItem?.label}</p>
               <a
-                href={`${window.location.origin}/admin`}
+                href="https://my-property-intel.base44.app/admin"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 rounded-md border border-black/15 px-2.5 py-1.5 text-xs font-medium text-black/60 transition hover:bg-black/5 hover:text-black"
