@@ -1,0 +1,105 @@
+{
+  "name": "SystemGap",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "blueprint_id": {
+      "type": "string",
+      "description": "Stable id matching the autonomous coding blueprint checklist"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "frontend",
+        "backend",
+        "entity",
+        "workflow",
+        "integration",
+        "data",
+        "seo",
+        "bug",
+        "enhancement"
+      ]
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
+      "default": "medium"
+    },
+    "description": {
+      "type": "string"
+    },
+    "file_path": {
+      "type": "string",
+      "description": "Target file to create or modify"
+    },
+    "spec": {
+      "type": "string",
+      "description": "Implementation spec from the Coder agent"
+    },
+    "code": {
+      "type": "string",
+      "description": "Generated code, if any"
+    },
+    "validation": {
+      "type": "string",
+      "description": "Validator agent review (JSON string)"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "speced",
+        "coded",
+        "validated",
+        "closed",
+        "failed"
+      ],
+      "default": "open"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "autonomous_loop",
+        "manual"
+      ],
+      "default": "autonomous_loop"
+    },
+    "cycle_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "category"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
