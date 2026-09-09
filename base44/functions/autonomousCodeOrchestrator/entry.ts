@@ -114,6 +114,24 @@ export default async function (req: Request): Promise<Response> {
         cycle_id: cycleId,
       });
 
+      // ── Auto-push validated code to GitHub — NO manual approval ──
+      let pushResult: any = null;
+      if (validator.approved && coder.code) {
+        try {
+          pushResult = await base44.asServiceRole.functions.invoke("autonomousCodePush", {
+            action: "push",
+            files: [{ path: next.file_path, content: coder.code }],
+            message: `autonomous: ${next.title}`,
+            pr_body: `## ${next.title}\n\n${coder.spec || ""}\n\n**Validator:** approved\n\nAutonomous build by the AGI swarm — no manual approval.`,
+          });
+          if (pushResult?.merged) {
+            await sr.SystemGap.update(gap.id, { status: "coded", code: coder.code });
+          }
+        } catch (e) {
+          pushResult = { error: e.message };
+        }
+      }
+
       return Response.json({
         cycle_id: cycleId,
         gap_id: gap.id,
@@ -124,6 +142,8 @@ export default async function (req: Request): Promise<Response> {
         code: coder.code,
         validation: validator,
         approved: validator.approved,
+        pushed: !!pushResult?.merged,
+        push_result: pushResult,
         ai_gateway: gw,
       });
     }

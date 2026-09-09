@@ -185,17 +185,35 @@ async function harvestViaCloudBrowser(source, url, cfg) {
 
 export async function scrapeSource(base44, { source, url, distress_type, state }) {
   const cfg = source?.scrape_config || {};
-  const method = cfg.method || 'ai';
   const sourceName = source?.name || 'manual';
   const fallbackDistress = cfg.distress_type || distress_type || 'foreclosure';
+
+  // Cloud Browser is the DEFAULT acquisition method when the engine is configured
+  // (owner's paid infra — no Base44 credits). Falls back to AI web-search only if
+  // the engine is absent. Set a DataSource's scrape_config.method to 'ai' to force
+  // the AI path for a specific source.
+  const runtime = await import('base44:runtime');
+  const engineConfigured = !!(runtime.secrets.get('BROWSER_ENGINE_URL') && runtime.secrets.get('BROWSER_ENGINE_API_KEY'));
+  const method = cfg.method || (engineConfigured ? 'cloudbrowser' : 'ai');
+
+  // For market-expansion scraping (no specific URL), build a default foreclosure
+  // search URL so the Cloud Browser has a page to render + extract.
+  let effectiveUrl = url;
+  if ((method === 'cloudbrowser' || method === 'browser') && !effectiveUrl && !source?.url) {
+    const st = (cfg.state || state || 'fl').toLowerCase();
+    const co = (cfg.county || '').toLowerCase().replace(/\s+/g, '-');
+    effectiveUrl = co
+      ? `https://www.auction.com/foreclosure/${st}/${co}-county/`
+      : `https://www.auction.com/foreclosure/${st}/`;
+  }
 
   let props = [];
   let acquisitionError = null;
   try {
     if (method === 'cloudbrowser') {
-      props = await harvestViaCloudBrowser(source, url, cfg);
+      props = await harvestViaCloudBrowser(source, effectiveUrl, cfg);
     } else if (method === 'browser') {
-      props = await harvestViaBrowser(base44, source, url, cfg);
+      props = await harvestViaBrowser(base44, source, effectiveUrl, cfg);
     } else {
       props = await harvestViaAI(base44, source, cfg, { distress_type, state });
     }
