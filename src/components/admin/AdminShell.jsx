@@ -3,10 +3,9 @@ import { Link } from "react-router-dom";
 import {
   LayoutDashboard, Database, Mail, FlaskConical, Search, Cpu, Target, Users, Home, Blocks, Calculator, Scale, TrendingUp, BarChart3,
   ArrowRight, X, ArrowLeft, Lightbulb, BookOpen, Globe, Building2, Handshake, Stamp, Radar, Sparkles, Key, Phone, Mic, Calendar, Rocket, ExternalLink,
-  ChevronDown, Compass, Briefcase, FileSignature, Wrench, Network
+  ChevronDown, Compass, Briefcase, FileSignature, Wrench, Network, Menu
 } from "lucide-react";
 import AdminOverview from "@/components/admin/AdminOverview";
-import DashboardStrip from "@/components/admin/DashboardStrip";
 import WorkflowCreator from "@/components/admin/WorkflowCreator";
 import AdminCommandBar from "@/components/admin/AdminCommandBar";
 import EdenBubble from "@/components/admin/EdenBubble";
@@ -50,9 +49,9 @@ import AdminCalendar from "@/pages/AdminCalendar";
 import AdminPreflight from "@/pages/AdminPreflight";
 
 /**
- * Workflow-organized admin shell. Tools are grouped by the deal-workflow
- * stage where they're used, so everything needed for a given task lives
- * in one place.
+ * Full-page, vertically-scrolling admin dashboard.
+ * Desktop: sticky left sidebar (workflow categories) + scrolling main column.
+ * Mobile: top bar + bottom tab navigation (PWA-style).
  */
 const CATEGORIES = [
   {
@@ -136,135 +135,155 @@ const CATEGORIES = [
   },
 ];
 
-// Flatten for search
 const ALL_ITEMS = CATEGORIES.flatMap(c => c.items.map(i => ({ ...i, catId: c.id })));
+
+// Mobile bottom-nav shortcuts (5 keys + "More" opens drawer)
+const MOBILE_NAV = [
+  { id: "overview", icon: LayoutDashboard, label: "Home" },
+  { id: "sources", icon: Database, label: "Source" },
+  { id: "investor-command", icon: Users, label: "Invest" },
+  { id: "smart-contracts", icon: Blocks, label: "Close" },
+  { id: "analytics", icon: BarChart3, label: "Stats" },
+];
 
 export default function AdminShell() {
   const [activeId, setActiveId] = useState("overview");
   const [history, setHistory] = useState([]);
   const [collapsed, setCollapsed] = useState({});
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const sidebarRef = useRef(null);
 
   const activeItem = ALL_ITEMS.find((n) => n.id === activeId);
   const ActiveComponent = activeItem?.component;
   const canGoBack = history.length > 0;
-  const canClose = activeId !== "overview";
 
   const selectTool = (id) => {
-    if (id === activeId) return;
+    if (id === activeId) { setDrawerOpen(false); return; }
     setHistory((prev) => [...prev, activeId]);
     setActiveId(id);
+    setDrawerOpen(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
   const goBack = () => {
     if (history.length === 0) return;
     const prev = history[history.length - 1];
     setHistory((h) => h.slice(0, -1));
     setActiveId(prev);
-  };
-  const closeTool = () => { setHistory([]); setActiveId("overview"); };
-
-  const jumpCategory = (catId) => {
-    setCollapsed(prev => ({ ...prev, [catId]: false }));
-    const el = sidebarRef.current?.querySelector(`[data-cat="${catId}"]`);
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const toggleCat = (catId) => setCollapsed(prev => ({ ...prev, [catId]: !prev[catId] }));
 
-  return (
-    <div className="relative flex h-[calc(100vh-112px)] overflow-hidden border border-black/10">
-      {/* Left sidebar — workflow categories */}
-      <aside className="flex w-64 shrink-0 flex-col bg-[#0c0d0e] text-white">
-        <div className="flex items-center gap-2.5 border-b border-white/10 px-5 py-4">
-          <div className="flex h-9 w-9 items-center justify-center rounded-md border border-[#6d5320]">
-            <LayoutDashboard className="h-4 w-4 text-[#e4b653]" />
-          </div>
-          <div>
-            <p className="text-[9px] uppercase tracking-[0.3em] text-white">Admin Portal</p>
-            <p className="font-display text-sm font-light text-white">Hidden Property Intel</p>
-          </div>
-        </div>
-        <nav ref={sidebarRef} className="flex-1 overflow-y-auto px-3 py-3">
-          {CATEGORIES.map(cat => {
-            const isCollapsed = collapsed[cat.id];
-            const hasActive = cat.items.some(i => i.id === activeId);
-            return (
-              <div key={cat.id} data-cat={cat.id} className="mb-1">
-                <button
-                  onClick={() => toggleCat(cat.id)}
-                  className={`group flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left transition ${hasActive ? "text-[#e4b653]" : "text-white hover:text-white"}`}
-                >
-                  <cat.icon className="h-3.5 w-3.5 shrink-0" />
-                  <span className="flex-1 text-[10px] font-semibold uppercase tracking-[0.18em]">{cat.label}</span>
-                  <ChevronDown className={`h-3 w-3 transition-transform ${isCollapsed ? "-rotate-90" : ""}`} />
-                </button>
-                {!isCollapsed && (
-                  <div className="mb-1 ml-1 mt-0.5 space-y-0.5 border-l border-white/10 pl-2">
-                    {cat.items.map(item => (
-                      <button
-                        key={item.id}
-                        onClick={() => selectTool(item.id)}
-                        className={`group flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left transition ${
-                          activeId === item.id ? "bg-white/10 text-[#e4b653]" : "text-white hover:bg-white/5 hover:text-white"
-                        }`}
-                      >
-                        <item.icon className="h-3.5 w-3.5 shrink-0" />
-                        <div className="min-w-0">
-                          <p className="truncate text-xs font-medium">{item.label}</p>
-                          <p className="truncate text-[10px] text-white">{item.desc}</p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
+  const SidebarContent = () => (
+    <nav ref={sidebarRef} className="px-3 py-3">
+      {CATEGORIES.map(cat => {
+        const isCollapsed = collapsed[cat.id];
+        const hasActive = cat.items.some(i => i.id === activeId);
+        return (
+          <div key={cat.id} className="mb-2">
+            <button
+              onClick={() => toggleCat(cat.id)}
+              className={`group flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left transition ${hasActive ? "text-[#e4b653]" : "text-white hover:bg-white/5"}`}
+            >
+              <cat.icon className="h-4 w-4 shrink-0" />
+              <span className="flex-1 text-xs font-semibold uppercase tracking-[0.14em]">{cat.label}</span>
+              <ChevronDown className={`h-4 w-4 transition-transform ${isCollapsed ? "-rotate-90" : ""}`} />
+            </button>
+            {!isCollapsed && (
+              <div className="mb-2 ml-2 mt-1 space-y-1 border-l border-white/10 pl-3">
+                {cat.items.map(item => (
+                  <button
+                    key={item.id}
+                    onClick={() => selectTool(item.id)}
+                    className={`group flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left transition ${
+                      activeId === item.id ? "bg-white/10 text-[#e4b653]" : "text-white/90 hover:bg-white/5"
+                    }`}
+                  >
+                    <item.icon className="h-4 w-4 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium">{item.label}</p>
+                      <p className="truncate text-xs text-white/60">{item.desc}</p>
+                    </div>
+                  </button>
+                ))}
               </div>
-            );
-          })}
-        </nav>
-        <div className="border-t border-white/10 p-3">
-          <Link to="/" className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-white transition hover:bg-white/5 hover:text-white">
-            <ArrowRight className="h-3 w-3" /> View Site
-          </Link>
-        </div>
-      </aside>
-
-      {/* Center content */}
-      <div className="flex flex-1 flex-col bg-[#f7f5f0]">
-        {/* Quick-access strip */}
-        <DashboardStrip onNavigate={selectTool} activeId={activeId} />
-        {/* Command bar: TOC + search + calendar */}
-        <AdminCommandBar
-          categories={CATEGORIES.map(c => ({ id: c.id, label: c.label }))}
-          items={ALL_ITEMS}
-          onNavigate={selectTool}
-          onJumpCategory={jumpCategory}
-        />
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-          {/* Card header */}
-          <div className="flex items-center justify-between border-b border-black/10 bg-white px-4 py-2.5">
-            <button onClick={goBack} disabled={!canGoBack}
-              className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-black/50 transition hover:bg-black/5 hover:text-black disabled:cursor-default disabled:opacity-25">
-              <ArrowLeft className="h-3.5 w-3.5" /> Back
-            </button>
-            <div className="flex items-center gap-3">
-              <p className="text-[11px] font-medium uppercase tracking-[0.25em] text-black/40">{activeItem?.label}</p>
-              <a
-                href="https://my-property-intel.base44.app/admin"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-md border border-black/15 px-2.5 py-1.5 text-xs font-medium text-black/60 transition hover:bg-black/5 hover:text-black"
-                title="Open admin full screen in a new tab"
-              >
-                <ExternalLink className="h-3.5 w-3.5" /> Open full screen
-              </a>
-            </div>
-            <button onClick={closeTool} disabled={!canClose}
-              className="inline-flex items-center justify-center rounded-md p-1.5 text-black/40 transition hover:bg-black/5 hover:text-black disabled:cursor-default disabled:opacity-25">
-              <X className="h-4 w-4" />
-            </button>
+            )}
           </div>
-          {/* Card content */}
-          <div className="min-h-0 flex-1 overflow-y-auto">
+        );
+      })}
+    </nav>
+  );
+
+  return (
+    <div className="min-h-screen bg-[#f7f5f0]">
+      {/* ===== Sticky top bar ===== */}
+      <header className="sticky top-0 z-40 border-b border-black/10 bg-white/95 backdrop-blur">
+        <div className="mx-auto flex max-w-[1400px] items-center gap-3 px-4 py-3">
+          <button onClick={() => setDrawerOpen(true)} className="lg:hidden rounded-md p-2 text-black/70 hover:bg-black/5">
+            <Menu className="h-5 w-5" />
+          </button>
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-md border border-[#6d5320]">
+              <LayoutDashboard className="h-4 w-4 text-[#e4b653]" />
+            </div>
+            <div className="hidden sm:block">
+              <p className="text-[10px] uppercase tracking-[0.3em] text-black/40">Admin Portal</p>
+              <p className="font-display text-base font-light text-black">Hidden Property Intel</p>
+            </div>
+          </div>
+          <div className="ml-auto flex items-center gap-2">
+            <a
+              href="https://hiddenpropertyintel.com/admin"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-md border border-black/15 px-3 py-2 text-xs font-medium text-black/70 transition hover:bg-black/5"
+              title="Open admin full screen in a new tab"
+            >
+              <ExternalLink className="h-4 w-4" /> <span className="hidden sm:inline">Open full screen</span>
+            </a>
+            <Link to="/" className="inline-flex items-center gap-1.5 rounded-md bg-black px-3 py-2 text-xs font-medium text-white transition hover:bg-black/80">
+              <ArrowRight className="h-4 w-4" /> <span className="hidden sm:inline">View Site</span>
+            </Link>
+          </div>
+        </div>
+        {/* Command bar: TOC + search + calendar */}
+        <div className="border-t border-black/5 bg-[#fbfaf7]">
+          <AdminCommandBar
+            categories={CATEGORIES.map(c => ({ id: c.id, label: c.label }))}
+            items={ALL_ITEMS}
+            onNavigate={selectTool}
+            onJumpCategory={() => {}}
+          />
+        </div>
+      </header>
+
+      {/* ===== Body: sidebar + main ===== */}
+      <div className="mx-auto flex max-w-[1400px] gap-6 px-4 py-6">
+        {/* Desktop sidebar */}
+        <aside className="hidden w-64 shrink-0 lg:block">
+          <div className="sticky top-[140px] rounded-xl border border-black/10 bg-[#0c0d0e] text-white">
+            <SidebarContent />
+          </div>
+        </aside>
+
+        {/* Main content — natural document scroll */}
+        <main className="min-w-0 flex-1 pb-24 lg:pb-6">
+          {/* Tool header */}
+          <div className="mb-4 flex items-center gap-3">
+            {canGoBack && (
+              <button onClick={goBack}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-black/15 bg-white px-3 py-2 text-sm font-medium text-black/70 transition hover:bg-black/5">
+                <ArrowLeft className="h-4 w-4" /> Back
+              </button>
+            )}
+            <div className="flex items-center gap-2.5">
+              {activeItem?.icon && <activeItem.icon className="h-5 w-5 text-[#8f6110]" />}
+              <h1 className="font-display text-2xl font-light tracking-tight text-black">{activeItem?.label}</h1>
+            </div>
+          </div>
+
+          {/* Tool content */}
+          <div className="overflow-x-auto rounded-xl border border-black/10 bg-white shadow-sm">
             {activeId === "overview" ? (
               <div>
                 <div className="p-6"><WorkflowCreator /></div>
@@ -274,10 +293,42 @@ export default function AdminShell() {
               <ActiveComponent />
             ) : null}
           </div>
-        </div>
+        </main>
       </div>
 
-      {/* Floating Eden Skye bubble — replaces the old right copilot panel */}
+      {/* ===== Mobile slide-in drawer (full nav) ===== */}
+      {drawerOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setDrawerOpen(false)} />
+          <div className="absolute left-0 top-0 h-full w-80 max-w-[85%] overflow-y-auto bg-[#0c0d0e] text-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-white/10 px-4 py-4">
+              <p className="font-display text-base font-light">Navigation</p>
+              <button onClick={() => setDrawerOpen(false)} className="rounded-md p-1.5 text-white/70 hover:bg-white/10">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <SidebarContent />
+          </div>
+        </div>
+      )}
+
+      {/* ===== Mobile bottom nav (PWA-style) ===== */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 grid grid-cols-5 border-t border-black/10 bg-white/95 backdrop-blur lg:hidden">
+        {MOBILE_NAV.map(item => {
+          const isActive = activeId === item.id;
+          return (
+            <button key={item.id} onClick={() => selectTool(item.id)}
+              className={`flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition ${
+                isActive ? "text-[#8f6110]" : "text-black/50"
+              }`}>
+              <item.icon className={`h-5 w-5 ${isActive ? "text-[#c38a1b]" : ""}`} />
+              {item.label}
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* Floating Eden Skye bubble */}
       <EdenBubble />
     </div>
   );

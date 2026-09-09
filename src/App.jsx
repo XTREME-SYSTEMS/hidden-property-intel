@@ -100,6 +100,9 @@ const AuthenticatedApp = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
+        <Route path="/admin" element={<AdminDashboard />} />
+      </Route>
       <Route element={<LuxLayout />}>
         <Route path="/" element={<LuxuryHome />} />
         <Route path="/listings" element={<Listings />} />
@@ -123,7 +126,6 @@ const AuthenticatedApp = () => {
           <Route path="/negotiation/:propertyId" element={<NegotiationChat />} />
           <Route path="/contracts/:id" element={<SmartContractDetail />} />
           <Route path="/portal" element={<PortalRouter />} />
-          <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/sources" element={<AdminSources />} />
           <Route path="/admin/outreach" element={<AdminOutreach />} />
           <Route path="/admin/test-lab" element={<AdminTestLab />} />
