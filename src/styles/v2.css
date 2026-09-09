@@ -462,9 +462,10 @@
 .hpi-v2 .z-rail a:hover { background: var(--z-surface); color: var(--z-ink); }
 .hpi-v2 .z-rail a.active { color: var(--z-blue); }
 .hpi-v2 .z-rail a svg { width: 22px; height: 22px; stroke-width: 1.6; }
-.hpi-v2 .z-content { flex: 1; min-width: 0; }
-@media (max-width: 768px) {
+.hpi-v2 .z-content { flex: 1; min-width: 0; overflow-x: hidden; }
+@media (max-width: 1024px) {
   .hpi-v2 .z-rail { display: none; }
+  .hpi-v2 .z-body { display: block; }
 }
 
 /* ---- Zillow Top Nav ---- */
@@ -616,6 +617,8 @@
   .hpi-v2 .z-nav-right .z-nav-link:nth-child(n+3) { display: none; }
   .hpi-v2 .z-spots { grid-template-columns: 1fr; }
   .hpi-v2 .z-footer-grid { grid-template-columns: repeat(2,1fr); }
+  .hpi-v2 .z-rail { display: none; }
+  .hpi-v2 .z-body { display: block; }
 }
 @media (max-width: 640px) {
   .hpi-v2 .z-nav-left .z-nav-link:nth-child(n+2) { display: none; }
@@ -827,7 +830,7 @@
 
 /* ---- Lead capture modal ---- */
 .hpi-v2 .z-lead-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 100; display: grid; place-items: center; padding: 20px; }
-.hpi-v2 .z-lead-modal { background: #fff; border-radius: 16px; width: 100%; max-width: 440px; padding: 28px; position: relative; box-shadow: 0 20px 60px rgba(0,0,0,.3); animation: z-lead-in .2s ease; }
+.hpi-v2 .z-lead-modal { background: #fff; border-radius: 16px; width: 100%; max-width: 440px; max-height: calc(100vh - 40px); overflow-y: auto; padding: 28px; position: relative; box-shadow: 0 20px 60px rgba(0,0,0,.3); animation: z-lead-in .2s ease; }
 @keyframes z-lead-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 .hpi-v2 .z-lead-close { position: absolute; top: 14px; right: 14px; border: 0; background: none; cursor: pointer; color: var(--z-muted); padding: 4px; }
 .hpi-v2 .z-lead-close:hover { color: var(--z-ink); }
