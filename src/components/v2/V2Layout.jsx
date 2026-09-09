@@ -1,31 +1,26 @@
 import React from "react";
 import { Outlet, Link } from "react-router-dom";
-import { Search, MapPin, Building2, Sparkles, Phone, Menu, Smartphone } from "lucide-react";
+import { Search, MapPin, Building2, Sparkles, Phone, Menu } from "lucide-react";
 import "../../styles/v2.css";
 
 export default function V2Layout() {
   return (
     <div className="hpi-v2">
-      {/* Top Nav */}
-      <nav className="v2-nav">
-        <div className="v2-nav-inner">
-          <Link to="/v2" className="v2-brand">
-            <span className="v2-brand-mark">HPI</span>
-            Hidden Property Intel
-          </Link>
-          <div className="v2-nav-links">
-            <Link to="/v2">Buy</Link>
-            <Link to="/v2">Sell</Link>
-            <Link to="/v2">Tools</Link>
-            <Link to="/v2">Pricing</Link>
-            <Link to="/v2">About</Link>
+      {/* Zillow-style Top Nav */}
+      <nav className="z-nav">
+        <div className="z-nav-inner">
+          <div className="z-nav-left">
+            <Link to="/v2" className="z-nav-link">Buy</Link>
+            <Link to="/seller/post-property" className="z-nav-link">Sell</Link>
+            <Link to="/deal-calculator" className="z-nav-link">Deal tools</Link>
+            <Link to="/v2" className="z-nav-link">Find an agent</Link>
           </div>
-          <div className="v2-nav-actions">
-            <Link to="/v2/app" className="v2-btn v2-btn-ghost v2-btn-sm" style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <Smartphone size={15} /> App
-            </Link>
-            <button className="v2-btn v2-btn-ghost v2-btn-sm">Sign in</button>
-            <button className="v2-btn v2-btn-primary v2-btn-sm">Join free</button>
+          <Link to="/v2" className="z-nav-logo"><b>H</b>PI</Link>
+          <div className="z-nav-right">
+            <Link to="/v2/app" className="z-nav-link">Manage rentals</Link>
+            <Link to="/v2" className="z-nav-link">Advertise</Link>
+            <Link to="/v2" className="z-nav-link">Get help</Link>
+            <Link to="/login" className="z-signin">Sign in</Link>
           </div>
         </div>
       </nav>
