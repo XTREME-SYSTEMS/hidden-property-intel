@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Search, ChevronLeft, ChevronRight, ArrowRight, Home, Tag, Wallet } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
 const TRENDING = [
-  { price: "$187,000", beds: 3, baths: 2, sqft: 1450, addr: "917 Flores Ct, Miami, FL 33125", badge: "Pre-foreclosure", score: 84, img: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=500&q=80", meta: "Distressed lead · HPI Scored" },
-  { price: "$142,500", beds: 3, baths: 2, sqft: 1280, addr: "3943 Filbert Way, Orlando, FL 32808", badge: "Probate", score: 79, img: "https://images.unsplash.com/photo-1570129477496-7c5e17e0f9b5?w=500&q=80", meta: "Heir-sourced · Skip-traced" },
-  { price: "$98,000", beds: 2, baths: 1, sqft: 980, addr: "2517 Olympic Ct, Tampa, FL 33615", badge: "Tax delinquent", score: 76, img: "https://images.unsplash.com/photo-1582407947194-2c47d6b8f9b7?w=500&q=80", meta: "Code violations · Vacant" },
-  { price: "$245,000", beds: 4, baths: 3, sqft: 2100, addr: "2530 Entrada Dr, Jacksonville, FL 32216", badge: "3D Tour", score: 81, img: "https://images.unsplash.com/photo-1600585154340-be6161a8a907?w=500&q=80", meta: "Bank-owned · REO" },
-  { price: "$165,000", beds: 3, baths: 2, sqft: 1560, addr: "1008 Levy Loop, Fort Lauderdale, FL 33311", badge: "Showcase", score: 88, img: "https://images.unsplash.com/photo-1502672260266-1c1ef2d9e3f3?w=500&q=80", meta: "High equity · Off-market" },
-  { price: "$112,000", beds: 2, baths: 1, sqft: 1040, addr: "800 Lake Edward Dr, St. Pete, FL 33715", badge: "Pre-foreclosure", score: 73, img: "https://images.unsplash.com/photo-1599809275671-4b3c4c4e4e4e?w=500&q=80", meta: "Divorce filing · Motivated" },
+  { price: "$187,000", beds: 3, baths: 2, sqft: 1450, addr: "917 Flores Ct, Miami, FL 33125", badge: "Open: Fri 9:30am-1pm (9/11)", score: 84, img: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=500&q=80", meta: "5 days on HPI · Distressed lead" },
+  { price: "$142,500", beds: 3, baths: 2, sqft: 1280, addr: "3943 Filbert Way, Orlando, FL 32808", badge: "5 days on HPI", score: 79, img: "https://images.unsplash.com/photo-1570129477496-7c5e17e0f9b5?w=500&q=80", meta: "Probate · Heir-sourced" },
+  { price: "$98,000", beds: 2, baths: 1, sqft: 980, addr: "2517 Olympic Ct, Tampa, FL 33615", badge: "5 days on HPI", score: 76, img: "https://images.unsplash.com/photo-1600585154340-be6161a8a907?w=500&q=80", meta: "Tax delinquent · Vacant" },
+  { price: "$245,000", beds: 4, baths: 3, sqft: 2100, addr: "2530 Entrada Dr, Jacksonville, FL 32216", badge: "14 days on HPI", score: 81, img: "https://images.unsplash.com/photo-1600592017751-4b3c4c4e4e4e?w=500&q=80", meta: "Bank-owned · REO" },
+  { price: "$165,000", beds: 3, baths: 2, sqft: 1560, addr: "1008 Levy Loop, Fort Lauderdale, FL 33311", badge: "3D Tour", score: 88, img: "https://images.unsplash.com/photo-1502672260266-1c1ef2d9e3f3?w=500&q=80", meta: "High equity · Off-market" },
+  { price: "$112,000", beds: 2, baths: 1, sqft: 1040, addr: "800 Lake Edward Dr, St. Pete, FL 33715", badge: "Open: Sat 10am-2pm (9/12)", score: 73, img: "https://images.unsplash.com/photo-1599809275671-4b3c4c4e4e4e?w=500&q=80", meta: "Divorce filing · Motivated" },
 ];
 
 const AFFORD = [
@@ -44,7 +44,7 @@ export default function V2Home() {
     <>
       {/* ===== Zillow-style Hero ===== */}
       <section className="z-hero">
-        <div className="z-hero-bg" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=1600&q=80')" }} />
+        <div className="z-hero-bg" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1600&q=80')" }} />
         <div className="z-hero-inner">
           <h1>Distressed. Homes.<br />Agents. Deals.</h1>
           <div className="z-search">
