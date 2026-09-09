@@ -49,7 +49,7 @@ export default function V2Home() {
         <div className="z-hero-bg" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1600&q=80')" }} />
         <div className="z-hero-inner">
           <h1>Distressed. Homes.<br />Agents. Deals.</h1>
-          <form className="z-search" onSubmit={(e) => { e.preventDefault(); navigate(`/listings${query ? `?q=${encodeURIComponent(query)}` : ""}`); }}>
+          <form className="z-search" onSubmit={(e) => { e.preventDefault(); navigate(`/v2/listings${query ? `?q=${encodeURIComponent(query)}` : ""}`); }}>
             <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Enter an address, neighborhood, city, or ZIP code" />
             <button type="submit" className="z-search-btn"><Search size={22} /></button>
           </form>
@@ -74,7 +74,7 @@ export default function V2Home() {
         ) : properties.length > 0 ? (
           <div className="z-carousel" ref={carouselRef}>
             {properties.slice(0, 10).map((p, i) => (
-              <Link to="/v2" key={p.id} className="z-card">
+              <Link to={`/v2/properties/${p.id}`} key={p.id} className="z-card">
                 <div className="z-card-media">
                   <img src={p.images?.[0]?.url || TRENDING[i % TRENDING.length].img} alt={p.address} />
                   <span className="z-card-badge">{(p.distress_type || "off-market").replace(/_/g, " ")}</span>

@@ -63,6 +63,8 @@ import V2AgentApp from '@/pages/v2/V2AgentApp';
 import V2SellerApp from '@/pages/v2/V2SellerApp';
 import V2BrokerApp from '@/pages/v2/V2BrokerApp';
 import V2SwarmDashboard from '@/pages/v2/V2SwarmDashboard';
+import V2Listings from '@/pages/v2/V2Listings';
+import V2PropertyDetail from '@/pages/v2/V2PropertyDetail';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
 import TheProcess from '@/pages/TheProcess';
@@ -172,6 +174,8 @@ const AuthenticatedApp = () => {
       <Route element={<V2Layout />}>
         <Route path="/" element={<V2Home />} />
         <Route path="/v2" element={<V2Home />} />
+        <Route path="/v2/listings" element={<V2Listings />} />
+        <Route path="/v2/properties/:id" element={<V2PropertyDetail />} />
       </Route>
       {/* V2 PWA — persona dashboards with bottom nav */}
       <Route element={<V2AppShell />}>
