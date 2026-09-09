@@ -5,120 +5,44 @@ import Seo from "@/components/Seo";
 
 const TIERS = [
   {
-    name: "Free",
-    icon: Sparkles,
-    price: "$0",
-    period: "forever",
+    name: "Free", icon: Sparkles, price: "$0", period: "forever",
     tagline: "Kick the tires. See what's out there.",
-    features: [
-      "5 property views per month",
-      "Basic search & filters",
-      "City + state + zip only (no full address)",
-      "Market overview dashboard",
-      "Community access",
-    ],
+    features: ["5 property views per month", "Basic search & filters", "City + state + zip only (no full address)", "Market overview dashboard", "Community access"],
     notIncluded: ["AI deal scoring", "Ownership chains", "Skip tracing", "Smart-contract escrow"],
-    cta: "Start free",
-    ctaTo: "/register",
-    highlight: false,
+    cta: "Start free", ctaTo: "/register", highlight: false,
   },
   {
-    name: "Starter",
-    icon: TrendingUp,
-    price: "$39",
-    period: "/month",
-    annual: "$31/mo billed annually",
+    name: "Starter", icon: TrendingUp, price: "$39", period: "/month", annual: "$31/mo billed annually",
     tagline: "For the part-time investor finding their first deals.",
-    features: [
-      "50 property views per month",
-      "Full addresses revealed",
-      "AI deal scoring (0–100)",
-      "Basic filters (price, type, distress)",
-      "Save up to 25 properties to watchlist",
-      "ROI calculator access",
-      "Email alerts",
-    ],
+    features: ["50 property views per month", "Full addresses revealed", "AI deal scoring (0–100)", "Basic filters (price, type, distress)", "Save up to 25 properties to watchlist", "ROI calculator access", "Email alerts"],
     notIncluded: ["Ownership chains & heirs", "Skip tracing", "Smart-contract escrow"],
-    cta: "Start Starter",
-    ctaTo: "/register",
-    highlight: false,
+    cta: "Start Starter", ctaTo: "/register", highlight: false,
     competitor: "DealMachine Starter $49/mo — you save 20%",
   },
   {
-    name: "Pro",
-    icon: Zap,
-    price: "$79",
-    period: "/month",
-    annual: "$63/mo billed annually",
+    name: "Pro", icon: Zap, price: "$79", period: "/month", annual: "$63/mo billed annually",
     tagline: "For serious investors who need the full intelligence stack.",
-    features: [
-      "Unlimited property views",
-      "Full AI scoring + score breakdown",
-      "Ownership chains & probate heir tracing",
-      "Advanced filters (165+ criteria)",
-      "Comparable sales data",
-      "Exit-strategy modeling (flip/BRRRR/rent)",
-      "Negotiation assistant",
-      "Unlimited watchlist + saved searches",
-      "Daily alert notifications",
-      "Priority email support",
-    ],
+    features: ["Unlimited property views", "Full AI scoring + score breakdown", "Ownership chains & probate heir tracing", "Advanced filters (165+ criteria)", "Comparable sales data", "Exit-strategy modeling (flip/BRRRR/rent)", "Negotiation assistant", "Unlimited watchlist + saved searches", "Daily alert notifications", "Priority email support"],
     notIncluded: ["Smart-contract escrow", "Skip tracing credits"],
-    cta: "Start Pro",
-    ctaTo: "/register",
-    highlight: true,
+    cta: "Start Pro", ctaTo: "/register", highlight: true,
     competitor: "PropStream $99/mo — you save 20% + get ownership chains",
     badge: "Most popular",
   },
   {
-    name: "Elite",
-    icon: Crown,
-    price: "$199",
-    period: "/month",
-    annual: "$159/mo billed annually",
+    name: "Elite", icon: Crown, price: "$199", period: "/month", annual: "$159/mo billed annually",
     tagline: "The full arsenal. Smart contracts, skip traces, everything.",
-    features: [
-      "Everything in Pro, plus:",
-      "Smart-contract escrow on Polygon",
-      "50 skip-trace credits / month",
-      "Title & lien risk assessment",
-      "Live negotiation chat with sellers",
-      "Property image pipeline (GIS + Street View)",
-      "Market analytics & trend data",
-      "API access (read-only)",
-      "Dedicated account manager",
-      "Phone + priority support",
-    ],
+    features: ["Everything in Pro, plus:", "Smart-contract escrow on Polygon", "50 skip-trace credits / month", "Title & lien risk assessment", "Live negotiation chat with sellers", "Property image pipeline (GIS + Street View)", "Market analytics & trend data", "API access (read-only)", "Dedicated account manager", "Phone + priority support"],
     notIncluded: [],
-    cta: "Start Elite",
-    ctaTo: "/register",
-    highlight: false,
+    cta: "Start Elite", ctaTo: "/register", highlight: false,
     competitor: "PropertyRadar $599/mo — you save 67% + get smart contracts",
     badge: "Best value",
   },
   {
-    name: "Enterprise",
-    icon: Building2,
-    price: "Custom",
-    period: "",
+    name: "Enterprise", icon: Building2, price: "Custom", period: "",
     tagline: "For funds, teams, and platforms operating at scale.",
-    features: [
-      "Everything in Elite, plus:",
-      "Unlimited skip tracing",
-      "Multi-seat team dashboard",
-      "White-label branding option",
-      "Full API access (read + write)",
-      "Custom data sources & scraping",
-      "Bulk property export",
-      "Dedicated scraping infrastructure",
-      "Custom smart-contract templates",
-      "24/7 priority support + SLA",
-      "Onboarding & training included",
-    ],
+    features: ["Everything in Elite, plus:", "Unlimited skip tracing", "Multi-seat team dashboard", "White-label branding option", "Full API access (read + write)", "Custom data sources & scraping", "Bulk property export", "Dedicated scraping infrastructure", "Custom smart-contract templates", "24/7 priority support + SLA", "Onboarding & training included"],
     notIncluded: [],
-    cta: "Contact sales",
-    ctaTo: "/contact",
-    highlight: false,
+    cta: "Contact sales", ctaTo: "/contact", highlight: false,
   },
 ];
 
@@ -135,176 +59,106 @@ const COMPETITOR_TABLE = [
 ];
 
 function Mark({ val }) {
-  if (val === true) return <Check className="h-4 w-4 text-emerald-600" />;
-  if (val === "partial") return <span className="text-xs text-amber-600">Partial</span>;
-  if (val === false) return <X className="h-4 w-4 text-black/20" />;
-  return <span className="text-xs font-medium text-black/70">{val}</span>;
+  if (val === true) return <Check size={16} style={{ color: "var(--z-blue)" }} />;
+  if (val === "partial") return <span style={{ fontSize: 12, color: "#b45309", fontWeight: 600 }}>Partial</span>;
+  if (val === false) return <X size={16} style={{ color: "var(--z-border)" }} />;
+  return <span style={{ fontSize: 13, fontWeight: 600, color: "var(--z-ink)" }}>{val}</span>;
 }
 
 export default function Pricing() {
   const [annual, setAnnual] = useState(false);
 
   return (
-    <div className="mx-auto max-w-[1400px] px-6 py-20 lg:px-12">
+    <div>
       <Seo
         title="Pricing — Distressed Property Intelligence Plans"
-        description="Hidden Property Intel pricing: Free, Starter $39/mo, Pro $79/mo, Elite $199/mo, Enterprise. AI-powered distressed property intelligence with smart-contract escrow. 20% cheaper than PropStream, DealMachine, and PropertyRadar."
-        keywords="distressed property pricing, real estate investment software pricing, PropStream alternative, DealMachine alternative, PropertyRadar alternative, smart contract escrow pricing, AI property scoring cost, real estate data platform pricing"
+        description="Hidden Property Intel pricing: Free, Starter $39/mo, Pro $79/mo, Elite $199/mo, Enterprise. AI-powered distressed property intelligence with smart-contract escrow."
+        keywords="distressed property pricing, real estate investment software pricing, PropStream alternative, DealMachine alternative, PropertyRadar alternative"
         path="/pricing"
-        jsonLd={{
-          "@context": "https://schema.org",
-          "@type": "PriceSpecification",
-          "name": "Hidden Property Intel Pricing Plans",
-          "description": "5-tier pricing from Free to Enterprise for AI-powered distressed property intelligence.",
-        }}
       />
 
-      <div className="text-center">
-        <p className="text-[11px] uppercase tracking-[0.4em] text-black/40">Pricing</p>
-        <h1 className="mt-3 font-display text-4xl font-light tracking-tight sm:text-6xl">
-          More intelligence. <em className="not-italic text-gold">Less cost.</em>
-        </h1>
-        <p className="mx-auto mt-5 max-w-2xl text-sm leading-relaxed text-black/60">
-          We priced ourselves against the top platforms in the market — then cut 20%+ off their price and added more
-          features at every tier. No platform offers smart-contract escrow. No platform offers AI negotiation. We do.
-        </p>
-
-        <div className="mt-8 inline-flex items-center gap-3 rounded-sm border border-black/10 p-1">
-          <button
-            onClick={() => setAnnual(false)}
-            className={`rounded-sm px-5 py-2 text-[11px] uppercase tracking-[0.2em] transition-colors ${!annual ? "bg-black text-white" : "text-black/60"}`}
-          >
-            Monthly
-          </button>
-          <button
-            onClick={() => setAnnual(true)}
-            className={`rounded-sm px-5 py-2 text-[11px] uppercase tracking-[0.2em] transition-colors ${annual ? "bg-black text-white" : "text-black/60"}`}
-          >
-            Annual <span className="text-gold">Save 20%</span>
-          </button>
+      <section className="z-page-hero" style={{ textAlign: "center" }}>
+        <p className="z-page-eyebrow">Pricing</p>
+        <h1 className="z-page-h1" style={{ margin: "10px auto 14px" }}>More intelligence. <em>Less cost.</em></h1>
+        <p className="z-page-lead" style={{ margin: "0 auto" }}>We priced ourselves against the top platforms in the market — then cut 20%+ off their price and added more features at every tier. No platform offers smart-contract escrow. No platform offers AI negotiation. We do.</p>
+        <div className="z-toggle" style={{ marginTop: 24 }}>
+          <button className={!annual ? "on" : ""} onClick={() => setAnnual(false)}>Monthly</button>
+          <button className={annual ? "on" : ""} onClick={() => setAnnual(true)}>Annual · Save 20%</button>
         </div>
-      </div>
+      </section>
 
       {/* TIER CARDS */}
-      <div className="mt-16 grid items-start gap-6 lg:grid-cols-5">
-        {TIERS.map((t) => (
-          <div
-            key={t.name}
-            className={`relative flex flex-col rounded-lg border p-6 transition-all duration-300 ease-out ${
-              t.highlight
-                ? "border-black bg-white shadow-xl lg:-mt-3 lg:mb-3 hover:-translate-y-2 hover:shadow-2xl"
-                : "border-black/10 bg-white hover:-translate-y-2 hover:border-black/30 hover:shadow-xl"
-            }`}
-          >
-            {t.badge && (
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-gold px-4 py-1 text-[9px] font-bold uppercase tracking-[0.2em] text-black shadow-md">
-                {t.badge}
-              </span>
-            )}
-            <div className="flex items-center justify-between">
-              <t.icon className={`h-6 w-6 ${t.highlight ? "text-gold" : "text-black/60"}`} />
-              <span className="text-[10px] uppercase tracking-[0.2em] text-black/40">{t.name}</span>
+      <section className="z-section-pad" style={{ paddingTop: 24 }}>
+        <div className="z-grid-3 z-tier-grid" style={{ gridTemplateColumns: "repeat(5,1fr)" }}>
+          {TIERS.map((t) => (
+            <div key={t.name} className={`z-tier-card ${t.highlight ? "featured" : ""}`}>
+              {t.badge && <span className="z-badge-pill">{t.badge}</span>}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <t.icon size={22} style={{ color: t.highlight ? "var(--z-blue)" : "var(--z-muted)" }} />
+                <span className="z-tier-name">{t.name}</span>
+              </div>
+              <div className="z-tier-price">{t.price}{t.period && <small>{t.period}</small>}</div>
+              {annual && t.annual && <div className="z-tier-annual">{t.annual}</div>}
+              <p className="z-tier-tag">{t.tagline}</p>
+              <ul>
+                {t.features.map((f, i) => (
+                  <li key={i}><Check size={15} /> <span>{f}</span></li>
+                ))}
+                {t.notIncluded?.map((f, i) => (
+                  <li key={i} className="no"><X size={15} /> <span>{f}</span></li>
+                ))}
+              </ul>
+              {t.competitor && <div className="z-tier-competitor">{t.competitor}</div>}
+              <Link to={t.ctaTo} className={`v2-btn ${t.highlight ? "v2-btn-primary" : "v2-btn-ghost"}`}>{t.cta}</Link>
             </div>
-            <p className="mt-4 font-display text-4xl font-light tracking-tight">
-              {t.price}
-              {t.period && <span className="text-base text-black/40">{t.period}</span>}
-            </p>
-            {annual && t.annual && (
-              <p className="mt-1 text-[10px] uppercase tracking-[0.15em] text-gold">{t.annual}</p>
-            )}
-            <p className="mt-3 text-xs leading-relaxed text-black/55">{t.tagline}</p>
-
-            <ul className="mt-6 flex-1 space-y-2.5">
-              {t.features.map((f, i) => (
-                <li key={i} className="flex items-start gap-2 text-xs text-black/70">
-                  <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />
-                  <span>{f}</span>
-                </li>
-              ))}
-              {t.notIncluded?.map((f, i) => (
-                <li key={i} className="flex items-start gap-2 text-xs text-black/30">
-                  <X className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                  <span>{f}</span>
-                </li>
-              ))}
-            </ul>
-
-            {t.competitor && (
-              <p className="mt-4 rounded-sm bg-black/5 px-3 py-2 text-[10px] leading-relaxed text-black/50">
-                {t.competitor}
-              </p>
-            )}
-
-            <Link
-              to={t.ctaTo}
-              className={`mt-6 inline-flex items-center justify-center rounded-sm px-5 py-3 text-[11px] uppercase tracking-[0.2em] transition-colors ${
-                t.highlight
-                  ? "bg-black text-white hover:bg-black/80"
-                  : "border border-black/15 text-black hover:bg-black hover:text-white"
-              }`}
-            >
-              {t.cta}
-            </Link>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      </section>
 
       {/* COMPETITOR COMPARISON */}
-      <section className="mt-24">
-        <div className="text-center">
-          <p className="text-[11px] uppercase tracking-[0.4em] text-black/40">Head-to-head</p>
-          <h2 className="mt-3 font-display text-3xl font-light tracking-tight sm:text-4xl">
-            How we stack up against the market.
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-black/50">
-            Feature-by-feature, platform-by-platform. HPI matches or beats every competitor — at a lower price.
-          </p>
-        </div>
-        <div className="mt-10 overflow-x-auto rounded-lg border border-black/10">
-          <table className="w-full border-collapse text-sm">
-            <thead>
-              <tr className="border-b border-black/10 bg-black/[0.02]">
-                <th className="sticky left-0 bg-black/[0.02] px-5 py-5 text-left text-[10px] uppercase tracking-[0.25em] text-black/40">Feature</th>
-                <th className="px-5 py-5 text-center">
-                  <span className="flex flex-col items-center gap-1.5">
-                    <span className="grid h-9 w-9 place-items-center rounded-full bg-black text-gold">
-                      <Shield className="h-4 w-4" />
-                    </span>
-                    <span className="font-display text-sm font-medium text-black">HPI</span>
-                    <span className="text-[9px] uppercase tracking-[0.15em] text-gold">Best value</span>
-                  </span>
-                </th>
-                <th className="px-5 py-5 text-center text-[10px] uppercase tracking-[0.25em] text-black/40">PropStream</th>
-                <th className="px-5 py-5 text-center text-[10px] uppercase tracking-[0.25em] text-black/40">DealMachine</th>
-                <th className="px-5 py-5 text-center text-[10px] uppercase tracking-[0.25em] text-black/40">PropertyRadar</th>
-              </tr>
-            </thead>
-            <tbody>
-              {COMPETITOR_TABLE.map((row, i) => (
-                <tr key={row.feature} className={`align-middle ${i % 2 === 0 ? "bg-white" : "bg-black/[0.015]"}`}>
-                  <td className="sticky left-0 border-r border-black/5 px-5 py-4 font-medium text-black/80">{row.feature}</td>
-                  <td className="bg-gold/[0.04] px-5 py-4 text-center">
-                    <div className="flex justify-center"><Mark val={row.us} /></div>
-                  </td>
-                  <td className="px-5 py-4 text-center"><div className="flex justify-center"><Mark val={row.propstream} /></div></td>
-                  <td className="px-5 py-4 text-center"><div className="flex justify-center"><Mark val={row.dealmachine} /></div></td>
-                  <td className="px-5 py-4 text-center"><div className="flex justify-center"><Mark val={row.propertyradar} /></div></td>
+      <section className="z-section-alt">
+        <div className="z-section-alt-inner">
+          <div style={{ textAlign: "center" }}>
+            <p className="z-page-eyebrow">Head-to-head</p>
+            <h2 className="z-page-h2" style={{ margin: "8px auto 0" }}>How we stack up against the market.</h2>
+            <p className="z-page-sub" style={{ margin: "0 auto 28px" }}>Feature-by-feature, platform-by-platform. HPI matches or beats every competitor — at a lower price.</p>
+          </div>
+          <div style={{ overflowX: "auto", border: "1px solid var(--z-border)", borderRadius: 12 }}>
+            <table className="z-compare-table">
+              <thead>
+                <tr>
+                  <th>Feature</th>
+                  <th style={{ textAlign: "center" }}><Shield size={16} style={{ display: "inline", marginRight: 4, color: "var(--z-blue)" }} /> HPI</th>
+                  <th style={{ textAlign: "center" }}>PropStream</th>
+                  <th style={{ textAlign: "center" }}>DealMachine</th>
+                  <th style={{ textAlign: "center" }}>PropertyRadar</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-black/50">
-          <span className="flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-emerald-600" /> Included</span>
-          <span className="flex items-center gap-1.5"><span className="text-amber-600">Partial</span> Limited or restricted</span>
-          <span className="flex items-center gap-1.5"><X className="h-3.5 w-3.5 text-black/20" /> Not available</span>
+              </thead>
+              <tbody>
+                {COMPETITOR_TABLE.map((row, i) => (
+                  <tr key={row.feature} style={{ background: i % 2 === 0 ? "#fff" : "var(--z-surface)" }}>
+                    <td><b>{row.feature}</b></td>
+                    <td style={{ textAlign: "center", background: "#f0f6ff" }}><Mark val={row.us} /></td>
+                    <td style={{ textAlign: "center" }}><Mark val={row.propstream} /></td>
+                    <td style={{ textAlign: "center" }}><Mark val={row.dealmachine} /></td>
+                    <td style={{ textAlign: "center" }}><Mark val={row.propertyradar} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div style={{ display: "flex", gap: 20, flexWrap: "wrap", marginTop: 14, fontSize: 13, color: "var(--z-muted)" }}>
+            <span style={{ display: "flex", alignItems: "center", gap: 6 }}><Check size={15} style={{ color: "var(--z-blue)" }} /> Included</span>
+            <span style={{ display: "flex", alignItems: "center", gap: 6 }}><span style={{ color: "#b45309", fontWeight: 600 }}>Partial</span> Limited or restricted</span>
+            <span style={{ display: "flex", alignItems: "center", gap: 6 }}><X size={15} style={{ color: "var(--z-border)" }} /> Not available</span>
+          </div>
         </div>
       </section>
 
       {/* FAQ */}
-      <section className="mt-24 max-w-3xl">
-        <h2 className="font-display text-3xl font-light tracking-tight">Pricing questions</h2>
-        <div className="mt-8 space-y-6">
+      <section className="z-section-pad" style={{ maxWidth: 820 }}>
+        <h2 className="z-page-h2">Pricing questions</h2>
+        <div style={{ marginTop: 20 }}>
           {[
             { q: "Can I switch plans anytime?", a: "Yes. Upgrade or downgrade from your dashboard at any time. We prorate the difference automatically." },
             { q: "Is there a free trial on paid plans?", a: "Starter, Pro, and Elite all include a 7-day free trial. No credit card required to start." },
@@ -312,28 +166,21 @@ export default function Pricing() {
             { q: "Do you offer team pricing?", a: "Enterprise plans include multi-seat dashboards, custom roles, and volume discounts. Contact us for a quote." },
             { q: "How are you cheaper than PropStream and PropertyRadar?", a: "We built our data pipeline on modern infrastructure (Supabase + Railway) instead of legacy data warehouses. That keeps our costs low — and we pass the savings to you." },
           ].map((f) => (
-            <div key={f.q} className="border-b border-black/10 pb-5">
-              <p className="font-display text-base font-medium">{f.q}</p>
-              <p className="mt-2 text-sm leading-relaxed text-black/60">{f.a}</p>
+            <div key={f.q} className="z-faq-item">
+              <h3>{f.q}</h3>
+              <p>{f.a}</p>
             </div>
           ))}
         </div>
       </section>
 
-      <div className="mt-20 rounded-sm bg-black p-10 text-center text-white lg:p-16">
-        <h2 className="mx-auto max-w-2xl font-display text-3xl font-light leading-tight">
-          Still not sure which plan is right for you?
-        </h2>
-        <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-white/60">
-          Start free, upgrade when you're ready. No lock-in, no hidden fees, cancel anytime.
-        </p>
-        <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Link to="/register" className="inline-flex items-center gap-2 rounded-sm bg-gold-warm px-6 py-3.5 text-[11px] uppercase tracking-[0.3em] text-black hover:opacity-90">
-            Get started free
-          </Link>
-          <Link to="/contact" className="inline-flex items-center gap-2 rounded-sm border border-white/25 px-6 py-3.5 text-[11px] uppercase tracking-[0.3em] text-white hover:bg-white/10">
-            Talk to us
-          </Link>
+      {/* CTA */}
+      <div className="z-cta-band">
+        <h2>Still not sure which plan is right for you?</h2>
+        <p>Start free, upgrade when you're ready. No lock-in, no hidden fees, cancel anytime.</p>
+        <div className="z-cta-row">
+          <Link to="/register" className="v2-btn v2-btn-primary">Get started free</Link>
+          <Link to="/contact" className="v2-btn v2-btn-ghost" style={{ background: "transparent", color: "#fff", borderColor: "rgba(255,255,255,.3)" }}>Talk to us</Link>
         </div>
       </div>
     </div>

@@ -120,10 +120,8 @@ const AuthenticatedApp = () => {
         <Route path="/properties/:id/bid" element={<Bidding />} />
         <Route path="/calculators" element={<Calculators />} />
         <Route path="/about" element={<About />} />
-        <Route path="/pricing" element={<Pricing />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/process" element={<TheProcess />} />
         <Route path="/launch" element={<LaunchElite />} />
         <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
           <Route path="/investor/signup" element={<InvestorSignup />} />
@@ -142,7 +140,6 @@ const AuthenticatedApp = () => {
           <Route path="/admin/architecture" element={<AdminArchitecture />} />
           <Route path="/admin/search-console" element={<AdminSearchConsole />} />
           <Route path="/system-dna" element={<SystemDNA />} />
-          <Route path="/smart-contracts" element={<SmartContractMarketing />} />
         <Route path="/deal-calculator" element={<DealCalculator />} />
         <Route path="/agent/dashboard" element={<AgentDashboard />} />
         <Route path="/legal-compliance" element={<LegalCompliance />} />
@@ -176,6 +173,9 @@ const AuthenticatedApp = () => {
         <Route path="/v2" element={<V2Home />} />
         <Route path="/v2/listings" element={<V2Listings />} />
         <Route path="/v2/properties/:id" element={<V2PropertyDetail />} />
+        <Route path="/smart-contracts" element={<SmartContractMarketing />} />
+        <Route path="/process" element={<TheProcess />} />
+        <Route path="/pricing" element={<Pricing />} />
       </Route>
       {/* V2 PWA — persona dashboards with bottom nav */}
       <Route element={<V2AppShell />}>
