@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Search, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import V2AppDownload from "@/components/v2/V2AppDownload";
 
 const TRENDING = [
   { price: "$187,000", beds: 3, baths: 2, sqft: 1450, addr: "917 Flores Ct, Miami, FL 33125", badge: "Open: Fri 9:30am-1pm (9/11)", score: 84, img: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=500&q=80", meta: "5 days on HPI · Distressed lead" },
@@ -20,6 +21,7 @@ const AFFORD = [
 
 export default function V2Home() {
   const [query, setQuery] = useState("");
+  const navigate = useNavigate();
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const carouselRef = useRef(null);
@@ -47,10 +49,10 @@ export default function V2Home() {
         <div className="z-hero-bg" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1600&q=80')" }} />
         <div className="z-hero-inner">
           <h1>Distressed. Homes.<br />Agents. Deals.</h1>
-          <div className="z-search">
+          <form className="z-search" onSubmit={(e) => { e.preventDefault(); navigate(`/listings${query ? `?q=${encodeURIComponent(query)}` : ""}`); }}>
             <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Enter an address, neighborhood, city, or ZIP code" />
-            <button className="z-search-btn"><Search size={22} /></button>
-          </div>
+            <button type="submit" className="z-search-btn"><Search size={22} /></button>
+          </form>
         </div>
       </section>
 
@@ -164,6 +166,9 @@ export default function V2Home() {
           </div>
         </div>
       </section>
+
+      {/* ===== App download (PWA install) ===== */}
+      <V2AppDownload />
 
       {/* ===== Zillow-style footer ===== */}
       <footer className="z-footer">

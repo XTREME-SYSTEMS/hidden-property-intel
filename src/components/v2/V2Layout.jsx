@@ -1,6 +1,7 @@
 import React from "react";
 import { Outlet, Link } from "react-router-dom";
 import { Search, Bell, Heart, Calendar, Mail } from "lucide-react";
+import PWAInstall from "@/components/PWAInstall";
 import "../../styles/v2.css";
 
 export default function V2Layout() {
@@ -18,9 +19,8 @@ export default function V2Layout() {
           </div>
           <Link to="/v2" className="z-nav-logo"><b>H</b>PI</Link>
           <div className="z-nav-right">
-            <Link to="/v2/app" className="z-nav-link">Manage rentals</Link>
-            <Link to="/v2" className="z-nav-link">Advertise</Link>
             <Link to="/v2" className="z-nav-link">Help</Link>
+            <PWAInstall variant="nav" />
             <Link to="/login" className="z-signin">Sign in</Link>
           </div>
         </div>

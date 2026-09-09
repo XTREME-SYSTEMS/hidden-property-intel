@@ -18,6 +18,21 @@ export const GATEWAY_MODELS = {
   // Google
   "google/gemini-3-flash": { provider: "google", label: "Gemini 3 Flash", tier: "fast" },
   "google/gemini-3.1-pro": { provider: "google", label: "Gemini 3.1 Pro", tier: "premium" },
+  // Perplexity — real-time web-grounded research
+  "perplexity/sonar-pro": { provider: "perplexity", label: "Perplexity Sonar Pro", tier: "research" },
+  "perplexity/sonar": { provider: "perplexity", label: "Perplexity Sonar", tier: "research" },
+  "perplexity/sonar-reasoning-pro": { provider: "perplexity", label: "Perplexity Reasoning Pro", tier: "research" },
+  "perplexity/sonar-deep-research": { provider: "perplexity", label: "Perplexity Deep Research", tier: "research" },
+  // xAI Grok — real-time + reasoning
+  "xai/grok-4": { provider: "xai", label: "Grok 4", tier: "premium" },
+  "xai/grok-4-fast": { provider: "xai", label: "Grok 4 Fast", tier: "fast" },
+  // DeepSeek — reasoning + code
+  "deepseek/deepseek-chat": { provider: "deepseek", label: "DeepSeek Chat", tier: "standard" },
+  "deepseek/deepseek-reasoner": { provider: "deepseek", label: "DeepSeek Reasoner", tier: "premium" },
+  // Meta Llama — open-weight
+  "meta-llama/llama-3.3-70b-instruct": { provider: "meta", label: "Llama 3.3 70B", tier: "standard" },
+  // Mistral
+  "mistralai/mistral-large": { provider: "mistral", label: "Mistral Large", tier: "standard" },
 };
 
 /**
