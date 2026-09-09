@@ -11,6 +11,10 @@
     {
       "path": "/api/autonomous-code-cycle",
       "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/swarm-cycle",
+      "schedule": "*/5 * * * *"
     }
   ]
 }

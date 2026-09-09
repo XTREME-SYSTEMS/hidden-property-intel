@@ -1,5 +1,22 @@
 {
-  "name": "AGI Swarm Cycle",
+  "description": "Autonomous swarm heartbeat \u2014 free deterministic fallback (zero Base44 credits). Runs every 30 min as a safety net; the Vercel cron (/api/swarm-cycle) is the primary 5-min driver on paid Vercel + Supabase + Railway. Deactivate this workflow once the Vercel orchestrator is deployed.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "*/30 * * * *",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
   "definition": {
     "document": {
       "dsl": "1.0.0",
@@ -20,29 +37,12 @@
           },
           "then": "end",
           "x-base44": {
-            "title": "Run swarm cycle",
-            "description": "Audit \u2192 deliberate \u2192 execute"
+            "title": "Run swarm cycle (free heartbeat)",
+            "description": "Deterministic \u2014 no LLM, zero credits"
           }
         }
       }
     ]
   },
-  "trigger": {
-    "condition": null,
-    "config": {
-      "trigger_type": "scheduled",
-      "events": [],
-      "schedule_mode": "recurring",
-      "cron_expression": "*/5 * * * *",
-      "one_time_date": null,
-      "timezone": "America/New_York",
-      "interval_value": null,
-      "interval_unit": null,
-      "interval_anchor": null,
-      "ends_type": "never",
-      "ends_on_date": null,
-      "ends_after_count": null
-    }
-  },
-  "description": "Autonomous swarm heartbeat \u2014 audits national coverage, deliberates with the council, and executes the highest-impact backend function every 5 minutes toward national scale"
+  "name": "AGI Swarm Cycle"
 }

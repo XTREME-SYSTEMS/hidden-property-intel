@@ -65,6 +65,18 @@ export default async function (req: Request): Promise<Response> {
 
     const action = body.action || "cycle";
 
+    // ── LOG (Vercel orchestrator writes its cycle result here) ──
+    if (action === "log") {
+      const rec = await sr.SwarmCycle.create({
+        cycle_id: body.cycle_id || `VERCEL-${Date.now()}`,
+        status: body.status || "complete", phase: "done", trigger_source: "cron",
+        national_coverage: body.coverage, decision: body.decision, execution_result: body.execution,
+        actions_taken: body.actions || [], errors: body.errors || [],
+        started_at: body.started_at || new Date().toISOString(), completed_at: new Date().toISOString(),
+      });
+      return Response.json({ logged: true, id: rec.id });
+    }
+
     // ── STATUS ──
     if (action === "status") {
       const coverage = await computeCoverage(sr);
@@ -105,31 +117,31 @@ export default async function (req: Request): Promise<Response> {
         const coverage = await computeCoverage(sr);
         report.coverage = coverage;
 
-        // ── PHASE 2: SWARM DELIBERATION (Prime + council) ──
+        // ── PHASE 2: DECIDE ──
         await sr.SwarmCycle.update(cycle.id, { phase: "deliberate" });
 
-        const deliberationPrompt = `You are PRIME, the orchestrator of the Hidden Property Intel AGI swarm. Your job is to advance national distressed-property operations autonomously.
+        let decision: any;
+        if (body.forced_function) {
+          // Vercel-directed execution — no LLM, zero Base44 credits
+          decision = {
+            action: body.forced_action || `Forced: ${body.forced_function}`,
+            specialist_agent: body.forced_agent || "EXTERNAL",
+            function_to_call: body.forced_function,
+            params: body.forced_params || {},
+            rationale: body.forced_rationale || "Directed by Vercel orchestrator",
+          };
+        } else if (body.use_llm && isGatewayConfigured()) {
+          // AI deliberation via Vercel AI Gateway (paid Vercel, NOT Base44 credits)
+          const deliberationPrompt = `You are PRIME, orchestrator of the Hidden Property Intel AGI swarm. Advance national distressed-property operations.
 
 NATIONAL COVERAGE AUDIT:
 ${JSON.stringify(coverage, null, 2)}
 
-TARGET: ${TARGET_MARKETS.length} markets across ${new Set(TARGET_MARKETS.map(m => m.state)).size} states. Currently ${coverage.counties_covered} covered, ${coverage.uncovered_markets.length} uncovered (first 5: ${coverage.uncovered_markets.slice(0, 5).join(", ")}).
-
-AVAILABLE ACTIONS (pick the ONE with highest impact right now):
+AVAILABLE ACTIONS:
 ${Object.entries(SAFE_FUNCTIONS).map(([fn, d]) => `- ${fn}: ${d}`).join("\n")}
 
-Decision rules:
-- If uncovered markets exist → scrapeProperties with the next uncovered { state, county } to expand national reach.
-- If properties exist but enrichment < 70% → runMasterEnrichment.
-- If enriched but unscored → scoreAllActiveProperties.
-- If scored properties with no recent outreach → runDailyOutreach.
-- If outreach sent → matchAndNotifyAlerts or processFollowUps.
-- Periodically → validateEnrichment (health) or expireStaleProperties (cleanup).
-
-Return JSON: { "action": "short label", "specialist_agent": "one of SENTINEL|ARCHITECT|ORACLE|SIREN|ANALYST|REAPER|HEALER", "function_to_call": "exact function name from the list", "params": { "state": "...", "county": "..." } or {}, "rationale": "one sentence why" }`;
-
-        let decision: any;
-        if (isGatewayConfigured()) {
+Priority: enrich unenriched > score unscored > scrape uncovered > outreach > alerts > cleanup.
+Return JSON: { "action": "label", "specialist_agent": "SENTINEL|ARCHITECT|ORACLE|SIREN|ANALYST|REAPER|HEALER", "function_to_call": "exact name", "params": {}, "rationale": "one sentence" }`;
           const r = await gatewayChat({
             prompt: deliberationPrompt,
             model: "anthropic/claude-sonnet-5",
@@ -147,19 +159,8 @@ Return JSON: { "action": "short label", "specialist_agent": "one of SENTINEL|ARC
           });
           try { decision = JSON.parse(stripMd(r.text)); } catch { decision = fallbackDecision(coverage); }
         } else {
-          decision = await base44.asServiceRole.integrations.Core.InvokeLLM({
-            prompt: deliberationPrompt,
-            response_json_schema: {
-              type: "object",
-              properties: {
-                action: { type: "string" },
-                specialist_agent: { type: "string" },
-                function_to_call: { type: "string" },
-                params: { type: "object" },
-                rationale: { type: "string" },
-              },
-            },
-          });
+          // Free deterministic fallback — zero credits, always-on heartbeat
+          decision = fallbackDecision(coverage);
         }
 
         // Validate the chosen function is in the safe whitelist
@@ -232,10 +233,14 @@ async function computeCoverage(sr: any) {
   const properties = await sr.Property.list("-created_date", 500).catch(() => []);
   const byState: Record<string, number> = {};
   const byCounty: Record<string, number> = {};
+  let unscored = 0, unenriched = 0, active = 0;
   for (const p of properties) {
     if (p.state) byState[p.state] = (byState[p.state] || 0) + 1;
     const key = `${p.city || ""}|${p.state || ""}`;
     byCounty[key] = (byCounty[key] || 0) + 1;
+    if (!p.status || p.status === "active") active++;
+    if (!p.property_score) unscored++;
+    if (!p.master_enriched_at || (p.enrichment_completeness || 0) < 70) unenriched++;
   }
   const coveredKeys = new Set(Object.keys(byState));
   const uncovered = TARGET_MARKETS
@@ -243,6 +248,8 @@ async function computeCoverage(sr: any) {
     .map((m) => `${m.county}, ${m.state}`);
   return {
     total_properties: properties.length,
+    active_properties: active,
+    unscored, unenriched,
     states_covered: Object.keys(byState).length,
     counties_covered: Object.keys(byCounty).length,
     by_state: byState,
@@ -251,14 +258,21 @@ async function computeCoverage(sr: any) {
   };
 }
 
-// Deterministic fallback if the LLM fails
+// Deterministic coordinator — prioritizes scoring + enrichment (the heavy lifting).
+// Zero LLM cost. Used by the free always-on heartbeat and as the Vercel default.
 function fallbackDecision(coverage: any) {
-  if (coverage.uncovered_markets.length > 0) {
+  if ((coverage.unenriched || 0) > 0) {
+    return { action: `Enrich ${coverage.unenriched} properties`, specialist_agent: "ARCHITECT", function_to_call: "runMasterEnrichment", params: {}, rationale: `${coverage.unenriched} properties need master enrichment` };
+  }
+  if ((coverage.unscored || 0) > 0) {
+    return { action: `Score ${coverage.unscored} properties`, specialist_agent: "ORACLE", function_to_call: "scoreAllActiveProperties", params: {}, rationale: `${coverage.unscored} properties need investment scoring` };
+  }
+  if ((coverage.uncovered_markets || []).length > 0) {
     const [county, state] = coverage.uncovered_markets[0].split(", ");
     return { action: `Scrape ${county}, ${state}`, specialist_agent: "SENTINEL", function_to_call: "scrapeProperties", params: { state, county }, rationale: "Expand national coverage to next uncovered market" };
   }
-  if (coverage.total_properties > 0) {
-    return { action: "Enrich properties", specialist_agent: "ARCHITECT", function_to_call: "runMasterEnrichment", params: {}, rationale: "Enrich existing properties to full 15-category data" };
+  if ((coverage.active_properties || coverage.total_properties || 0) > 0) {
+    return { action: "Match alerts & notify investors", specialist_agent: "ANALYST", function_to_call: "matchAndNotifyAlerts", params: {}, rationale: "Match scored properties to investor alerts" };
   }
-  return { action: "Validate system", specialist_agent: "HEALER", function_to_call: "validateEnrichment", params: {}, rationale: "No properties yet — run health check" };
+  return { action: "Validate system", specialist_agent: "HEALER", function_to_call: "validateEnrichment", params: {}, rationale: "No work pending — run health check" };
 }

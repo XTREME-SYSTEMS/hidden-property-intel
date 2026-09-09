@@ -63,20 +63,21 @@ export default function V2SwarmDashboard() {
 
       <div className="v2-app-stats" style={{ gridTemplateColumns: "repeat(4,1fr)" }}>
         <div className="v2-app-stat">
+          <div className="v2-app-stat-icon" style={{ background: "#fef3c7", color: "#d97706" }}><Activity size={18} /></div>
+          <b>{cov.unenriched ?? "—"}</b><span>Need enrichment</span>
+          {cov.total_properties ? <div className="up" style={{ color: "#d97706" }}>{cov.total_properties} total</div> : null}
+        </div>
+        <div className="v2-app-stat">
+          <div className="v2-app-stat-icon" style={{ background: "#ede9fe", color: "#7c3aed" }}><Zap size={18} /></div>
+          <b>{cov.unscored ?? "—"}</b><span>Need scoring</span>
+        </div>
+        <div className="v2-app-stat">
           <div className="v2-app-stat-icon" style={{ background: "#dcfce7", color: "#16a34a" }}><Globe size={18} /></div>
-          <b>{cov.states_covered || 0}</b><span>States covered</span>
+          <b>{cov.states_covered || 0}</b><span>States · {cov.counties_covered || 0} counties</span>
         </div>
         <div className="v2-app-stat">
           <div className="v2-app-stat-icon" style={{ background: "#dbeafe", color: "#2563eb" }}><Map size={18} /></div>
-          <b>{cov.counties_covered || 0}/{status?.target_markets || 0}</b><span>Markets ({pct}%)</span>
-        </div>
-        <div className="v2-app-stat">
-          <div className="v2-app-stat-icon" style={{ background: "#fef3c7", color: "#d97706" }}><Activity size={18} /></div>
-          <b>{cov.total_properties || 0}</b><span>Properties</span>
-        </div>
-        <div className="v2-app-stat">
-          <div className="v2-app-stat-icon" style={{ background: "#ede9fe", color: "#7c3aed" }}><Cpu size={18} /></div>
-          <b>{status?.ai_gateway ? "ON" : "OFF"}</b><span>AI Gateway</span>
+          <b>{cov.total_properties || 0}</b><span>Properties · {pct}% national</span>
         </div>
       </div>
 
