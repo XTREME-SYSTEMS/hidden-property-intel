@@ -1,10 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { Outlet, Link } from "react-router-dom";
 import { Search, Bell, Heart, Calendar, Mail } from "lucide-react";
 import PWAInstall from "@/components/PWAInstall";
+import V2LeadCapture from "@/components/v2/V2LeadCapture";
 import "../../styles/v2.css";
 
 export default function V2Layout() {
+  const [lead, setLead] = useState({ open: false, feature: "updates" });
+  const openLead = (feature) => setLead({ open: true, feature });
   return (
     <div className="hpi-v2">
       {/* Zillow-style Top Nav (full width) */}
@@ -32,10 +35,10 @@ export default function V2Layout() {
         {/* Zillow left sidebar rail */}
         <aside className="z-rail">
           <Link to="/v2/listings" className="active"><Search /> Search</Link>
-          <Link to="/alerts"><Bell /> Updates</Link>
-          <Link to="/investor/pipeline"><Heart /> Favorites</Link>
-          <Link to="/admin/calendar"><Calendar /> Plan</Link>
-          <Link to="/eden-skye/chat"><Mail /> Inbox</Link>
+          <button className="z-rail-btn" onClick={() => openLead("updates")}><Bell /> Updates</button>
+          <button className="z-rail-btn" onClick={() => openLead("favorites")}><Heart /> Favorites</button>
+          <button className="z-rail-btn" onClick={() => openLead("plan")}><Calendar /> Plan</button>
+          <button className="z-rail-btn" onClick={() => openLead("inbox")}><Mail /> Inbox</button>
         </aside>
 
         <div className="z-content">
@@ -84,6 +87,7 @@ export default function V2Layout() {
           </footer>
         </div>
       </div>
+      <V2LeadCapture open={lead.open} feature={lead.feature} onClose={() => setLead({ open: false, feature: lead.feature })} />
     </div>
   );
 }
