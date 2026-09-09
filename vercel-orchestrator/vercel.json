@@ -7,14 +7,6 @@
     {
       "path": "/api/mirror-to-supabase",
       "schedule": "*/30 * * * *"
-    },
-    {
-      "path": "/api/autonomous-code-cycle",
-      "schedule": "*/5 * * * *"
-    },
-    {
-      "path": "/api/swarm-cycle",
-      "schedule": "*/5 * * * *"
     }
   ]
 }

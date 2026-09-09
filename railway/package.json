@@ -1,10 +1,10 @@
 {
   "name": "hidden-property-intel-scraper",
   "version": "1.0.0",
-  "main": "dist/server.js",
+  "main": "dist/scraper-cron.js",
   "scripts": {
-    "build": "tsc scraper-cron.ts server.ts --outDir dist --module commonjs --target es2020 --lib es2020 --skipLibCheck --esModuleInterop --resolveJsonModule",
-    "start": "node dist/server.js",
+    "build": "tsc scraper-cron.ts --outDir dist --module commonjs --target es2020 --lib es2020 --skipLibCheck --esModuleInterop --resolveJsonModule",
+    "start": "node dist/scraper-cron.js",
     "dev": "ts-node --compiler-options '{\"module\":\"commonjs\"}' scraper-cron.ts"
   },
   "dependencies": {

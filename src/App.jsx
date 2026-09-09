@@ -54,17 +54,6 @@ import FloridaSourceDirectory from '@/pages/FloridaSourceDirectory';
 import AdminEnrichmentUpgrades from '@/pages/AdminEnrichmentUpgrades';
 import AdminXtremeVision from '@/pages/AdminXtremeVision';
 import PortalRouter from '@/pages/PortalRouter';
-import V2Layout from '@/components/v2/V2Layout';
-import V2Home from '@/pages/v2/V2Home';
-import V2AppShell from '@/components/v2/V2AppShell';
-import V2AppHome from '@/pages/v2/V2AppHome';
-import V2InvestorApp from '@/pages/v2/V2InvestorApp';
-import V2AgentApp from '@/pages/v2/V2AgentApp';
-import V2SellerApp from '@/pages/v2/V2SellerApp';
-import V2BrokerApp from '@/pages/v2/V2BrokerApp';
-import V2SwarmDashboard from '@/pages/v2/V2SwarmDashboard';
-import V2Listings from '@/pages/v2/V2Listings';
-import V2PropertyDetail from '@/pages/v2/V2PropertyDetail';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
 import TheProcess from '@/pages/TheProcess';
@@ -111,14 +100,17 @@ const AuthenticatedApp = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
-      <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
-        <Route path="/admin" element={<AdminDashboard />} />
-      </Route>
       <Route element={<LuxLayout />}>
-        <Route path="/listings" element={<Navigate to="/v2/listings" replace />} />
+        <Route path="/" element={<LuxuryHome />} />
+        <Route path="/listings" element={<Listings />} />
         <Route path="/properties/:id" element={<PropertyDetail />} />
         <Route path="/properties/:id/bid" element={<Bidding />} />
         <Route path="/calculators" element={<Calculators />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/process" element={<TheProcess />} />
         <Route path="/launch" element={<LaunchElite />} />
         <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
           <Route path="/investor/signup" element={<InvestorSignup />} />
@@ -131,12 +123,15 @@ const AuthenticatedApp = () => {
           <Route path="/negotiation/:propertyId" element={<NegotiationChat />} />
           <Route path="/contracts/:id" element={<SmartContractDetail />} />
           <Route path="/portal" element={<PortalRouter />} />
+          <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/sources" element={<AdminSources />} />
           <Route path="/admin/outreach" element={<AdminOutreach />} />
           <Route path="/admin/test-lab" element={<AdminTestLab />} />
           <Route path="/admin/architecture" element={<AdminArchitecture />} />
           <Route path="/admin/search-console" element={<AdminSearchConsole />} />
           <Route path="/system-dna" element={<SystemDNA />} />
+          <Route path="/smart-contracts" element={<SmartContractMarketing />} />
+        <Route path="/deal-calculator" element={<DealCalculator />} />
         <Route path="/agent/dashboard" element={<AgentDashboard />} />
         <Route path="/legal-compliance" element={<LegalCompliance />} />
         <Route path="/industry-intelligence" element={<IndustryIntelligence />} />
@@ -162,29 +157,6 @@ const AuthenticatedApp = () => {
         </Route>
         <Route path="/eden-skye" element={<EdenSkyeProfile />} />
         <Route path="/eden-skye/chat" element={<EdenSkyeChat />} />
-      </Route>
-      {/* V2 — Zillow/Redfin-clean redesign (now the home page) */}
-      <Route element={<V2Layout />}>
-        <Route path="/" element={<V2Home />} />
-        <Route path="/v2" element={<V2Home />} />
-        <Route path="/v2/listings" element={<V2Listings />} />
-        <Route path="/v2/properties/:id" element={<V2PropertyDetail />} />
-        <Route path="/smart-contracts" element={<SmartContractMarketing />} />
-        <Route path="/process" element={<TheProcess />} />
-        <Route path="/pricing" element={<Pricing />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/blog" element={<Blog />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/deal-calculator" element={<DealCalculator />} />
-      </Route>
-      {/* V2 PWA — persona dashboards with bottom nav */}
-      <Route element={<V2AppShell />}>
-        <Route path="/v2/app" element={<V2AppHome />} />
-        <Route path="/v2/app/investor" element={<V2InvestorApp />} />
-        <Route path="/v2/app/agent" element={<V2AgentApp />} />
-        <Route path="/v2/app/seller" element={<V2SellerApp />} />
-        <Route path="/v2/app/broker" element={<V2BrokerApp />} />
-        <Route path="/v2/swarm" element={<V2SwarmDashboard />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
