@@ -56,6 +56,12 @@ import AdminXtremeVision from '@/pages/AdminXtremeVision';
 import PortalRouter from '@/pages/PortalRouter';
 import V2Layout from '@/components/v2/V2Layout';
 import V2Home from '@/pages/v2/V2Home';
+import V2AppShell from '@/components/v2/V2AppShell';
+import V2AppHome from '@/pages/v2/V2AppHome';
+import V2InvestorApp from '@/pages/v2/V2InvestorApp';
+import V2AgentApp from '@/pages/v2/V2AgentApp';
+import V2SellerApp from '@/pages/v2/V2SellerApp';
+import V2BrokerApp from '@/pages/v2/V2BrokerApp';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
 import TheProcess from '@/pages/TheProcess';
@@ -165,6 +171,14 @@ const AuthenticatedApp = () => {
       {/* V2 — parallel Zillow/Redfin-clean redesign (preview only) */}
       <Route element={<V2Layout />}>
         <Route path="/v2" element={<V2Home />} />
+      </Route>
+      {/* V2 PWA — persona dashboards with bottom nav */}
+      <Route element={<V2AppShell />}>
+        <Route path="/v2/app" element={<V2AppHome />} />
+        <Route path="/v2/app/investor" element={<V2InvestorApp />} />
+        <Route path="/v2/app/agent" element={<V2AgentApp />} />
+        <Route path="/v2/app/seller" element={<V2SellerApp />} />
+        <Route path="/v2/app/broker" element={<V2BrokerApp />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
