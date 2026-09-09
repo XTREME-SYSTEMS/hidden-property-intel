@@ -947,3 +947,9 @@
   .hpi-v2 .z-cta-band { padding: 32px 20px; margin: 30px 16px; }
   .hpi-v2 .z-tier-grid { grid-template-columns: 1fr; }
 }
+.hpi-v2 .z-calc-grid { display: grid; gap: 20px; grid-template-columns: 1fr 1fr 320px; }
+.hpi-v2 .z-blog-featured { grid-template-columns: 1fr 1fr; }
+@media (max-width: 1024px) {
+  .hpi-v2 .z-calc-grid { grid-template-columns: 1fr; }
+  .hpi-v2 .z-blog-featured { grid-template-columns: 1fr; }
+}
