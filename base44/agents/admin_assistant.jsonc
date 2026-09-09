@@ -210,6 +210,96 @@
       ]
     },
     {
+      "entity_name": "Campaign",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "CommunicationTemplate",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "Conversation",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "CommsEvent",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "Wholesaler",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "MaintenanceRequest",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "PhoneNumber",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "ApiKey",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "ShadowReport",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "AutonomousCycle",
+      "allowed_operations": [
+        "create",
+        "update",
+        "delete",
+        "read"
+      ]
+    },
+    {
       "entity_name": "User",
       "allowed_operations": [
         "read"
@@ -268,6 +358,10 @@
       "description": "Ingest fetched images into PropertyImage entity"
     },
     {
+      "function_name": "scrapePropertyImages",
+      "description": "Scrape property images"
+    },
+    {
       "function_name": "syncMarketAnalytics",
       "description": "Sync market analytics data from web"
     },
@@ -310,6 +404,14 @@
     {
       "function_name": "configureFollowUp",
       "description": "Configure follow-up automation for a contact"
+    },
+    {
+      "function_name": "processFollowUps",
+      "description": "Process pending follow-ups"
+    },
+    {
+      "function_name": "autonomousFollowUp",
+      "description": "AI autonomous follow-up intelligence"
     },
     {
       "function_name": "searchNextOfKin",
@@ -420,60 +522,136 @@
       "description": "Create a Stripe checkout session for subscription"
     },
     {
+      "function_name": "handleStripeWebhook",
+      "description": "Handle Stripe webhook events"
+    },
+    {
       "function_name": "generatePropertyDescription",
-      "description": "AI-generate 3 SEO-optimized property listing descriptions in different tones (professional, emotional, investment)"
+      "description": "AI-generate SEO-optimized property listing descriptions"
     },
     {
       "function_name": "estimateRehabCosts",
-      "description": "AI estimate rehab costs by category (roof, kitchen, baths, etc.) with local contractor rates"
+      "description": "AI estimate rehab costs by category"
     },
     {
       "function_name": "predictDistress",
-      "description": "AI predict probability of property becoming distressed in next 90 days"
+      "description": "AI predict probability of property becoming distressed"
     },
     {
       "function_name": "auditFairHousing",
-      "description": "Audit outreach emails and listings for fair housing compliance violations"
+      "description": "Audit outreach emails and listings for fair housing compliance"
     },
     {
       "function_name": "optimizePortfolio",
-      "description": "AI recommend 5 properties to complement an investor's existing portfolio"
+      "description": "AI recommend properties to complement an investor's portfolio"
     },
     {
       "function_name": "assessPropertyCondition",
-      "description": "AI vision-based property condition assessment from images \u2014 roof age, exterior damage, overall condition score, repair cost estimates"
+      "description": "AI vision-based property condition assessment"
     },
     {
       "function_name": "assessDealRisk",
-      "description": "5-dimension deal risk intelligence: title, market, condition, financial, legal risk with mitigation recommendations"
+      "description": "5-dimension deal risk intelligence"
     },
     {
       "function_name": "optimizeSellerTiming",
-      "description": "AI seller timing optimizer \u2014 sell now vs wait 3/6 months with projected prices and market analysis"
+      "description": "AI seller timing optimizer"
     },
     {
       "function_name": "matchInvestorSeller",
-      "description": "AI investor-seller compatibility matching \u2014 ranks top 5 investors by match score with deal type and offer range"
-    },
-    {
-      "function_name": "autonomousFollowUp",
-      "description": "AI autonomous follow-up intelligence \u2014 decides when/how/whether to follow up with each contact"
+      "description": "AI investor-seller compatibility matching"
     },
     {
       "function_name": "auditSmartContract",
-      "description": "AI smart contract security audit \u2014 checks for reentrancy, overflow, access control, and 10+ vulnerability categories"
+      "description": "AI smart contract security audit"
     },
     {
       "function_name": "scrapeProbateRecords",
-      "description": "Scrapes obituary and probate court sources for deceased homeowners, cross-references with property records, creates probate_inherited properties and potential_heir owners"
+      "description": "Scrape obituary and probate court sources"
     },
     {
       "function_name": "findHeirsForProperty",
-      "description": "Enhanced heir finder for probate properties \u2014 searches obituaries, probate filings, people-search sites, and social media for next of kin and executors"
+      "description": "Enhanced heir finder for probate properties"
     },
     {
       "function_name": "outreachProbateHeirs",
-      "description": "Sends empathetic, personalized outreach emails to identified heirs of deceased homeowners with cash offer and probate assistance"
+      "description": "Send empathetic outreach to heirs of deceased homeowners"
+    },
+    {
+      "function_name": "aiGatewayGenerate",
+      "description": "Generate content via the AI gateway"
+    },
+    {
+      "function_name": "autonomousMasterLoop",
+      "description": "Run the autonomous master loop \u2014 self-healing & optimization"
+    },
+    {
+      "function_name": "edenVoiceConfig",
+      "description": "Configure Eden Skye AI voice settings"
+    },
+    {
+      "function_name": "enrichProperties",
+      "description": "Enrich properties with additional data"
+    },
+    {
+      "function_name": "runMasterEnrichment",
+      "description": "Run master 15-category enrichment"
+    },
+    {
+      "function_name": "validateEnrichment",
+      "description": "Validate enrichment data completeness"
+    },
+    {
+      "function_name": "generateMorningBrief",
+      "description": "Generate the daily morning brief"
+    },
+    {
+      "function_name": "generateReplyEmail",
+      "description": "Generate a reply email"
+    },
+    {
+      "function_name": "lookupNumbers",
+      "description": "Lookup phone number carrier/type info"
+    },
+    {
+      "function_name": "manageApiKeys",
+      "description": "Manage API keys"
+    },
+    {
+      "function_name": "provisionNumbers",
+      "description": "Provision phone numbers"
+    },
+    {
+      "function_name": "shadowDealHunt",
+      "description": "Shadow autonomous deal hunting"
+    },
+    {
+      "function_name": "shadowOrchestrator",
+      "description": "Shadow orchestrator \u2014 autonomous intelligence"
+    },
+    {
+      "function_name": "syncFromRailway",
+      "description": "Sync data from Railway"
+    },
+    {
+      "function_name": "syncGoogleCalendar",
+      "description": "Sync Google Calendar events"
+    },
+    {
+      "function_name": "syncToSupabase",
+      "description": "Sync data to Supabase"
+    },
+    {
+      "function_name": "systemPreflight",
+      "description": "Run system preflight checks"
+    },
+    {
+      "function_name": "validateEmailQuality",
+      "description": "Validate email quality & compliance"
+    },
+    {
+      "function_name": "xtremeComms",
+      "description": "Xtreme Comms multi-channel messaging"
     }
   ],
   "context_files": [],
