@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   LayoutDashboard, Database, Mail, FlaskConical, Search, Cpu, Target, Users, Home, Blocks, Calculator, Scale, TrendingUp, BarChart3,
-  ArrowRight, X, ArrowLeft, Lightbulb, BookOpen, Globe, Building2, Handshake, Stamp, Radar, Sparkles, Key, Phone, Mic, Calendar, Rocket,
+  ArrowRight, X, ArrowLeft, Lightbulb, BookOpen, Globe, Building2, Handshake, Stamp, Radar, Sparkles, Key, Phone, Mic, Calendar, Rocket, ExternalLink,
   ChevronDown, Compass, Briefcase, FileSignature, Wrench, Network
 } from "lucide-react";
 import AdminOverview from "@/components/admin/AdminOverview";
@@ -246,7 +246,18 @@ export default function AdminShell() {
               className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-black/50 transition hover:bg-black/5 hover:text-black disabled:cursor-default disabled:opacity-25">
               <ArrowLeft className="h-3.5 w-3.5" /> Back
             </button>
-            <p className="text-[11px] font-medium uppercase tracking-[0.25em] text-black/40">{activeItem?.label}</p>
+            <div className="flex items-center gap-3">
+              <p className="text-[11px] font-medium uppercase tracking-[0.25em] text-black/40">{activeItem?.label}</p>
+              <a
+                href={`${window.location.origin}/admin`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-md border border-black/15 px-2.5 py-1.5 text-xs font-medium text-black/60 transition hover:bg-black/5 hover:text-black"
+                title="Open admin full screen in a new tab"
+              >
+                <ExternalLink className="h-3.5 w-3.5" /> Open full screen
+              </a>
+            </div>
             <button onClick={closeTool} disabled={!canClose}
               className="inline-flex items-center justify-center rounded-md p-1.5 text-black/40 transition hover:bg-black/5 hover:text-black disabled:cursor-default disabled:opacity-25">
               <X className="h-4 w-4" />
