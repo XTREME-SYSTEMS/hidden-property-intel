@@ -1,0 +1,48 @@
+{
+  "name": "AGI Swarm Cycle",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "agi_swarm_cycle",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_swarm_cycle": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "autonomousSwarmCycle",
+            "args": {
+              "action": "cycle",
+              "trigger_source": "workflow"
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Run swarm cycle",
+            "description": "Audit \u2192 deliberate \u2192 execute"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "*/5 * * * *",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "description": "Autonomous swarm heartbeat \u2014 audits national coverage, deliberates with the council, and executes the highest-impact backend function every 5 minutes toward national scale"
+}

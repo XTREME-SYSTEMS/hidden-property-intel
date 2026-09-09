@@ -62,6 +62,7 @@ import V2InvestorApp from '@/pages/v2/V2InvestorApp';
 import V2AgentApp from '@/pages/v2/V2AgentApp';
 import V2SellerApp from '@/pages/v2/V2SellerApp';
 import V2BrokerApp from '@/pages/v2/V2BrokerApp';
+import V2SwarmDashboard from '@/pages/v2/V2SwarmDashboard';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
 import TheProcess from '@/pages/TheProcess';
@@ -179,6 +180,7 @@ const AuthenticatedApp = () => {
         <Route path="/v2/app/agent" element={<V2AgentApp />} />
         <Route path="/v2/app/seller" element={<V2SellerApp />} />
         <Route path="/v2/app/broker" element={<V2BrokerApp />} />
+        <Route path="/v2/swarm" element={<V2SwarmDashboard />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
