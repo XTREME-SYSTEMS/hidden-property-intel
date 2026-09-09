@@ -115,7 +115,7 @@ const AuthenticatedApp = () => {
         <Route path="/admin" element={<AdminDashboard />} />
       </Route>
       <Route element={<LuxLayout />}>
-        <Route path="/listings" element={<Listings />} />
+        <Route path="/listings" element={<Navigate to="/v2/listings" replace />} />
         <Route path="/properties/:id" element={<PropertyDetail />} />
         <Route path="/properties/:id/bid" element={<Bidding />} />
         <Route path="/calculators" element={<Calculators />} />
