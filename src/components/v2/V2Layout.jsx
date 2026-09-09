@@ -3,6 +3,7 @@ import { Outlet, Link } from "react-router-dom";
 import { Search, Bell, Heart, Calendar, Mail } from "lucide-react";
 import PWAInstall from "@/components/PWAInstall";
 import V2LeadCapture from "@/components/v2/V2LeadCapture";
+import PrimeBubble from "@/components/PrimeBubble";
 import "../../styles/v2.css";
 
 export default function V2Layout() {
@@ -88,6 +89,7 @@ export default function V2Layout() {
         </div>
       </div>
       <V2LeadCapture open={lead.open} feature={lead.feature} onClose={() => setLead({ open: false, feature: lead.feature })} />
+      <PrimeBubble />
     </div>
   );
 }
