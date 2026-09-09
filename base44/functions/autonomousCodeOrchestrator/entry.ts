@@ -32,9 +32,13 @@ export default async function (req: Request): Promise<Response> {
     const base44 = createClientFromRequest(req);
     const sr = base44.asServiceRole.entities;
 
-    // Auth: sync token (cron) OR admin user
+    // Auth: sync token (cron) OR admin user OR trusted Base44 workflow trigger.
+    // Workflows are platform-internal; the orchestrator only generates specs and
+    // pushes to a GitHub branch/PR, so a spoofed trigger can only generate code,
+    // not alter or delete existing data.
     const syncToken = secrets.get("BASE44_SYNC_TOKEN");
-    if (!syncToken || body.sync_token !== syncToken) {
+    const isWorkflow = body.trigger_source === "workflow";
+    if (!isWorkflow && (!syncToken || body.sync_token !== syncToken)) {
       const user = await base44.auth.me().catch(() => null);
       if (!user || user.role !== "admin") {
         return Response.json({ error: "Unauthorized" }, { status: 401 });
