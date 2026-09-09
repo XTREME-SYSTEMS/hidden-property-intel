@@ -54,6 +54,8 @@ import FloridaSourceDirectory from '@/pages/FloridaSourceDirectory';
 import AdminEnrichmentUpgrades from '@/pages/AdminEnrichmentUpgrades';
 import AdminXtremeVision from '@/pages/AdminXtremeVision';
 import PortalRouter from '@/pages/PortalRouter';
+import V2Layout from '@/components/v2/V2Layout';
+import V2Home from '@/pages/v2/V2Home';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
 import TheProcess from '@/pages/TheProcess';
@@ -159,6 +161,10 @@ const AuthenticatedApp = () => {
         </Route>
         <Route path="/eden-skye" element={<EdenSkyeProfile />} />
         <Route path="/eden-skye/chat" element={<EdenSkyeChat />} />
+      </Route>
+      {/* V2 — parallel Zillow/Redfin-clean redesign (preview only) */}
+      <Route element={<V2Layout />}>
+        <Route path="/v2" element={<V2Home />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
