@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { PenLine, Search, ArrowRight, Calendar, User, TrendingUp } from "lucide-react";
+import { PenLine, Search, ArrowRight, Calendar, User } from "lucide-react";
 import Seo from "@/components/Seo";
 
 const SAMPLE_POSTS = [
@@ -12,6 +12,7 @@ const SAMPLE_POSTS = [
     author: "Steve Giordano",
     date: "2025-08-28",
     readTime: "6 min",
+    image: "https://images.unsplash.com/photo-1647265450512-339162927cd6?auto=format&fit=crop&w=800&q=80",
   },
   {
     id: 2,
@@ -21,6 +22,7 @@ const SAMPLE_POSTS = [
     author: "HPI Team",
     date: "2025-08-25",
     readTime: "5 min",
+    image: "https://images.unsplash.com/photo-1518770660439-4636190ac4bb?auto=format&fit=crop&w=800&q=80",
   },
   {
     id: 3,
@@ -30,6 +32,7 @@ const SAMPLE_POSTS = [
     author: "Steve Giordano",
     date: "2025-08-20",
     readTime: "8 min",
+    image: "https://images.unsplash.com/photo-1625759886017-ccb98578f2f2?auto=format&fit=crop&w=800&q=80",
   },
   {
     id: 4,
@@ -39,6 +42,7 @@ const SAMPLE_POSTS = [
     author: "HPI Team",
     date: "2025-08-15",
     readTime: "7 min",
+    image: "https://images.unsplash.com/photo-1616555670626-09496d2eed9e?auto=format&fit=crop&w=800&q=80",
   },
   {
     id: 5,
@@ -48,6 +52,7 @@ const SAMPLE_POSTS = [
     author: "Steve Giordano",
     date: "2025-08-10",
     readTime: "6 min",
+    image: "https://images.unsplash.com/photo-1606561959351-1e16db651db3?auto=format&fit=crop&w=800&q=80",
   },
   {
     id: 6,
@@ -57,6 +62,7 @@ const SAMPLE_POSTS = [
     author: "Steve Giordano",
     date: "2025-08-05",
     readTime: "9 min",
+    image: "https://images.unsplash.com/photo-1598977946456-ae589f348af6?auto=format&fit=crop&w=800&q=80",
   },
 ];
 
@@ -130,14 +136,12 @@ export default function Blog() {
       {filtered.length > 0 && category === "All" && !query && (
         <Link
           to="/blog"
-          className="mt-12 grid gap-6 rounded-sm border border-black/10 bg-white p-6 transition-shadow hover:shadow-2xl lg:grid-cols-2 lg:p-8"
+          className="mt-12 grid gap-6 overflow-hidden rounded-sm border border-black/10 bg-white transition-shadow hover:shadow-2xl lg:grid-cols-2"
         >
-          <div className="aspect-[16/10] overflow-hidden rounded-sm bg-black/5">
-            <div className="flex h-full items-center justify-center bg-gradient-to-br from-black/5 to-black/10">
-              <TrendingUp className="h-12 w-12 text-black/20" />
-            </div>
+          <div className="aspect-[16/10] overflow-hidden bg-black/5 lg:aspect-auto lg:h-full">
+            <img src={filtered[0].image} alt="" className="h-full w-full object-cover" loading="lazy" />
           </div>
-          <div className="flex flex-col justify-center">
+          <div className="flex flex-col justify-center p-6 lg:p-8">
             <span className="text-[10px] uppercase tracking-[0.3em] text-gold">Featured · {filtered[0].category}</span>
             <h2 className="mt-3 font-display text-2xl font-light tracking-tight sm:text-3xl">{filtered[0].title}</h2>
             <p className="mt-3 text-sm leading-relaxed text-black/60">{filtered[0].excerpt}</p>
@@ -159,17 +163,27 @@ export default function Blog() {
           <Link
             key={p.id}
             to="/blog"
-            className="group flex flex-col rounded-sm border border-black/10 bg-white p-6 transition-shadow hover:shadow-xl"
+            className="group flex flex-col overflow-hidden rounded-sm border border-black/10 bg-white transition-shadow hover:shadow-xl"
           >
-            <span className="text-[10px] uppercase tracking-[0.3em] text-gold">{p.category}</span>
-            <h3 className="mt-3 font-display text-lg font-medium leading-snug tracking-tight">{p.title}</h3>
-            <p className="mt-2 flex-1 text-sm leading-relaxed text-black/55">{p.excerpt}</p>
-            <div className="mt-4 flex items-center gap-3 text-[10px] uppercase tracking-[0.2em] text-black/40">
-              <span>{p.author}</span>
-              <span>·</span>
-              <span>{p.date}</span>
-              <span>·</span>
-              <span>{p.readTime}</span>
+            <div className="aspect-[16/10] overflow-hidden bg-black/5">
+              <img
+                src={p.image}
+                alt=""
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                loading="lazy"
+              />
+            </div>
+            <div className="flex flex-1 flex-col p-6">
+              <span className="text-[10px] uppercase tracking-[0.3em] text-gold">{p.category}</span>
+              <h3 className="mt-3 font-display text-lg font-medium leading-snug tracking-tight">{p.title}</h3>
+              <p className="mt-2 flex-1 text-sm leading-relaxed text-black/55">{p.excerpt}</p>
+              <div className="mt-4 flex items-center gap-3 text-[10px] uppercase tracking-[0.2em] text-black/40">
+                <span>{p.author}</span>
+                <span>·</span>
+                <span>{p.date}</span>
+                <span>·</span>
+                <span>{p.readTime}</span>
+              </div>
             </div>
           </Link>
         ))}

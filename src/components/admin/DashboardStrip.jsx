@@ -3,84 +3,117 @@ import {
   LayoutDashboard, BarChart3, Database, Mail, Users, Home, Target, Lightbulb,
   Globe, BookOpen, Blocks, Calculator, TrendingUp, Scale, Radar, Sparkles,
   Key, Phone, Mic, Calendar, Rocket, Cpu, Search, FlaskConical, Building2,
-  Handshake, Stamp, Zap,
+  Handshake, Stamp,
 } from "lucide-react";
 
-const DASHBOARDS = [
-  { icon: Rocket, label: "Pre-Flight", color: "text-rose-600 bg-rose-50 border-rose-200" },
-  { icon: BarChart3, label: "Analytics", color: "text-blue-600 bg-blue-50 border-blue-200" },
-  { icon: Database, label: "Data Sources", color: "text-emerald-600 bg-emerald-50 border-emerald-200" },
-  { icon: Mail, label: "Outreach", color: "text-purple-600 bg-purple-50 border-purple-200" },
-  { icon: Users, label: "Investors", color: "text-indigo-600 bg-indigo-50 border-indigo-200" },
-  { icon: Home, label: "Owners", color: "text-teal-600 bg-teal-50 border-teal-200" },
-  { icon: Home, label: "Probate", color: "text-amber-600 bg-amber-50 border-amber-200" },
-  { icon: Radar, label: "Shadow Cmd", color: "text-slate-600 bg-slate-50 border-slate-200" },
-  { icon: Target, label: "Strategy", color: "text-orange-600 bg-orange-50 border-orange-200" },
-  { icon: Lightbulb, label: "Tricks", color: "text-yellow-600 bg-yellow-50 border-yellow-200" },
-  { icon: BookOpen, label: "Distress Edu", color: "text-cyan-600 bg-cyan-50 border-cyan-200" },
-  { icon: Radar, label: "Distress Tracker", color: "text-rose-600 bg-rose-50 border-rose-200" },
-  { icon: Globe, label: "FL Sources", color: "text-lime-600 bg-lime-50 border-lime-200" },
-  { icon: Blocks, label: "Contracts", color: "text-violet-600 bg-violet-50 border-violet-200" },
-  { icon: Calculator, label: "Calc", color: "text-pink-600 bg-pink-50 border-pink-200" },
-  { icon: TrendingUp, label: "Investor", color: "text-green-600 bg-green-50 border-green-200" },
-  { icon: Home, label: "Seller", color: "text-stone-600 bg-stone-50 border-stone-200" },
-  { icon: Users, label: "Agent", color: "text-sky-600 bg-sky-50 border-sky-200" },
-  { icon: Building2, label: "Title/Escrow", color: "text-red-600 bg-red-50 border-red-200" },
-  { icon: Handshake, label: "Wholesaler", color: "text-fuchsia-600 bg-fuchsia-50 border-fuchsia-200" },
-  { icon: Stamp, label: "Notary", color: "text-blue-600 bg-blue-50 border-blue-200" },
-  { icon: Scale, label: "Legal", color: "text-gray-600 bg-gray-50 border-gray-200" },
-  { icon: TrendingUp, label: "Industry", color: "text-emerald-600 bg-emerald-50 border-emerald-200" },
-  { icon: Sparkles, label: "Eden Skye", color: "text-amber-600 bg-amber-50 border-amber-200" },
-  { icon: Key, label: "API Keys", color: "text-slate-600 bg-slate-50 border-slate-200" },
-  { icon: Phone, label: "Numbers", color: "text-teal-600 bg-teal-50 border-teal-200" },
-  { icon: Mic, label: "Voice", color: "text-purple-600 bg-purple-50 border-purple-200" },
-  { icon: Calendar, label: "Calendar", color: "text-blue-600 bg-blue-50 border-blue-200" },
-  { icon: Cpu, label: "Architecture", color: "text-indigo-600 bg-indigo-50 border-indigo-200" },
-  { icon: Search, label: "Search Console", color: "text-cyan-600 bg-cyan-50 border-cyan-200" },
-  { icon: FlaskConical, label: "Test Lab", color: "text-violet-600 bg-violet-50 border-violet-200" },
+// Grouped by workflow stage — mirrors the sidebar categories in AdminShell.
+const GROUPS = [
+  {
+    label: "Command",
+    items: [
+      { icon: Rocket, label: "Pre-Flight", nav: "preflight" },
+      { icon: BarChart3, label: "Analytics", nav: "analytics" },
+      { icon: TrendingUp, label: "Comparison", nav: "comparison" },
+    ],
+  },
+  {
+    label: "Sourcing",
+    items: [
+      { icon: Database, label: "Data Sources", nav: "sources" },
+      { icon: Globe, label: "FL Sources", nav: "sources-directory" },
+      { icon: Radar, label: "Distress Tracker", nav: "distress-tracker" },
+      { icon: Radar, label: "Shadow Cmd", nav: "shadow" },
+      { icon: Home, label: "Probate", nav: "probate" },
+      { icon: Home, label: "Owners", nav: "owner-list" },
+      { icon: BookOpen, label: "Distress Edu", nav: "distress-edu" },
+    ],
+  },
+  {
+    label: "Analysis",
+    items: [
+      { icon: Calculator, label: "Calculator", nav: "deal-calculator" },
+      { icon: Target, label: "Strategy", nav: "strategy" },
+      { icon: Lightbulb, label: "Tricks", nav: "tricks" },
+      { icon: TrendingUp, label: "Industry", nav: "industry-intel" },
+    ],
+  },
+  {
+    label: "Investors",
+    items: [
+      { icon: Users, label: "Investor Cmd", nav: "investor-command" },
+      { icon: Users, label: "Investor List", nav: "investor-list" },
+      { icon: TrendingUp, label: "Investor Mirror", nav: "mirror-investor" },
+      { icon: Handshake, label: "Wholesaler", nav: "wholesaler" },
+    ],
+  },
+  {
+    label: "Outreach",
+    items: [
+      { icon: Mail, label: "Outreach", nav: "outreach" },
+      { icon: Mail, label: "Email Gallery", nav: "email-gallery" },
+      { icon: Mic, label: "Voice", nav: "eden-voice" },
+      { icon: Phone, label: "Numbers", nav: "numbers" },
+      { icon: Calendar, label: "Calendar", nav: "calendar" },
+    ],
+  },
+  {
+    label: "Closing",
+    items: [
+      { icon: Blocks, label: "Contracts", nav: "smart-contracts" },
+      { icon: Building2, label: "Title/Escrow", nav: "title-escrow" },
+      { icon: Stamp, label: "Notary", nav: "notary" },
+      { icon: Scale, label: "Legal", nav: "legal-compliance" },
+      { icon: Users, label: "Agent", nav: "agent-portal" },
+      { icon: Home, label: "Seller", nav: "mirror-seller" },
+    ],
+  },
+  {
+    label: "System",
+    items: [
+      { icon: Cpu, label: "Architecture", nav: "architecture" },
+      { icon: Search, label: "Search Console", nav: "search-console" },
+      { icon: FlaskConical, label: "Test Lab", nav: "test-lab" },
+      { icon: Key, label: "API Keys", nav: "api-keys" },
+      { icon: Sparkles, label: "Eden Skye", nav: "eden-skye" },
+    ],
+  },
 ];
-
-// Map dashboard label to NAV_ITEMS id in AdminShell
-const DASHBOARD_TO_NAV = {
-  "Pre-Flight": "preflight", "Analytics": "analytics", "Data Sources": "sources",
-  "Outreach": "outreach", "Investors": "investor-list", "Owners": "owner-list",
-  "Probate": "probate", "Shadow Cmd": "shadow", "Strategy": "strategy",
-  "Tricks": "tricks", "Distress Edu": "distress-edu", "Distress Tracker": "distress-tracker", "FL Sources": "sources",
-  "Contracts": "smart-contracts", "Calc": "deal-calculator",
-  "Investor": "mirror-investor", "Seller": "mirror-seller", "Agent": "agent-portal",
-  "Title/Escrow": "title-escrow", "Wholesaler": "wholesaler", "Notary": "notary",
-  "Legal": "legal-compliance", "Industry": "industry-intel", "Eden Skye": "eden-skye",
-  "API Keys": "api-keys", "Numbers": "numbers", "Voice": "eden-voice",
-  "Calendar": "calendar", "Architecture": "architecture", "Search Console": "search-console",
-  "Test Lab": "test-lab",
-};
 
 export default function DashboardStrip({ onNavigate, activeId }) {
   return (
-    <div className="border-b border-black/10 bg-[#0c0d0e] px-4 py-3">
+    <div className="border-b border-white/10 bg-[#0c0d0e] px-4 py-2.5">
       <div className="flex items-center gap-2 pb-2">
         <LayoutDashboard className="h-3.5 w-3.5 text-[#e4b653]" />
-        <p className="text-[9px] uppercase tracking-[0.3em] text-white/40">Dashboard Quick Access · All Portals</p>
+        <p className="text-[9px] uppercase tracking-[0.3em] text-white/40">Quick Access</p>
       </div>
-      <div className="flex flex-wrap gap-1.5">
-        {DASHBOARDS.map(({ icon: Icon, label, color }) => {
-          const navId = DASHBOARD_TO_NAV[label];
-          const isActive = activeId === navId;
-          return (
-            <button
-              key={label}
-              onClick={() => onNavigate && onNavigate(navId)}
-              className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-[10px] font-medium transition ${
-                isActive
-                  ? "border-[#e4b653] bg-[#e4b653]/10 text-[#e4b653]"
-                  : "border-white/10 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
-              }`}
-            >
-              <Icon className="h-3 w-3" />
-              {label}
-            </button>
-          );
-        })}
+      <div className="flex gap-4 overflow-x-auto pb-1 [scrollbar-width:thin]">
+        {GROUPS.map((group) => (
+          <div key={group.label} className="flex shrink-0 items-stretch gap-2">
+            <span className="flex items-center pr-1 text-[9px] font-semibold uppercase tracking-[0.2em] text-white/25">
+              {group.label}
+            </span>
+            <div className="flex gap-1.5">
+              {group.items.map(({ icon: Icon, label, nav }) => {
+                const isActive = activeId === nav;
+                return (
+                  <button
+                    key={label}
+                    onClick={() => onNavigate && onNavigate(nav)}
+                    className={`inline-flex items-center gap-1.5 rounded border px-2 py-1 text-[10px] font-medium transition whitespace-nowrap ${
+                      isActive
+                        ? "border-[#e4b653] bg-[#e4b653]/10 text-[#e4b653]"
+                        : "border-white/10 bg-white/5 text-white/55 hover:bg-white/10 hover:text-white"
+                    }`}
+                  >
+                    <Icon className="h-3 w-3 shrink-0" />
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+            <span className="ml-1 w-px self-stretch bg-white/10" />
+          </div>
+        ))}
       </div>
     </div>
   );
