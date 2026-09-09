@@ -11,15 +11,17 @@ export default function V2Layout() {
       <nav className="z-nav">
         <div className="z-nav-inner">
           <div className="z-nav-left">
-            <Link to="/v2" className="z-nav-link">Buy</Link>
-            <Link to="/v2" className="z-nav-link">Rent</Link>
-            <Link to="/seller/post-property" className="z-nav-link">Sell</Link>
-            <Link to="/deal-calculator" className="z-nav-link">Get a mortgage</Link>
-            <Link to="/v2" className="z-nav-link">Find an agent</Link>
+            <Link to="/investor/dashboard" className="z-nav-link">Investors</Link>
+            <Link to="/seller/dashboard" className="z-nav-link">Sellers</Link>
+            <Link to="/smart-contracts" className="z-nav-link">Smart Contracts</Link>
+            <Link to="/process" className="z-nav-link">The Process</Link>
+            <Link to="/pricing" className="z-nav-link">Save $</Link>
+            <Link to="/eden-skye/chat" className="z-nav-link z-nav-hot">Instant Message</Link>
           </div>
           <Link to="/v2" className="z-nav-logo"><b>H</b>PI</Link>
           <div className="z-nav-right">
-            <Link to="/v2" className="z-nav-link">Help</Link>
+            <Link to="/v2/listings" className="z-nav-link">Browse</Link>
+            <Link to="/contact" className="z-nav-link">Help</Link>
             <PWAInstall variant="nav" />
             <Link to="/login" className="z-signin">Sign in</Link>
           </div>
@@ -29,11 +31,11 @@ export default function V2Layout() {
       <div className="z-body">
         {/* Zillow left sidebar rail */}
         <aside className="z-rail">
-          <Link to="/v2" className="active"><Search /> Search</Link>
-          <Link to="/v2"><Bell /> Updates</Link>
-          <Link to="/v2"><Heart /> Favorites</Link>
-          <Link to="/v2"><Calendar /> Plan</Link>
-          <Link to="/v2"><Mail /> Inbox</Link>
+          <Link to="/v2/listings" className="active"><Search /> Search</Link>
+          <Link to="/alerts"><Bell /> Updates</Link>
+          <Link to="/investor/pipeline"><Heart /> Favorites</Link>
+          <Link to="/admin/calendar"><Calendar /> Plan</Link>
+          <Link to="/eden-skye/chat"><Mail /> Inbox</Link>
         </aside>
 
         <div className="z-content">

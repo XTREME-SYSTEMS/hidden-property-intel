@@ -792,3 +792,15 @@
   .hpi-v2 .z-detail-head-right { text-align: left; }
   .hpi-v2 .z-detail-cta-inline { justify-content: flex-start; }
 }
+
+/* Hot-button accent for primary nav CTA */
+.hpi-v2 .z-nav-hot {
+  background: #c38a1b;
+  color: #fff !important;
+  border-radius: 999px;
+  padding: 7px 14px !important;
+  font-weight: 800;
+  border: 0;
+  transition: background .15s ease;
+}
+.hpi-v2 .z-nav-hot:hover { background: #a87315; color: #fff !important; }
