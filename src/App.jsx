@@ -53,6 +53,7 @@ import AdminPreflight from '@/pages/AdminPreflight';
 import FloridaSourceDirectory from '@/pages/FloridaSourceDirectory';
 import AdminEnrichmentUpgrades from '@/pages/AdminEnrichmentUpgrades';
 import AdminXtremeVision from '@/pages/AdminXtremeVision';
+import AdminOwnerIdentification from '@/pages/AdminOwnerIdentification';
 import PortalRouter from '@/pages/PortalRouter';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
@@ -154,6 +155,7 @@ const AuthenticatedApp = () => {
         <Route path="/admin/florida-sources" element={<FloridaSourceDirectory />} />
         <Route path="/admin/enrichment-upgrades" element={<AdminEnrichmentUpgrades />} />
         <Route path="/admin/xtreme-vision" element={<AdminXtremeVision />} />
+        <Route path="/admin/owner-identify" element={<AdminOwnerIdentification />} />
         </Route>
         <Route path="/eden-skye" element={<EdenSkyeProfile />} />
         <Route path="/eden-skye/chat" element={<EdenSkyeChat />} />

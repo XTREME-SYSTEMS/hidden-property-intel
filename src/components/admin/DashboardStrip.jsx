@@ -1,6 +1,6 @@
 import React from "react";
 import {
-  LayoutDashboard, BarChart3, Database, Mail, Users, Home, Target, Lightbulb,
+  LayoutDashboard, BarChart3, Database, Mail, Users, User, Home, Target, Lightbulb,
   Globe, BookOpen, Blocks, Calculator, TrendingUp, Scale, Radar, Sparkles,
   Key, Phone, Mic, Calendar, Rocket, Cpu, Search, FlaskConical, Building2,
   Handshake, Stamp,
@@ -24,6 +24,7 @@ const GROUPS = [
       { icon: Radar, label: "Distress Tracker", nav: "distress-tracker" },
       { icon: Radar, label: "Shadow Cmd", nav: "shadow" },
       { icon: Home, label: "Probate", nav: "probate" },
+      { icon: User, label: "Owner ID", nav: "owner-identify" },
       { icon: Home, label: "Owners", nav: "owner-list" },
       { icon: BookOpen, label: "Distress Edu", nav: "distress-edu" },
     ],

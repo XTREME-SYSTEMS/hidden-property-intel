@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
-  LayoutDashboard, Database, Mail, FlaskConical, Search, Cpu, Target, Users, Home, Blocks, Calculator, Scale, TrendingUp, BarChart3,
+  LayoutDashboard, Database, Mail, FlaskConical, Search, Cpu, Target, Users, User, Home, Blocks, Calculator, Scale, TrendingUp, BarChart3,
   ArrowRight, X, ArrowLeft, Lightbulb, BookOpen, Globe, Building2, Handshake, Stamp, Radar, Sparkles, Key, Phone, Mic, Calendar, Rocket, ExternalLink,
   ChevronDown, Compass, Briefcase, FileSignature, Wrench, Network
 } from "lucide-react";
@@ -20,6 +20,7 @@ import AdminArchitecture from "@/pages/AdminArchitecture";
 import AdminSearchConsole from "@/pages/AdminSearchConsole";
 import AdminInvestorList from "@/pages/AdminInvestorList";
 import AdminOwnerList from "@/pages/AdminOwnerList";
+import AdminOwnerIdentification from "@/pages/AdminOwnerIdentification";
 import AdminSmartContracts from "@/pages/AdminSmartContracts";
 import DealCalculator from "@/pages/DealCalculator";
 import AgentDashboard from "@/pages/AgentDashboard";
@@ -72,6 +73,7 @@ const CATEGORIES = [
       { id: "distress-edu", icon: BookOpen, label: "Distress Education", desc: "Causes & warning signs", component: AdminDistressEducation },
       { id: "shadow", icon: Radar, label: "Shadow Command", desc: "Autonomous intelligence", component: ShadowCommandCenter },
       { id: "probate", icon: Home, label: "Probate Pipeline", desc: "Deceased owners & heirs", component: AdminProbateDashboard },
+      { id: "owner-identify", icon: User, label: "Owner Identification Engine", desc: "Exhaustive owner ID & skip-trace", component: AdminOwnerIdentification },
       { id: "owner-list", icon: Home, label: "Owner List", desc: "Owners & next of kin", component: AdminOwnerList },
     ],
   },

@@ -17,6 +17,20 @@
       ],
       "default": "current"
     },
+    "entity_type": {
+      "type": "string",
+      "enum": [
+        "individual",
+        "llc",
+        "trust",
+        "corporation",
+        "partnership",
+        "government",
+        "unknown"
+      ],
+      "default": "individual",
+      "description": "Legal structure of the owner"
+    },
     "contact_phone": {
       "type": "string"
     },
@@ -39,6 +53,49 @@
     "is_verified": {
       "type": "boolean",
       "default": false
+    },
+    "deceased": {
+      "type": "boolean",
+      "default": false,
+      "description": "True if owner is confirmed or likely deceased"
+    },
+    "confidence_score": {
+      "type": "number",
+      "description": "0-100 confidence that this owner identity + contact info is correct"
+    },
+    "aka": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Aliases / alternate names (maiden, DBA, middle-name variants)"
+    },
+    "identification_methods": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "found",
+              "not_found",
+              "partial",
+              "error"
+            ]
+          },
+          "result": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Every identification method attempted and its outcome"
     },
     "source": {
       "type": "string"
@@ -105,6 +162,11 @@
     },
     "last_outreach_body": {
       "type": "string"
+    },
+    "last_identified_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the owner identification engine last ran"
     }
   },
   "required": [
