@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import {
   LayoutDashboard, Database, Mail, FlaskConical, Search, Cpu, Target, Users, User, Home, Blocks, Calculator, Scale, TrendingUp, BarChart3,
   ArrowRight, X, ArrowLeft, Lightbulb, BookOpen, Globe, Building2, Handshake, Stamp, Radar, Sparkles, Key, Phone, Mic, Calendar, Rocket, ExternalLink,
-  ChevronDown, Compass, Briefcase, FileSignature, Wrench, Network
+  ChevronDown, Compass, Briefcase, FileSignature, Wrench, Network, Brain
 } from "lucide-react";
 import AdminOverview from "@/components/admin/AdminOverview";
 import DashboardStrip from "@/components/admin/DashboardStrip";
@@ -22,6 +22,7 @@ import AdminInvestorList from "@/pages/AdminInvestorList";
 import AdminOwnerList from "@/pages/AdminOwnerList";
 import AdminOwnerIdentification from "@/pages/AdminOwnerIdentification";
 import AdminAiGateway from "@/pages/AdminAiGateway";
+import IntelligenceConsole from "@/pages/IntelligenceConsole";
 import AdminSmartContracts from "@/pages/AdminSmartContracts";
 import DealCalculator from "@/pages/DealCalculator";
 import AgentDashboard from "@/pages/AgentDashboard";
@@ -76,6 +77,7 @@ const CATEGORIES = [
       { id: "probate", icon: Home, label: "Probate Pipeline", desc: "Deceased owners & heirs", component: AdminProbateDashboard },
       { id: "owner-identify", icon: User, label: "Owner Identification Engine", desc: "Exhaustive owner ID & skip-trace", component: AdminOwnerIdentification },
       { id: "ai-gateway", icon: Sparkles, label: "AI Gateway Engine", desc: "372 models: search, vision, voice, RAG", component: AdminAiGateway },
+      { id: "intelligence", icon: Brain, label: "Intelligence Console", desc: "Autonomous investigation engine", component: IntelligenceConsole },
       { id: "owner-list", icon: Home, label: "Owner List", desc: "Owners & next of kin", component: AdminOwnerList },
     ],
   },

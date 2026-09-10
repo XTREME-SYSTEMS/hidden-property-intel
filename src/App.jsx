@@ -55,6 +55,7 @@ import AdminEnrichmentUpgrades from '@/pages/AdminEnrichmentUpgrades';
 import AdminXtremeVision from '@/pages/AdminXtremeVision';
 import AdminOwnerIdentification from '@/pages/AdminOwnerIdentification';
 import AdminAiGateway from '@/pages/AdminAiGateway';
+import IntelligenceConsole from '@/pages/IntelligenceConsole';
 import PwaMobile from '@/pages/PwaMobile';
 import PortalRouter from '@/pages/PortalRouter';
 import About from '@/pages/About';
@@ -160,6 +161,7 @@ const AuthenticatedApp = () => {
         <Route path="/admin/xtreme-vision" element={<AdminXtremeVision />} />
         <Route path="/admin/owner-identify" element={<AdminOwnerIdentification />} />
         <Route path="/admin/ai-gateway" element={<AdminAiGateway />} />
+        <Route path="/admin/intelligence" element={<IntelligenceConsole />} />
         </Route>
         <Route path="/eden-skye" element={<EdenSkyeProfile />} />
         <Route path="/eden-skye/chat" element={<EdenSkyeChat />} />

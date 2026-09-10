@@ -1,0 +1,86 @@
+{
+  "name": "Relationship",
+  "type": "object",
+  "properties": {
+    "source_entity_id": {
+      "type": "string"
+    },
+    "source_name": {
+      "type": "string"
+    },
+    "target_entity_id": {
+      "type": "string"
+    },
+    "target_name": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "owns",
+        "previously_owned",
+        "located_at",
+        "associated_with",
+        "operates",
+        "manages",
+        "employed_by",
+        "registered_at",
+        "mentioned_in",
+        "listed_as",
+        "sold",
+        "purchased",
+        "permitted",
+        "near",
+        "related_to",
+        "controls",
+        "supplied_by",
+        "competes_with"
+      ],
+      "default": "associated_with"
+    },
+    "confidence": {
+      "type": "number",
+      "description": "0-100 confidence in this relationship"
+    },
+    "evidence_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source": {
+      "type": "string"
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "source_entity_id",
+    "target_entity_id",
+    "type"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

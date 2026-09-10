@@ -1,0 +1,105 @@
+{
+  "name": "EntityRecord",
+  "type": "object",
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "person",
+        "property",
+        "organization",
+        "address",
+        "document",
+        "event",
+        "transaction",
+        "listing",
+        "permit"
+      ],
+      "default": "person"
+    },
+    "canonical_name": {
+      "type": "string"
+    },
+    "normalized_name": {
+      "type": "string"
+    },
+    "aliases": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "confidence": {
+      "type": "number",
+      "description": "0-100 entity resolution confidence"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "known",
+        "likely",
+        "possible",
+        "unresolved",
+        "conflicted"
+      ],
+      "default": "possible"
+    },
+    "evidence_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "merge_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "merged_with": {
+            "type": "string"
+          },
+          "merged_at": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "properties": {
+      "type": "object",
+      "description": "Flexible attribute bag for the resolved entity"
+    },
+    "last_verified": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "canonical_name",
+    "type"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

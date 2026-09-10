@@ -1,0 +1,104 @@
+{
+  "name": "Evidence",
+  "type": "object",
+  "properties": {
+    "investigation_id": {
+      "type": "string"
+    },
+    "claim": {
+      "type": "string",
+      "description": "The assertion this evidence supports or contradicts"
+    },
+    "entity_ref": {
+      "type": "string",
+      "description": "Entity or property this evidence concerns"
+    },
+    "classification": {
+      "type": "string",
+      "enum": [
+        "fact",
+        "observation",
+        "inference",
+        "hypothesis",
+        "prediction",
+        "unverified",
+        "contradicted",
+        "stale"
+      ],
+      "default": "observation"
+    },
+    "confidence": {
+      "type": "number",
+      "description": "0-100 confidence in this claim"
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "acquired_at": {
+            "type": "string"
+          },
+          "raw": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "contradictions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "supports": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Claim ids this evidence supports"
+    },
+    "contradicts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Claim ids this evidence contradicts"
+    },
+    "last_verified": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "claim"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

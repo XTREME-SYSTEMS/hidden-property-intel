@@ -1,0 +1,171 @@
+{
+  "name": "Investigation",
+  "type": "object",
+  "properties": {
+    "question": {
+      "type": "string",
+      "description": "Natural-language question or objective"
+    },
+    "target_type": {
+      "type": "string",
+      "enum": [
+        "property",
+        "entity",
+        "market",
+        "address",
+        "company",
+        "person"
+      ],
+      "default": "property"
+    },
+    "target_ref": {
+      "type": "string",
+      "description": "Address, entity id, or region under investigation"
+    },
+    "objective": {
+      "type": "string",
+      "description": "Structured objective derived from the question"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "queued",
+        "planning",
+        "running",
+        "completed",
+        "failed",
+        "cancelled"
+      ],
+      "default": "queued"
+    },
+    "depth": {
+      "type": "string",
+      "enum": [
+        "quick",
+        "standard",
+        "deep"
+      ],
+      "default": "standard"
+    },
+    "budget_tokens": {
+      "type": "number",
+      "default": 20000
+    },
+    "tokens_used": {
+      "type": "number",
+      "default": 0
+    },
+    "plan": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "step": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "steps_completed": {
+      "type": "number",
+      "default": 0
+    },
+    "steps_total": {
+      "type": "number",
+      "default": 0
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "finding": {
+            "type": "string"
+          },
+          "classification": {
+            "type": "string"
+          },
+          "confidence": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "executive_summary": {
+      "type": "string"
+    },
+    "confidence_score": {
+      "type": "number",
+      "description": "0-100 overall investigation confidence"
+    },
+    "contradictions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "unknown_information": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "recommended_next": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source_list": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "duration_ms": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "question"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -3,7 +3,7 @@ import {
   LayoutDashboard, BarChart3, Database, Mail, Users, User, Home, Target, Lightbulb,
   Globe, BookOpen, Blocks, Calculator, TrendingUp, Scale, Radar, Sparkles,
   Key, Phone, Mic, Calendar, Rocket, Cpu, Search, FlaskConical, Building2,
-  Handshake, Stamp,
+  Handshake, Stamp, Brain,
 } from "lucide-react";
 
 // Grouped by workflow stage — mirrors the sidebar categories in AdminShell.
@@ -26,6 +26,7 @@ const GROUPS = [
       { icon: Home, label: "Probate", nav: "probate" },
       { icon: User, label: "Owner ID", nav: "owner-identify" },
       { icon: Sparkles, label: "AI Gateway", nav: "ai-gateway" },
+      { icon: Brain, label: "Intel Console", nav: "intelligence" },
       { icon: Home, label: "Owners", nav: "owner-list" },
       { icon: BookOpen, label: "Distress Edu", nav: "distress-edu" },
     ],

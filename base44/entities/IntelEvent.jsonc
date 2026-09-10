@@ -1,0 +1,76 @@
+{
+  "name": "IntelEvent",
+  "type": "object",
+  "properties": {
+    "property_id": {
+      "type": "string"
+    },
+    "entity_id": {
+      "type": "string"
+    },
+    "investigation_id": {
+      "type": "string"
+    },
+    "event_type": {
+      "type": "string",
+      "description": "ownership, permit, transaction, listing, business, signal, change, prediction"
+    },
+    "event_date": {
+      "type": "string",
+      "description": "When the event occurred (ISO date or year)"
+    },
+    "classification": {
+      "type": "string",
+      "enum": [
+        "fact",
+        "observation",
+        "inference",
+        "hypothesis",
+        "prediction"
+      ],
+      "default": "observation"
+    },
+    "description": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": "number",
+      "description": "0-100"
+    },
+    "evidence_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "event_type",
+    "description"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
