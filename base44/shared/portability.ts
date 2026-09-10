@@ -219,14 +219,32 @@ function isEmpty(v: any): boolean {
     (typeof v === "object" && !Array.isArray(v) && Object.keys(v).length === 0);
 }
 
-async function contentHash(record: any): Promise<string> {
+/**
+ * Content hash for comparison. If `refKeys` is provided, only those fields
+ * are hashed — this lets us compare an existing DB record against an import
+ * record using only the import's field set, ignoring platform-added fields
+ * (like `is_sample`) that the DB may inject.
+ */
+async function contentHash(record: any, refKeys?: Set<string>): Promise<string> {
   const portable: Record<string, any> = {};
   for (const [k, v] of Object.entries(record)) {
     if (SYSTEM_FIELDS.has(k)) continue;
-    if (isEmpty(v)) continue; // normalize empty values — treat as absent
+    if (refKeys && !refKeys.has(k)) continue;
+    if (isEmpty(v)) continue;
     portable[k] = v;
   }
   return sha256(JSON.stringify(portable, Object.keys(portable).sort()));
+}
+
+/** Build the set of non-system, non-empty field keys from a record. */
+function portableKeys(record: any): Set<string> {
+  const keys = new Set<string>();
+  for (const [k, v] of Object.entries(record)) {
+    if (SYSTEM_FIELDS.has(k)) continue;
+    if (isEmpty(v)) continue;
+    keys.add(k);
+  }
+  return keys;
 }
 
 // ─── Import Validation (Dry Run) ───────────────────────────────────
@@ -311,8 +329,9 @@ export async function validateImportPackage(
       if (!existing) {
         newCount++;
       } else {
-        const existingHash = await contentHash(existing);
-        const importHash = await contentHash(record);
+        const refKeys = portableKeys(record);
+        const existingHash = await contentHash(existing, refKeys);
+        const importHash = await contentHash(record, refKeys);
         if (existingHash === importHash) {
           existingIdentical++;
         } else {
@@ -435,8 +454,9 @@ export async function executeImport(
       if (!existing) {
         toCreate.push(portable);
       } else {
-        const existingHash = await contentHash(existing);
-        const importHash = await contentHash(record);
+        const refKeys = portableKeys(record);
+        const existingHash = await contentHash(existing, refKeys);
+        const importHash = await contentHash(record, refKeys);
         if (existingHash === importHash) {
           secResult.skipped++; skipped++;
         } else if (opts.force) {
