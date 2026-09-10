@@ -54,6 +54,8 @@ import FloridaSourceDirectory from '@/pages/FloridaSourceDirectory';
 import AdminEnrichmentUpgrades from '@/pages/AdminEnrichmentUpgrades';
 import AdminXtremeVision from '@/pages/AdminXtremeVision';
 import AdminOwnerIdentification from '@/pages/AdminOwnerIdentification';
+import AdminAiGateway from '@/pages/AdminAiGateway';
+import PwaMobile from '@/pages/PwaMobile';
 import PortalRouter from '@/pages/PortalRouter';
 import About from '@/pages/About';
 import Contact from '@/pages/Contact';
@@ -124,6 +126,7 @@ const AuthenticatedApp = () => {
           <Route path="/negotiation/:propertyId" element={<NegotiationChat />} />
           <Route path="/contracts/:id" element={<SmartContractDetail />} />
           <Route path="/portal" element={<PortalRouter />} />
+          <Route path="/mobile" element={<PwaMobile />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/sources" element={<AdminSources />} />
           <Route path="/admin/outreach" element={<AdminOutreach />} />
@@ -156,6 +159,7 @@ const AuthenticatedApp = () => {
         <Route path="/admin/enrichment-upgrades" element={<AdminEnrichmentUpgrades />} />
         <Route path="/admin/xtreme-vision" element={<AdminXtremeVision />} />
         <Route path="/admin/owner-identify" element={<AdminOwnerIdentification />} />
+        <Route path="/admin/ai-gateway" element={<AdminAiGateway />} />
         </Route>
         <Route path="/eden-skye" element={<EdenSkyeProfile />} />
         <Route path="/eden-skye/chat" element={<EdenSkyeChat />} />

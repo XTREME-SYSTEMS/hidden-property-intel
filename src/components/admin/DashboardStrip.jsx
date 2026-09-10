@@ -25,6 +25,7 @@ const GROUPS = [
       { icon: Radar, label: "Shadow Cmd", nav: "shadow" },
       { icon: Home, label: "Probate", nav: "probate" },
       { icon: User, label: "Owner ID", nav: "owner-identify" },
+      { icon: Sparkles, label: "AI Gateway", nav: "ai-gateway" },
       { icon: Home, label: "Owners", nav: "owner-list" },
       { icon: BookOpen, label: "Distress Edu", nav: "distress-edu" },
     ],

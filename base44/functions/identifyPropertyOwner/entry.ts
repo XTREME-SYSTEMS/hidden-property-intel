@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.46';
+import { gatewayChat, isGatewayConfigured } from "../../shared/aiGateway.ts";
 
 /**
  * identifyPropertyOwner — Master Owner Identification Engine.
@@ -160,12 +161,32 @@ INSTRUCTIONS:
 
 Return the complete JSON report.`;
 
-    const r = await base44.asServiceRole.integrations.Core.InvokeLLM({
-      prompt,
-      add_context_from_internet: true,
-      model: 'gemini_3_flash',
-      response_json_schema: REPORT_SCHEMA,
-    });
+    let r;
+    if (isGatewayConfigured()) {
+      // Use Perplexity Sonar Pro via the Vercel AI Gateway — live web search,
+      // works even when platform integration credits are exhausted.
+      const gw = await gatewayChat({
+        prompt,
+        web_search: true,
+        model: 'perplexity/sonar-pro',
+        max_tokens: 8000,
+        response_json_schema: REPORT_SCHEMA,
+      });
+      r = gw.json || {};
+      if (!r.owner_name) {
+        // gateway didn't return clean JSON — try to salvage
+        const salvage = gw.text.match(/\{[\s\S]*\}/);
+        if (salvage) { try { r = JSON.parse(salvage[0]); } catch {} }
+      }
+    } else {
+      // Fallback to built-in InvokeLLM (requires platform credits)
+      r = await base44.asServiceRole.integrations.Core.InvokeLLM({
+        prompt,
+        add_context_from_internet: true,
+        model: 'gemini_3_flash',
+        response_json_schema: REPORT_SCHEMA,
+      });
+    }
 
     const ownerName = r.owner_name || 'Unknown Owner';
     const confidenceScore = typeof r.confidence_score === 'number' ? r.confidence_score : confidenceToScore(r.confidence);

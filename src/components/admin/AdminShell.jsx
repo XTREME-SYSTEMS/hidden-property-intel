@@ -21,6 +21,7 @@ import AdminSearchConsole from "@/pages/AdminSearchConsole";
 import AdminInvestorList from "@/pages/AdminInvestorList";
 import AdminOwnerList from "@/pages/AdminOwnerList";
 import AdminOwnerIdentification from "@/pages/AdminOwnerIdentification";
+import AdminAiGateway from "@/pages/AdminAiGateway";
 import AdminSmartContracts from "@/pages/AdminSmartContracts";
 import DealCalculator from "@/pages/DealCalculator";
 import AgentDashboard from "@/pages/AgentDashboard";
@@ -74,6 +75,7 @@ const CATEGORIES = [
       { id: "shadow", icon: Radar, label: "Shadow Command", desc: "Autonomous intelligence", component: ShadowCommandCenter },
       { id: "probate", icon: Home, label: "Probate Pipeline", desc: "Deceased owners & heirs", component: AdminProbateDashboard },
       { id: "owner-identify", icon: User, label: "Owner Identification Engine", desc: "Exhaustive owner ID & skip-trace", component: AdminOwnerIdentification },
+      { id: "ai-gateway", icon: Sparkles, label: "AI Gateway Engine", desc: "372 models: search, vision, voice, RAG", component: AdminAiGateway },
       { id: "owner-list", icon: Home, label: "Owner List", desc: "Owners & next of kin", component: AdminOwnerList },
     ],
   },
