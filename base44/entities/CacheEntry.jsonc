@@ -1,0 +1,86 @@
+{
+  "name": "CacheEntry",
+  "type": "object",
+  "properties": {
+    "cache_key": {
+      "type": "string",
+      "description": "Normalized hash of source + query + parameters + time window"
+    },
+    "source": {
+      "type": "string",
+      "description": "Data source identifier"
+    },
+    "query": {
+      "type": "string",
+      "description": "Original query"
+    },
+    "response": {
+      "type": "object",
+      "description": "Cached response data"
+    },
+    "response_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of response for diff detection"
+    },
+    "cached_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "TTL boundary"
+    },
+    "ttl_seconds": {
+      "type": "number",
+      "default": 86400
+    },
+    "provenance": {
+      "type": "string",
+      "description": "Where this data came from"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "fresh",
+        "stale",
+        "expired",
+        "invalidated"
+      ],
+      "default": "fresh"
+    },
+    "hit_count": {
+      "type": "number",
+      "default": 0
+    },
+    "tenant_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "cache_key",
+    "source"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

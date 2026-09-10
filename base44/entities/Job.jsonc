@@ -1,0 +1,136 @@
+{
+  "name": "Job",
+  "type": "object",
+  "properties": {
+    "job_id": {
+      "type": "string",
+      "description": "Unique job identifier (UUID)"
+    },
+    "type": {
+      "type": "string",
+      "description": "Job type: scrape, enrich, investigate, resolve, verify, etc."
+    },
+    "priority": {
+      "type": "number",
+      "default": 5,
+      "description": "1 (highest) to 10 (lowest)"
+    },
+    "payload": {
+      "type": "object",
+      "description": "Job input data"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "queued",
+        "running",
+        "waiting",
+        "retrying",
+        "completed",
+        "failed",
+        "dead_letter",
+        "cancelled"
+      ],
+      "default": "queued"
+    },
+    "attempts": {
+      "type": "number",
+      "default": 0
+    },
+    "max_attempts": {
+      "type": "number",
+      "default": 3
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "next_retry_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "error": {
+      "type": "string"
+    },
+    "result": {
+      "type": "object",
+      "description": "Job output data"
+    },
+    "parent_job_id": {
+      "type": "string",
+      "description": "Parent job for dependency chains"
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Job IDs that must complete before this job"
+    },
+    "tenant_id": {
+      "type": "string",
+      "description": "Owner/tenant for multi-tenant isolation"
+    },
+    "correlation_id": {
+      "type": "string",
+      "description": "Links related jobs in a pipeline"
+    },
+    "idempotency_key": {
+      "type": "string",
+      "description": "Prevents duplicate job creation"
+    },
+    "checkpoint": {
+      "type": "object",
+      "description": "Resumability checkpoint data"
+    },
+    "timeout_seconds": {
+      "type": "number",
+      "default": 120
+    },
+    "autonomy_level": {
+      "type": "string",
+      "enum": [
+        "observe",
+        "recommend",
+        "execute_reversible",
+        "execute_consequential",
+        "human_required"
+      ],
+      "default": "execute_reversible"
+    }
+  },
+  "required": [
+    "job_id",
+    "type"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -2,8 +2,9 @@ import React, { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import {
   Sparkles, Loader2, Search, Activity, Database, AlertTriangle, CheckCircle2,
-  Brain, FileSearch, TrendingUp, Zap, ChevronRight, Clock, Target, X,
+  Brain, FileSearch, TrendingUp, Zap, ChevronRight, Clock, Target, X, Wrench, ShieldCheck,
 } from "lucide-react";
+import IntelligenceTools from "@/components/intelligence/IntelligenceTools";
 
 export default function IntelligenceConsole() {
   const [tab, setTab] = useState("command");
@@ -82,6 +83,7 @@ export default function IntelligenceConsole() {
           { id: "command", label: "Command", icon: Sparkles },
           { id: "investigations", label: `Investigations (${investigations.length})`, icon: FileSearch },
           { id: "evidence", label: `Evidence (${evidence.length})`, icon: Database },
+          { id: "tools", label: "Tools", icon: Wrench },
           { id: "audit", label: "System Audit", icon: Activity },
         ].map((t) => (
           <button key={t.id} onClick={() => setTab(t.id)} className={`inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition ${tab === t.id ? "bg-black text-white" : "text-black/50 hover:bg-black/5"}`}>
@@ -174,6 +176,9 @@ export default function IntelligenceConsole() {
         </div>
       )}
 
+      {/* TOOLS TAB */}
+      {tab === "tools" && <IntelligenceTools />}
+
       {/* AUDIT TAB */}
       {tab === "audit" && (
         <div className="mt-5">
@@ -220,7 +225,13 @@ function InvestigationResult({ result }) {
           <ul className="space-y-1">{inv.recommended_next.map((n, i) => <li key={i} className="flex items-start gap-1.5 text-xs"><ChevronRight className="mt-0.5 h-3 w-3 shrink-0 text-black/40" />{n}</li>)}</ul>
         </div>
       )}
-      <p className="mt-3 text-[10px] text-black/40">{result.evidence_count} evidence records · {result.entity_count} entities · sources: {inv.source_list?.join(", ")}</p>
+      {result.security && (
+        <div className="mt-3 flex items-center gap-3 text-[10px]">
+          <span className="flex items-center gap-1 text-emerald-600"><ShieldCheck className="h-3 w-3" /> Injection: {result.security.prompt_injection_tests ? "blocked" : "FAIL"}</span>
+          <span className="flex items-center gap-1 text-emerald-600"><ShieldCheck className="h-3 w-3" /> SSRF: {result.security.ssrf_tests ? "blocked" : "FAIL"}</span>
+        </div>
+      )}
+      <p className="mt-2 text-[10px] text-black/40">{result.evidence_count} evidence · {result.entity_count} entities · {result.tokens_used || inv.tokens_used || 0} tokens · sources: {inv.source_list?.join(", ")}</p>
     </div>
   );
 }
@@ -273,6 +284,36 @@ function AuditView({ audit }) {
           </div>
         ))}
       </div>
+      {/* Security regression tests */}
+      {audit.security_tests && (
+        <div className="rounded-lg border border-black/10 bg-white p-4">
+          <p className="mb-2 text-[10px] uppercase tracking-[0.2em] text-black/40">Security Regression Tests</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <p className="text-xs font-medium">Prompt Injection: {audit.security_tests.prompt_injection?.passed ? "✓ PASS" : "✗ FAIL"}</p>
+              <div className="mt-1 space-y-0.5">
+                {audit.security_tests.prompt_injection?.tests?.map((t, i) => (
+                  <div key={i} className="flex items-center gap-1.5 text-[10px] text-black/50">
+                    {t.blocked ? <CheckCircle2 className="h-3 w-3 text-emerald-500" /> : <X className="h-3 w-3 text-black/20" />}
+                    <span className="truncate">{t.input.slice(0, 50)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="text-xs font-medium">SSRF Defense: {audit.security_tests.ssrf?.passed ? "✓ PASS" : "✗ FAIL"}</p>
+              <div className="mt-1 space-y-0.5">
+                {audit.security_tests.ssrf?.tests?.map((t, i) => (
+                  <div key={i} className="flex items-center gap-1.5 text-[10px] text-black/50">
+                    {t.blocked ? <CheckCircle2 className="h-3 w-3 text-emerald-500" /> : <X className="h-3 w-3 text-black/20" />}
+                    <span className="truncate">{t.url}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Truth model */}
       <div className="rounded-lg border border-black/10 bg-white p-4">
         <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-black/40">Architectural Truth Model</p>

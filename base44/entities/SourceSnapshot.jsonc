@@ -1,0 +1,70 @@
+{
+  "name": "SourceSnapshot",
+  "type": "object",
+  "properties": {
+    "source": {
+      "type": "string",
+      "description": "Data source identifier"
+    },
+    "target_ref": {
+      "type": "string",
+      "description": "Address, entity, or query snapshotted"
+    },
+    "snapshot_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of normalized snapshot data"
+    },
+    "data": {
+      "type": "object",
+      "description": "Normalized snapshot of source state at capture time"
+    },
+    "captured_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "previous_snapshot_id": {
+      "type": "string",
+      "description": "Prior snapshot for diffing"
+    },
+    "diff": {
+      "type": "object",
+      "description": "Detected changes vs previous snapshot"
+    },
+    "diff_summary": {
+      "type": "string"
+    },
+    "events_generated": {
+      "type": "number",
+      "default": 0
+    },
+    "tenant_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "source",
+    "snapshot_hash"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
