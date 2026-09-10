@@ -1,120 +1,100 @@
-import { createClientFromRequest } from "npm:@base44/sdk@0.8.44";
-import { gatewayChat, GATEWAY_MODELS, isGatewayConfigured } from "../../shared/aiGateway.ts";
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.46';
+import {
+  gatewayChat, gatewayEmbed, gatewayRerank, gatewayImage, gatewayTTS,
+  gatewayTranscribe, listGatewayModels, isGatewayConfigured,
+  GATEWAY_MODELS, DEFAULTS,
+} from "../../shared/aiGateway.ts";
 
-// Vercel AI Gateway — multi-model AI generation endpoint.
-// Supports OpenAI, Anthropic, and Google models through a single API.
-// Falls back to built-in InvokeLLM if the gateway key is not configured.
-
+/**
+ * aiGatewayGenerate — unified multi-modal AI Gateway endpoint.
+ * Actions: models, generate, web_search, vision, embed, rerank, image, tts, transcribe.
+ * Uses the Vercel AI Gateway directly (works without platform integration credits).
+ */
 export default async function (req: Request): Promise<Response> {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
+    const user = await base44.auth.me().catch(() => null);
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const body = await req.json();
-    const action = body.action || "generate";
+    const body = await req.json().catch(() => ({}));
+    const action = body.action || 'models';
 
-    // LIST MODELS — return available gateway models
-    if (action === "models") {
+    if (action === 'models') {
+      const live = await listGatewayModels();
       return Response.json({
         configured: isGatewayConfigured(),
-        models: GATEWAY_MODELS,
+        defaults: DEFAULTS,
+        curated: GATEWAY_MODELS,
+        live_count: live.length,
+        live_sample: live.slice(0, 50).map((m: any) => ({ id: m.id, name: m.name, type: m.type, owned_by: m.owned_by, tags: m.tags })),
       });
     }
 
-    // GENERATE — call the AI Gateway
-    if (action === "generate") {
-      const { prompt, system, model, max_tokens, temperature, response_json_schema, fallback_to_invoke_llm } = body;
-
-      if (!prompt || typeof prompt !== "string") {
-        return Response.json({ error: 'Missing "prompt" field' }, { status: 400 });
-      }
-      if (prompt.length > 32000) {
-        return Response.json({ error: "Prompt too long (max 32k chars)" }, { status: 400 });
-      }
-
-      // Try the AI Gateway first
-      if (isGatewayConfigured()) {
-        try {
-          const result = await gatewayChat({
-            prompt,
-            system,
-            model,
-            max_tokens,
-            temperature,
-            response_json_schema,
-          });
-
-          let parsed = result.text;
-          // If JSON schema was requested, parse the response
-          if (response_json_schema) {
-            try {
-              const cleaned = result.text.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-              parsed = JSON.parse(cleaned);
-            } catch {
-              const match = result.text.match(/\{[\s\S]*\}/);
-              if (match) parsed = JSON.parse(match[0]);
-            }
-          }
-
-          return Response.json({
-            source: "vercel_ai_gateway",
-            result: parsed,
-            model: result.model,
-            usage: result.usage,
-          });
-        } catch (gwError) {
-          // If gateway fails and fallback is enabled, use InvokeLLM
-          if (!fallback_to_invoke_llm) {
-            return Response.json({ error: gwError.message, source: "vercel_ai_gateway" }, { status: 502 });
-          }
-          // Fall through to InvokeLLM
-        }
-      }
-
-      // Fallback to built-in InvokeLLM
-      const invokeOpts: any = { prompt };
-      if (model) invokeOpts.model = model;
-      if (response_json_schema) invokeOpts.response_json_schema = response_json_schema;
-
-      const llmResult = await base44.asServiceRole.integrations.Core.InvokeLLM(invokeOpts);
-
+    if (action === 'generate' || action === 'web_search' || action === 'vision') {
+      const { prompt, system, model, max_tokens, temperature, response_json_schema, images, web_search } = body;
+      if (!prompt) return Response.json({ error: 'prompt required' }, { status: 400 });
+      const isWs = action === 'web_search' || web_search;
+      const isVision = action === 'vision' || (Array.isArray(images) && images.length > 0);
+      const result = await gatewayChat({
+        prompt,
+        system,
+        model,
+        max_tokens,
+        temperature,
+        response_json_schema,
+        images: isVision ? images : undefined,
+        web_search: isWs,
+      });
       return Response.json({
-        source: "invoke_llm_fallback",
-        result: llmResult,
-        model: model || "automatic",
-        usage: null,
-        note: "AI Gateway not configured or failed — used built-in InvokeLLM",
+        source: 'vercel_ai_gateway',
+        text: result.text,
+        result: result.json ?? result.text,
+        model: result.model,
+        usage: result.usage,
+        mode: isWs ? 'web_search' : isVision ? 'vision' : 'chat',
       });
     }
 
-    // BATCH — generate multiple completions in one call
-    if (action === "batch") {
-      const { prompts, system, model, max_tokens, temperature } = body;
-      if (!Array.isArray(prompts) || prompts.length === 0) {
-        return Response.json({ error: "prompts must be a non-empty array" }, { status: 400 });
-      }
-      if (prompts.length > 10) {
-        return Response.json({ error: "Max 10 prompts per batch" }, { status: 400 });
-      }
-
-      const results = [];
-      for (const p of prompts) {
-        if (!isGatewayConfigured()) break;
-        try {
-          const result = await gatewayChat({ prompt: p, system, model, max_tokens, temperature });
-          results.push({ text: result.text, model: result.model, usage: result.usage });
-        } catch (e) {
-          results.push({ error: e.message });
-        }
-      }
-
-      return Response.json({ source: "vercel_ai_gateway", results, count: results.length });
+    if (action === 'embed') {
+      const { input, model } = body;
+      if (!input) return Response.json({ error: 'input required' }, { status: 400 });
+      const r = await gatewayEmbed({ input, model });
+      return Response.json({ source: 'vercel_ai_gateway', embedding: r.embedding, model: r.model, dims: r.embedding.length });
     }
 
-    return Response.json({ error: "Unknown action. Use: models, generate, batch" }, { status: 400 });
+    if (action === 'rerank') {
+      const { query, documents, model, top_n } = body;
+      if (!query || !Array.isArray(documents)) return Response.json({ error: 'query and documents[] required' }, { status: 400 });
+      const r = await gatewayRerank({ query, documents, model, top_n });
+      if (!r) return Response.json({ error: 'Rerank endpoint unavailable on this gateway', source: 'vercel_ai_gateway' }, { status: 502 });
+      return Response.json({ source: 'vercel_ai_gateway', results: r.results, model: r.model });
+    }
+
+    if (action === 'image') {
+      const { prompt, model, size, n } = body;
+      if (!prompt) return Response.json({ error: 'prompt required' }, { status: 400 });
+      const r = await gatewayImage({ prompt, model, size, n });
+      return Response.json({ source: 'vercel_ai_gateway', urls: r.urls, model: r.model });
+    }
+
+    if (action === 'tts') {
+      const { text, model, voice } = body;
+      if (!text) return Response.json({ error: 'text required' }, { status: 400 });
+      if (text.length > 4000) return Response.json({ error: 'text too long (max 4000 chars)' }, { status: 400 });
+      const r = await gatewayTTS({ text, model, voice });
+      return Response.json({ source: 'vercel_ai_gateway', audio_base64: r.audio_base64, model: r.model, format: 'mp3' });
+    }
+
+    if (action === 'transcribe') {
+      const { audio_url, model } = body;
+      if (!audio_url) return Response.json({ error: 'audio_url required' }, { status: 400 });
+      const r = await gatewayTranscribe({ audio_url, model });
+      return Response.json({ source: 'vercel_ai_gateway', text: r.text, model: r.model });
+    }
+
+    return Response.json({ error: 'Unknown action. Use: models, generate, web_search, vision, embed, rerank, image, tts, transcribe' }, { status: 400 });
   } catch (error) {
-    console.error("aiGatewayGenerate error", error);
+    console.error('aiGatewayGenerate error', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 }
