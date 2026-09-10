@@ -184,6 +184,51 @@ export async function buildExportPackage(db: any, opts: { sections?: string[] } 
   return { manifest, data, checksums };
 }
 
+// ─── Natural Key Functions (for idempotency) ───────────────────────
+// The platform auto-generates IDs on create, so we use natural keys
+// (business-logic fields) to detect duplicates and achieve idempotency.
+
+const NATURAL_KEYS: Record<string, (r: any) => string> = {
+  Property: (r) => [r.address, r.city, r.state, r.zip_code].filter(Boolean).join("|").toLowerCase().trim(),
+  Owner: (r) => [r.name, r.property_id].filter(Boolean).join("|").toLowerCase().trim(),
+  EntityRecord: (r) => [r.type, r.canonical_name].filter(Boolean).join("|").toLowerCase().trim(),
+  Relationship: (r) => [r.source_entity_id, r.target_entity_id, r.type].filter(Boolean).join("|"),
+  Evidence: (r) => [r.claim, r.entity_ref].filter(Boolean).join("|").toLowerCase().trim(),
+  IntelEvent: (r) => [r.event_type, r.description, r.entity_id, r.property_id].filter(Boolean).join("|").toLowerCase().trim(),
+  Investigation: (r) => [r.question, r.target_ref].filter(Boolean).join("|").toLowerCase().trim(),
+  PropertyScore: (r) => r.property_id || "",
+  OwnershipChain: (r) => r.property_id || "",
+  DataSource: (r) => [r.name, r.url].filter(Boolean).join("|").toLowerCase().trim(),
+  SourceSnapshot: (r) => [r.source, r.snapshot_hash].filter(Boolean).join("|"),
+  CacheEntry: (r) => r.cache_key || "",
+  Job: (r) => r.job_id || "",
+};
+
+function naturalKey(entityName: string, record: any): string {
+  const fn = NATURAL_KEYS[entityName];
+  if (!fn) return record.id || "";
+  return fn(record) || record.id || "";
+}
+
+// Fields to exclude from content hash (system-managed, non-portable)
+const SYSTEM_FIELDS = new Set(["id", "created_date", "updated_date", "created_by_id"]);
+
+function isEmpty(v: any): boolean {
+  return v === null || v === undefined || v === "" ||
+    (Array.isArray(v) && v.length === 0) ||
+    (typeof v === "object" && !Array.isArray(v) && Object.keys(v).length === 0);
+}
+
+async function contentHash(record: any): Promise<string> {
+  const portable: Record<string, any> = {};
+  for (const [k, v] of Object.entries(record)) {
+    if (SYSTEM_FIELDS.has(k)) continue;
+    if (isEmpty(v)) continue; // normalize empty values — treat as absent
+    portable[k] = v;
+  }
+  return sha256(JSON.stringify(portable, Object.keys(portable).sort()));
+}
+
 // ─── Import Validation (Dry Run) ───────────────────────────────────
 
 export interface ImportValidationResult {
@@ -237,7 +282,7 @@ export async function validateImportPackage(
     }
   }
 
-  // 3. Record analysis — check each record against existing DB
+  // 3. Record analysis — check each record against existing DB using natural keys
   let total = 0, newCount = 0, existingIdentical = 0, existingModified = 0, conflictCount = 0, invalidCount = 0;
 
   const sectionToEntity: Record<string, string> = {};
@@ -249,24 +294,33 @@ export async function validateImportPackage(
     const entityName = sectionToEntity[section];
     if (!entityName) continue;
 
+    // Build natural key → existing record map for this entity
+    const existingRecords = await db.entities[entityName].list("-created_date", 500).catch(() => []);
+    const existingByKey = new Map<string, any>();
+    for (const er of existingRecords) {
+      const key = naturalKey(entityName, er);
+      if (key) existingByKey.set(key, er);
+    }
+
     for (const record of records as any[]) {
       total++;
-      if (!record.id) { invalidCount++; continue; }
+      const nkey = naturalKey(entityName, record);
+      if (!nkey) { invalidCount++; continue; }
 
-      const existing = await db.entities[entityName].get(record.id).catch(() => null);
+      const existing = existingByKey.get(nkey);
       if (!existing) {
         newCount++;
       } else {
-        const existingHash = await checksumRecord(existing);
-        const importHash = await checksumRecord(record);
+        const existingHash = await contentHash(existing);
+        const importHash = await contentHash(record);
         if (existingHash === importHash) {
           existingIdentical++;
         } else {
           existingModified++;
           conflicts.push({
             section,
-            id: record.id,
-            reason: `Content differs — existing hash ${existingHash.slice(0, 8)} vs import ${importHash.slice(0, 8)}`,
+            id: record.id || nkey,
+            reason: `Natural key "${nkey.slice(0, 40)}" exists with different content — existing ${existingHash.slice(0, 8)} vs import ${importHash.slice(0, 8)}`,
           });
           conflictCount++;
         }
@@ -356,26 +410,39 @@ export async function executeImport(
 
     const secResult = { created: 0, updated: 0, skipped: 0, failed: 0 };
 
-    // Process in batches of 50 for bulkCreate
+    // Build natural key → existing record map
+    const existingRecords = await db.entities[entityName].list("-created_date", 500).catch(() => []);
+    const existingByKey = new Map<string, any>();
+    for (const er of existingRecords) {
+      const key = naturalKey(entityName, er);
+      if (key) existingByKey.set(key, er);
+    }
+
     const toCreate: any[] = [];
     const toUpdate: { id: string; data: any }[] = [];
 
     for (const record of records as any[]) {
-      if (!record.id) { secResult.failed++; failed++; continue; }
+      const nkey = naturalKey(entityName, record);
+      if (!nkey) { secResult.failed++; failed++; continue; }
 
-      const existing = await db.entities[entityName].get(record.id).catch(() => null);
+      // Strip system fields — platform manages these
+      const portable: any = {};
+      for (const [k, v] of Object.entries(record)) {
+        if (!SYSTEM_FIELDS.has(k)) portable[k] = v;
+      }
+
+      const existing = existingByKey.get(nkey);
       if (!existing) {
-        toCreate.push(record);
+        toCreate.push(portable);
       } else {
-        const existingHash = await checksumRecord(existing);
-        const importHash = await checksumRecord(record);
+        const existingHash = await contentHash(existing);
+        const importHash = await contentHash(record);
         if (existingHash === importHash) {
           secResult.skipped++; skipped++;
         } else if (opts.force) {
-          toUpdate.push({ id: record.id, data: record });
+          toUpdate.push({ id: existing.id, data: portable });
           conflictsResolved++;
         } else {
-          // Skip conflict — don't overwrite without force
           secResult.skipped++; skipped++;
         }
       }
