@@ -1,0 +1,142 @@
+{
+  "name": "IntelligenceArchive",
+  "type": "object",
+  "properties": {
+    "archive_id": {
+      "type": "string",
+      "description": "Unique ID for this archive entry"
+    },
+    "operation_type": {
+      "type": "string",
+      "enum": [
+        "export",
+        "import",
+        "snapshot",
+        "backup",
+        "integrity_check",
+        "disaster_recovery_test"
+      ]
+    },
+    "label": {
+      "type": "string",
+      "description": "Human-readable label"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "running",
+        "completed",
+        "failed",
+        "partial"
+      ],
+      "default": "running"
+    },
+    "scope": {
+      "type": "string",
+      "enum": [
+        "full",
+        "intelligence",
+        "properties",
+        "entities",
+        "graph",
+        "rag",
+        "evidence",
+        "investigations",
+        "timeline",
+        "scoring"
+      ],
+      "default": "full"
+    },
+    "record_counts": {
+      "type": "object",
+      "description": "Counts per section/entity"
+    },
+    "total_records": {
+      "type": "number",
+      "default": 0
+    },
+    "checksum": {
+      "type": "string",
+      "description": "SHA-256 checksum of the export/snapshot"
+    },
+    "size_bytes": {
+      "type": "number",
+      "default": 0
+    },
+    "manifest": {
+      "type": "object",
+      "description": "Full manifest for export operations"
+    },
+    "validation_result": {
+      "type": "object",
+      "description": "Dry-run or integrity check results"
+    },
+    "import_result": {
+      "type": "object",
+      "description": "Import execution results"
+    },
+    "comparison_result": {
+      "type": "object",
+      "description": "Snapshot comparison results"
+    },
+    "integrity_score": {
+      "type": "number",
+      "description": "0-100 integrity score for integrity_check operations"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "duration_ms": {
+      "type": "number",
+      "default": 0
+    },
+    "initiated_by": {
+      "type": "string",
+      "description": "User ID who initiated the operation"
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "archive_id",
+    "operation_type",
+    "label"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
