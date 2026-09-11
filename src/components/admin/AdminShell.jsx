@@ -23,6 +23,7 @@ import AdminOwnerList from "@/pages/AdminOwnerList";
 import AdminOwnerIdentification from "@/pages/AdminOwnerIdentification";
 import AdminAiGateway from "@/pages/AdminAiGateway";
 import IntelligenceConsole from "@/pages/IntelligenceConsole";
+import DigitalWorkforce from "@/pages/DigitalWorkforce";
 import AdminSmartContracts from "@/pages/AdminSmartContracts";
 import DealCalculator from "@/pages/DealCalculator";
 import AgentDashboard from "@/pages/AgentDashboard";
@@ -78,6 +79,7 @@ const CATEGORIES = [
       { id: "owner-identify", icon: User, label: "Owner Identification Engine", desc: "Exhaustive owner ID & skip-trace", component: AdminOwnerIdentification },
       { id: "ai-gateway", icon: Sparkles, label: "AI Gateway Engine", desc: "372 models: search, vision, voice, RAG", component: AdminAiGateway },
       { id: "intelligence", icon: Brain, label: "Intelligence Console", desc: "Autonomous investigation engine", component: IntelligenceConsole },
+      { id: "digital-workforce", icon: Users, label: "Digital Workforce", desc: "8 AI team members · governance + shadow", component: DigitalWorkforce },
       { id: "owner-list", icon: Home, label: "Owner List", desc: "Owners & next of kin", component: AdminOwnerList },
     ],
   },

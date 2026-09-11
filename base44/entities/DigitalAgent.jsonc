@@ -1,0 +1,270 @@
+{
+  "name": "DigitalAgent",
+  "type": "object",
+  "properties": {
+    "agent_id": {
+      "type": "string",
+      "description": "Unique slug (e.g. 'ceo', 'lead_investigator')"
+    },
+    "name": {
+      "type": "string",
+      "description": "Display name of the digital human"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "ceo",
+        "cfo",
+        "coo",
+        "cro",
+        "lead_investigator",
+        "skip_tracer",
+        "market_analyst",
+        "deal_closer"
+      ]
+    },
+    "team": {
+      "type": "string",
+      "enum": [
+        "executive",
+        "intelligence"
+      ]
+    },
+    "title": {
+      "type": "string",
+      "description": "Human role being cloned"
+    },
+    "avatar_url": {
+      "type": "string"
+    },
+    "persona": {
+      "type": "object",
+      "description": "The human being cloned",
+      "properties": {
+        "background": {
+          "type": "string"
+        },
+        "expertise": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "personality_traits": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "communication_style": {
+          "type": "string"
+        },
+        "decision_framework": {
+          "type": "string"
+        }
+      }
+    },
+    "charter": {
+      "type": "object",
+      "description": "Constitutional charter \u2014 ethical governance framework",
+      "properties": {
+        "mission": {
+          "type": "string"
+        },
+        "core_values": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "ethical_principles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "decision_boundaries": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "prohibited_actions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "emotional_guidelines": {
+          "type": "string"
+        }
+      }
+    },
+    "emotional_state": {
+      "type": "object",
+      "description": "Emotional intelligence tracking",
+      "properties": {
+        "current_mood": {
+          "type": "string"
+        },
+        "stress_level": {
+          "type": "number",
+          "description": "0-100"
+        },
+        "confidence": {
+          "type": "number",
+          "description": "0-100"
+        },
+        "empathy_score": {
+          "type": "number",
+          "description": "0-100"
+        },
+        "emotional_tone": {
+          "type": "string"
+        },
+        "last_updated": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "accountability_score": {
+      "type": "number",
+      "description": "0-100 trust score",
+      "default": 75
+    },
+    "actions_taken": {
+      "type": "number",
+      "default": 0
+    },
+    "actions_approved": {
+      "type": "number",
+      "default": 0
+    },
+    "actions_rejected": {
+      "type": "number",
+      "default": 0
+    },
+    "actions_escalated": {
+      "type": "number",
+      "default": 0
+    },
+    "autonomy_level": {
+      "type": "string",
+      "enum": [
+        "observe",
+        "recommend",
+        "execute_routine",
+        "execute_strategic",
+        "human_required"
+      ],
+      "default": "execute_routine",
+      "description": "Strategic autonomy: routine auto-execute, strategic needs human approval"
+    },
+    "capabilities": {
+      "type": "object",
+      "properties": {
+        "web_browsing": {
+          "type": "boolean",
+          "default": true
+        },
+        "shadow_scraping": {
+          "type": "boolean",
+          "default": true
+        },
+        "ai_reasoning": {
+          "type": "boolean",
+          "default": true
+        },
+        "graph_query": {
+          "type": "boolean",
+          "default": true
+        },
+        "rag_search": {
+          "type": "boolean",
+          "default": true
+        },
+        "can_escalate_to_human": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "ai_model": {
+      "type": "string",
+      "default": "anthropic/claude-opus-4.8"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "paused",
+        "training",
+        "retired"
+      ],
+      "default": "active"
+    },
+    "last_active": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "performance": {
+      "type": "object",
+      "properties": {
+        "tasks_completed": {
+          "type": "number",
+          "default": 0
+        },
+        "avg_decision_time_ms": {
+          "type": "number",
+          "default": 0
+        },
+        "success_rate": {
+          "type": "number",
+          "default": 0
+        },
+        "peer_reviews_given": {
+          "type": "number",
+          "default": 0
+        },
+        "peer_reviews_received": {
+          "type": "number",
+          "default": 0
+        },
+        "human_overrides": {
+          "type": "number",
+          "default": 0
+        }
+      }
+    }
+  },
+  "required": [
+    "agent_id",
+    "name",
+    "role",
+    "team",
+    "title"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

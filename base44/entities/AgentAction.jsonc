@@ -1,0 +1,135 @@
+{
+  "name": "AgentAction",
+  "type": "object",
+  "properties": {
+    "action_id": {
+      "type": "string"
+    },
+    "agent_id": {
+      "type": "string"
+    },
+    "agent_name": {
+      "type": "string"
+    },
+    "agent_role": {
+      "type": "string"
+    },
+    "action_type": {
+      "type": "string",
+      "enum": [
+        "think",
+        "research",
+        "scrape",
+        "analyze",
+        "recommend",
+        "execute",
+        "escalate",
+        "communicate",
+        "peer_review"
+      ]
+    },
+    "description": {
+      "type": "string"
+    },
+    "reasoning": {
+      "type": "string",
+      "description": "Why the agent decided to take this action"
+    },
+    "input": {
+      "type": "object"
+    },
+    "output": {
+      "type": "object"
+    },
+    "governance_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "escalated",
+        "auto_approved",
+        "peer_reviewing"
+      ],
+      "default": "pending"
+    },
+    "governance_review_id": {
+      "type": "string"
+    },
+    "autonomy_level": {
+      "type": "string"
+    },
+    "emotional_context": {
+      "type": "string",
+      "description": "Agent's emotional state during this action"
+    },
+    "ethical_considerations": {
+      "type": "string"
+    },
+    "charter_compliance": {
+      "type": "number",
+      "description": "0-100"
+    },
+    "duration_ms": {
+      "type": "number"
+    },
+    "ai_model_used": {
+      "type": "string"
+    },
+    "tokens_used": {
+      "type": "number"
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "human_reviewer": {
+      "type": "string"
+    },
+    "human_decision": {
+      "type": "string",
+      "enum": [
+        "approved",
+        "rejected",
+        "modified",
+        "deferred"
+      ]
+    },
+    "human_feedback": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "agent_id",
+    "action_type",
+    "description"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

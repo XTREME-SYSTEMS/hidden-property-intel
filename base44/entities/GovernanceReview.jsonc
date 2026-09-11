@@ -1,0 +1,135 @@
+{
+  "name": "GovernanceReview",
+  "type": "object",
+  "properties": {
+    "review_id": {
+      "type": "string"
+    },
+    "agent_id": {
+      "type": "string"
+    },
+    "action_id": {
+      "type": "string"
+    },
+    "action_description": {
+      "type": "string"
+    },
+    "charter_compliance": {
+      "type": "number",
+      "description": "0-100 compliance with agent's charter"
+    },
+    "ethical_score": {
+      "type": "number",
+      "description": "0-100"
+    },
+    "dilemmas_identified": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "dilemma_resolutions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "dilemma": {
+            "type": "string"
+          },
+          "resolution": {
+            "type": "string"
+          },
+          "principle_applied": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "peer_reviews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "reviewer_agent_id": {
+            "type": "string"
+          },
+          "reviewer_name": {
+            "type": "string"
+          },
+          "verdict": {
+            "type": "string",
+            "enum": [
+              "approve",
+              "reject",
+              "modify",
+              "escalate"
+            ]
+          },
+          "reasoning": {
+            "type": "string"
+          },
+          "confidence": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "peer_consensus": {
+      "type": "number",
+      "description": "0-100"
+    },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "approved",
+        "rejected",
+        "escalated",
+        "modified",
+        "auto_approved",
+        "pending"
+      ],
+      "default": "pending"
+    },
+    "modifications_required": {
+      "type": "string"
+    },
+    "reasoning": {
+      "type": "string"
+    },
+    "human_override_required": {
+      "type": "boolean",
+      "default": false
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "review_id",
+    "agent_id",
+    "action_id"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

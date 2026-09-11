@@ -27,6 +27,7 @@ const GROUPS = [
       { icon: User, label: "Owner ID", nav: "owner-identify" },
       { icon: Sparkles, label: "AI Gateway", nav: "ai-gateway" },
       { icon: Brain, label: "Intel Console", nav: "intelligence" },
+      { icon: Users, label: "Digital Team", nav: "digital-workforce" },
       { icon: Home, label: "Owners", nav: "owner-list" },
       { icon: BookOpen, label: "Distress Edu", nav: "distress-edu" },
     ],
