@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
+import { Link } from "react-router-dom";
 import {
   Users, Brain, Shield, Scale, Heart, Activity, Zap, Eye, Search,
   Send, RefreshCw, Sparkles, Crown, Target, Radar, TrendingUp,
-  Handshake, UserSearch, AlertTriangle, CheckCircle, XCircle, Clock,
+  Handshake, UserSearch, AlertTriangle, CheckCircle, XCircle, Clock, ExternalLink,
 } from "lucide-react";
 
 const TEAM_META = {
@@ -279,6 +280,14 @@ function AgentCard({ agent, selected, onSelect }) {
         <span className="flex items-center gap-1"><XCircle className="h-3 w-3" /> {agent.actions_rejected || 0}</span>
         <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {agent.actions_escalated || 0}</span>
       </div>
+      {/* Full profile link */}
+      <Link
+        to={`/admin/digital-workforce/${agent.agent_id}`}
+        onClick={(e) => e.stopPropagation()}
+        className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-md border border-white/10 py-1.5 text-[10px] font-medium text-white/50 transition hover:border-[#e4b653]/40 hover:text-[#e4b653]"
+      >
+        <ExternalLink className="h-3 w-3" /> View Full Profile
+      </Link>
     </button>
   );
 }
