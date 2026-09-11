@@ -20,6 +20,15 @@ const VALID_DISTRESS = new Set([
   'code_violation', 'divorce', 'bankruptcy', 'auction', 'short_sale', 'bank_owned'
 ]);
 
+// System is currently locked to Florida only. Set to null to lift the restriction.
+const ALLOWED_STATE = 'FL';
+
+const FL_STATE_NAMES = new Set(['FL', 'FLORIDA']);
+function isFloridaState(value) {
+  if (!value) return false;
+  return FL_STATE_NAMES.has(String(value).trim().toUpperCase());
+}
+
 const DISTRESS_MAP = {
   'pre-foreclosure': 'pre-foreclosure', 'pre_foreclosure': 'pre-foreclosure', 'preforeclosure': 'pre-foreclosure',
   'foreclosure': 'foreclosure',
@@ -73,7 +82,8 @@ const BROWSER_SCHEMA = AI_SCHEMA;
 const PROPERTY_ITEM_SCHEMA = AI_SCHEMA.properties.items;
 
 function buildHarvestPrompt(source, cfg, overrides) {
-  const state = cfg.state || overrides.state || 'FL';
+  // Florida-only lock: ignore any requested state and always harvest FL
+  const state = ALLOWED_STATE;
   const region = cfg.county ? `${cfg.county} County, ${state}` : `the state of ${state}`;
   const distress = cfg.distress_type || overrides.distress_type || 'distressed, foreclosure, pre-foreclosure, tax-delinquent, probate, or auction';
   const max = cfg.max_results || 20;
@@ -210,9 +220,15 @@ export async function scrapeSource(base44, { source, url, distress_type, state }
   let found = props.length;
   let isNew = 0;
   let updated = 0;
+  let skippedNonFL = 0;
   const newRecords = [];
   for (const p of props) {
     if (!p.address) continue;
+    // Florida-only lock: drop any property not in Florida
+    if (ALLOWED_STATE && !isFloridaState(p.state || cfg.state || state)) {
+      skippedNonFL++;
+      continue;
+    }
     const norm = normalizeAddress(p.address);
     // Dedupe by normalized address + zip (falls back to exact match for legacy records)
     let existing = await base44.asServiceRole.entities.Property.filter({
@@ -229,7 +245,7 @@ export async function scrapeSource(base44, { source, url, distress_type, state }
       address: p.address,
       normalized_address: norm,
       city: p.city || cfg.city,
-      state: p.state || cfg.state || state,
+      state: ALLOWED_STATE,
       zip_code: p.zip_code,
       distress_type: normDistress(p.distress_type, fallbackDistress),
       estimated_value: p.estimated_value || null,
@@ -263,5 +279,5 @@ export async function scrapeSource(base44, { source, url, distress_type, state }
       isNew++;
     }
   }
-  return { found, isNew, updated, newRecords, error: null };
+  return { found, isNew, updated, skippedNonFL, newRecords, error: null };
 }

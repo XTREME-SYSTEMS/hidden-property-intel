@@ -28,7 +28,8 @@ export default async function (req) {
     if (user && user.role !== 'admin') return Response.json({ error: 'Admin only' }, { status: 403 });
 
     const body = await req.json().catch(() => ({}));
-    const state = body.state || 'FL';
+    // Florida-only lock: ignore any requested state and always scan FL
+    const state = 'FL';
     const county = body.county || null;
     const maxResults = body.max_results || 15;
 
@@ -112,7 +113,11 @@ Return up to ${maxResults} records.`;
       }
     });
 
-    const deceased = r.deceased_homeowners || [];
+    const deceased = (r.deceased_homeowners || []).filter((d) => {
+      // Florida-only lock: keep only records tied to Florida
+      const st = (d.state || '').trim().toUpperCase();
+      return !st || st === 'FL' || st === 'FLORIDA';
+    });
     let propertiesCreated = 0;
     let propertiesUpdated = 0;
     let ownersCreated = 0;
