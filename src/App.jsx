@@ -59,6 +59,7 @@ import IntelligenceConsole from '@/pages/IntelligenceConsole';
 import DigitalWorkforce from '@/pages/DigitalWorkforce';
 import DigitalAgentProfile from '@/pages/DigitalAgentProfile';
 import AgentToolGenerator from '@/pages/AgentToolGenerator';
+import SkipTraceConsole from '@/pages/SkipTraceConsole';
 import PwaMobile from '@/pages/PwaMobile';
 import PortalRouter from '@/pages/PortalRouter';
 import About from '@/pages/About';
@@ -168,6 +169,7 @@ const AuthenticatedApp = () => {
         <Route path="/admin/digital-workforce" element={<DigitalWorkforce />} />
         <Route path="/admin/digital-workforce/:agentId" element={<DigitalAgentProfile />} />
         <Route path="/admin/tool-generator" element={<AgentToolGenerator />} />
+        <Route path="/admin/skip-trace" element={<SkipTraceConsole />} />
         </Route>
         <Route path="/eden-skye" element={<EdenSkyeProfile />} />
         <Route path="/eden-skye/chat" element={<EdenSkyeChat />} />

@@ -68,6 +68,14 @@ export default function GlobalHamburger() {
 
             <div className="mt-2 w-full border-t border-black/10 pt-3">
               <Link
+                to="/admin/skip-trace"
+                onClick={close}
+                className="group flex w-full items-center justify-end gap-2 py-2.5 text-right font-brand text-sm font-bold uppercase tracking-[0.2em] text-black transition-colors hover:text-gold"
+              >
+                Skip-Trace Console
+                <ChevronRight className="h-3 w-3 text-black/30 transition-colors group-hover:text-gold" />
+              </Link>
+              <Link
                 to="/login?returnTo=/portal"
                 onClick={close}
                 className="group flex w-full items-center justify-end gap-2 py-2.5 text-right font-brand text-sm font-bold uppercase tracking-[0.2em] text-black transition-colors hover:text-gold"

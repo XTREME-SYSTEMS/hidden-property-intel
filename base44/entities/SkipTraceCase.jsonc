@@ -1,0 +1,293 @@
+{
+  "name": "SkipTraceCase",
+  "type": "object",
+  "properties": {
+    "case_id": {
+      "type": "string",
+      "description": "Unique case identifier"
+    },
+    "case_type": {
+      "type": "string",
+      "enum": [
+        "property_owner",
+        "residential_lead",
+        "contractor_lead",
+        "heir_search",
+        "asset_recovery"
+      ]
+    },
+    "authorized_user": {
+      "type": "string",
+      "description": "User id who authorized the search"
+    },
+    "jurisdiction": {
+      "type": "string",
+      "description": "e.g. US-FL"
+    },
+    "permissible_purpose": {
+      "type": "string"
+    },
+    "intended_use": {
+      "type": "string"
+    },
+    "retention_period_days": {
+      "type": "number"
+    },
+    "permitted_outreach": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "voice",
+          "sms",
+          "email",
+          "mail",
+          "none"
+        ]
+      }
+    },
+    "seed": {
+      "type": "object",
+      "description": "Normalized search seed (name, phone, email, address, etc.)",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        },
+        "zip": {
+          "type": "string"
+        },
+        "business_name": {
+          "type": "string"
+        },
+        "parcel_id": {
+          "type": "string"
+        },
+        "entity_type": {
+          "type": "string",
+          "enum": [
+            "individual",
+            "business"
+          ]
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "queued",
+        "running",
+        "completed",
+        "failed",
+        "suppressed"
+      ],
+      "default": "queued"
+    },
+    "verdict": {
+      "type": "string",
+      "enum": [
+        "VERIFIED",
+        "PROBABLE",
+        "AMBIGUOUS",
+        "CONFLICTED",
+        "SUPPRESSED",
+        "NOT_FOUND"
+      ],
+      "description": "NIST-aligned verification verdict"
+    },
+    "scores": {
+      "type": "object",
+      "description": "The five independent scores \u2014 never combined",
+      "properties": {
+        "identity_match": {
+          "type": "number"
+        },
+        "relationship_match": {
+          "type": "number"
+        },
+        "channel_ownership": {
+          "type": "number"
+        },
+        "contact_eligibility": {
+          "type": "number"
+        },
+        "target_priority": {
+          "type": "number"
+        }
+      }
+    },
+    "canonical_record": {
+      "type": "object",
+      "description": "The resolved canonical person/company record",
+      "properties": {
+        "entity_id": {
+          "type": "string"
+        },
+        "canonical_name": {
+          "type": "string"
+        },
+        "former_names": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "current_addresses": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "former_addresses": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "companies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "properties": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "best_phone": {
+          "type": "string"
+        },
+        "best_email": {
+          "type": "string"
+        },
+        "best_address": {
+          "type": "string"
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "description": "Every attribute with source, collection date, freshness",
+      "items": {
+        "type": "object",
+        "properties": {
+          "claim": {
+            "type": "string"
+          },
+          "attribute": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "source_upstream": {
+            "type": "string"
+          },
+          "authority": {
+            "type": "number"
+          },
+          "collected_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "freshness_days": {
+            "type": "number"
+          },
+          "classification": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "contradictions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "claims": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "independent_sources": {
+      "type": "number",
+      "description": "Count of genuinely independent source confirmations"
+    },
+    "automation_allowed": {
+      "type": "boolean",
+      "default": false,
+      "description": "True only when all required gates pass"
+    },
+    "lawful_purpose": {
+      "type": "string",
+      "description": "Human-readable lawful purpose + restrictions governing this record"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "duration_ms": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "case_id",
+    "case_type",
+    "authorized_user",
+    "jurisdiction",
+    "permissible_purpose",
+    "intended_use",
+    "retention_period_days",
+    "permitted_outreach"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
