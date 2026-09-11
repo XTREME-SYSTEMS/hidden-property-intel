@@ -7,18 +7,20 @@ import { DIGITAL_WORKFORCE_ROSTER } from "../../shared/digitalWorkforceRoster.ts
  * persona/charter while preserving emotional state, accountability, and stats.
  */
 export default async function (req: Request): Promise<Response> {
-  const base44 = createClientFromRequest(req);
-  const user = await base44.auth.me().catch(() => null);
-  if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
-  if (user.role !== "admin") return Response.json({ error: "Admin only" }, { status: 403 });
+  try {
+    const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me().catch(() => null);
+    if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
+    if (user.role !== "admin") return Response.json({ error: "Admin only" }, { status: 403 });
 
-  const db = base44.asServiceRole;
-  const results: any[] = [];
+    const db = base44.asServiceRole;
+    const results: any[] = [];
 
-  for (const agentDef of DIGITAL_WORKFORCE_ROSTER) {
-    const existing = await db.entities.DigitalAgent.filter({ agent_id: agentDef.agent_id }).catch(() => []);
+    for (const agentDef of DIGITAL_WORKFORCE_ROSTER) {
+      const existing = await db.entities.DigitalAgent.filter({ agent_id: agentDef.agent_id }).catch(() => []);
 
     const baseData = {
+      agent_id: agentDef.agent_id,
       name: agentDef.name,
       role: agentDef.role,
       team: agentDef.team,
@@ -85,4 +87,8 @@ export default async function (req: Request): Promise<Response> {
     updated: results.filter((r) => r.status === "updated").length,
     agents: results,
   });
+  } catch (error) {
+    console.error("seedDigitalWorkforce error", error);
+    return Response.json({ error: error.message, stack: error.stack?.slice(0, 500) }, { status: 500 });
+  }
 }
