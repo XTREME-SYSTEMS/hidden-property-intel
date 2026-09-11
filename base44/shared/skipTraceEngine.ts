@@ -108,46 +108,96 @@ export async function runBrowserSearch(
 ): Promise<any> {
   const browserUrl = secrets.get('BROWSER_ENGINE_URL');
   const browserKey = secrets.get('BROWSER_ENGINE_API_KEY');
+  const browserbaseKey = secrets.get('BROWSERBASE_API_KEY');
 
-  if (!browserUrl || !browserKey) {
-    return { strategy: strategy.id, status: 'error', message: 'Browser engine not configured' };
+  if (!browserUrl && !browserbaseKey) {
+    return { strategy: strategy.id, status: 'error', message: 'No browser engine configured' };
   }
 
   const searchUrls = buildSearchUrls(strategy, target);
   const results: any[] = [];
+  let usedFallback = false;
 
   for (const url of searchUrls.slice(0, 3)) {
-    try {
-      const res = await fetch(`${browserUrl}/api/sessions`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${browserKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'skip_trace',
-          target_url: url.url,
-          task: {
-            strategy: strategy.id,
-            source: url.source,
-            target,
-            instructions: url.instructions,
-            extract: ['phone', 'email', 'address', 'relatives', 'social_profiles'],
-          },
-        }),
-        signal: AbortSignal.timeout(30000),
-      });
+    let success = false;
 
-      if (res.ok) {
-        const data = await res.json();
-        results.push({ source: url.source, url: url.url, data });
+    // Try primary cloudbrowser engine first
+    if (browserUrl && browserKey) {
+      try {
+        const res = await fetch(`${browserUrl}/api/sessions`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${browserKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'skip_trace',
+            target_url: url.url,
+            task: {
+              strategy: strategy.id,
+              source: url.source,
+              target,
+              instructions: url.instructions,
+              extract: ['phone', 'email', 'address', 'relatives', 'social_profiles'],
+            },
+          }),
+          signal: AbortSignal.timeout(30000),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data && Object.keys(data).length > 0) {
+            results.push({ source: url.source, url: url.url, data, engine: 'cloudbrowser' });
+            success = true;
+          }
+        }
+      } catch (e) {
+        // Primary failed — will try fallback
       }
-    } catch (e) {
-      results.push({ source: url.source, url: url.url, error: e.message });
+    }
+
+    // Fallback: Browserbase Fetch API
+    if (!success && browserbaseKey) {
+      try {
+        const res = await fetch('https://api.browserbase.com/v1/fetch', {
+          method: 'POST',
+          headers: {
+            'X-BB-API-Key': browserbaseKey,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            url: url.url,
+            format: 'markdown',
+            allowRedirects: true,
+          }),
+          signal: AbortSignal.timeout(30000),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          const content = typeof data.content === 'string' ? data.content : '';
+          if (content.length > 50) {
+            results.push({
+              source: url.source,
+              url: url.url,
+              data: { content, statusCode: data.statusCode, format: 'markdown' },
+              engine: 'browserbase',
+            });
+            success = true;
+            usedFallback = true;
+          }
+        }
+      } catch (e) {
+        results.push({ source: url.source, url: url.url, error: e.message, engine: 'browserbase' });
+      }
+    }
+
+    if (!success) {
+      results.push({ source: url.source, url: url.url, error: 'All engines failed', engine: 'none' });
     }
   }
 
-  return { strategy: strategy.id, status: 'completed', results };
+  return { strategy: strategy.id, status: 'completed', results, used_fallback: usedFallback };
 }
 
 // ─── Build Search URLs for each strategy ──────────────────────────────
@@ -207,7 +257,51 @@ export async function runAICorroboration(
     return { status: 'error', message: 'AI Gateway key not configured' };
   }
 
-  const prompt = `You are an elite skip-trace analyst. Cross-reference and corroborate the following raw search results for this target:
+  // Check if browser results have any useful content
+  const hasContent = rawResults.some((r: any) =>
+    r.results?.some((rr: any) =>
+      (rr.data && typeof rr.data === 'object' && Object.keys(rr.data).length > 0 && !rr.error) ||
+      (rr.data?.content && rr.data.content.length > 100)
+    )
+  );
+
+  // If browser results are empty (all sites blocked/failed), use web-search AI
+  const useWebSearch = !hasContent;
+  const model = useWebSearch ? 'perplexity/sonar-pro' : 'anthropic/claude-sonnet-4-6';
+
+  const prompt = useWebSearch
+    ? `You are an elite skip-trace analyst. Search the web to find contact information for this person:
+
+TARGET:
+Name: ${target.name || 'Unknown'}
+Address: ${target.address || 'Unknown'}
+Entity Type: ${target.entity_type || 'individual'}
+
+Use your web search to find:
+1. Phone numbers
+2. Email addresses
+3. Current and previous addresses
+4. Relatives and associates
+5. Social media profiles
+6. Business affiliations (LLC officer, registered agent, etc.)
+
+Score overall confidence (0-100) based on how many independent sources corroborate each finding.
+
+Return ONLY a JSON object with this exact structure (no other text):
+{
+  "phones": [{"number": "...", "type": "mobile|landline|voip|unknown", "confidence": 0-100, "source": "..."}],
+  "emails": [{"address": "...", "confidence": 0-100, "source": "..."}],
+  "addresses": [{"line": "...", "type": "current|previous|mailing", "confidence": 0-100, "source": "..."}],
+  "relatives": [{"name": "...", "relationship": "...", "confidence": 0-100, "source": "..."}],
+  "associates": [{"name": "...", "type": "...", "confidence": 0-100, "source": "..."}],
+  "social_profiles": [{"platform": "...", "url": "...", "confidence": 0-100}],
+  "business_affiliations": [{"name": "...", "role": "...", "status": "..."}],
+  "overall_confidence": 0-100,
+  "identification_methods": [{"method": "...", "source": "...", "status": "found|not_found|partial|error", "result": "..."}],
+  "contradictions": ["..."],
+  "executive_summary": "2-3 sentence summary of findings"
+}`
+    : `You are an elite skip-trace analyst. Cross-reference and corroborate the following raw search results for this target:
 
 TARGET:
 Name: ${target.name || 'Unknown'}
@@ -242,17 +336,22 @@ Return JSON with this exact structure:
 }`;
 
   try {
+    const body: any = {
+      model,
+      messages: [{ role: 'user', content: prompt }],
+    };
+    // Only use json_object format for non-web-search models (Perplexity may not support it)
+    if (!useWebSearch) {
+      body.response_format = { type: 'json_object' };
+    }
+
     const res = await fetch('https://ai-gateway.vercel.sh/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${gatewayKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        model: 'anthropic/claude-sonnet-4-6',
-        messages: [{ role: 'user', content: prompt }],
-        response_format: { type: 'json_object' },
-      }),
+      body: JSON.stringify(body),
     });
 
     if (!res.ok) {
@@ -261,7 +360,17 @@ Return JSON with this exact structure:
 
     const data = await res.json();
     const content = data.choices?.[0]?.message?.content || '{}';
-    return { status: 'success', ...JSON.parse(content) };
+
+    // Parse JSON (Perplexity may include citations/text around the JSON)
+    let parsed: any = null;
+    try {
+      parsed = JSON.parse(content);
+    } catch {
+      const m = content.match(/\{[\s\S]*\}/);
+      if (m) { try { parsed = JSON.parse(m[0]); } catch {} }
+    }
+
+    return { status: 'success', search_mode: useWebSearch ? 'web_search' : 'corroboration', ...(parsed || {}) };
   } catch (e) {
     return { status: 'error', message: e.message };
   }

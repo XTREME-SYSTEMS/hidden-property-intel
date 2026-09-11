@@ -77,3 +77,69 @@ export async function fetchRenderedHtml(url: string, opts: FetchRenderedHtmlOpts
     await fetch(`${engineUrl}/sessions/${sessionId}`, { method: 'DELETE', headers }).catch(() => {});
   }
 }
+
+/**
+ * Browserbase Fetch API — cloud browser backup.
+ * Simple REST: POST /v1/fetch with a URL, get page content back.
+ * No Playwright/CDP needed. Uses BROWSERBASE_API_KEY secret.
+ */
+export async function fetchRenderedHtmlBrowserbase(url: string, opts: FetchRenderedHtmlOpts = {}): Promise<{ html: string; title: string; url: string }> {
+  const runtime: any = await import('base44:runtime');
+  const apiKey = runtime.secrets.get('BROWSERBASE_API_KEY');
+  if (!apiKey) {
+    throw new Error('Browserbase not configured — set BROWSERBASE_API_KEY');
+  }
+
+  const res = await fetch('https://api.browserbase.com/v1/fetch', {
+    method: 'POST',
+    headers: {
+      'X-BB-API-Key': apiKey,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      url,
+      format: 'raw',
+      allowRedirects: true,
+    }),
+    signal: AbortSignal.timeout(opts.timeout || 45000),
+  });
+
+  if (!res.ok) {
+    const e = await res.json().catch(() => ({}));
+    throw new Error(e.message || e.error || `Browserbase fetch failed: ${res.status}`);
+  }
+
+  const data = await res.json();
+  const html = typeof data.content === 'string' ? data.content : '';
+  return {
+    html,
+    title: '',
+    url: url,
+  };
+}
+
+/**
+ * Fallback chain: try primary cloudbrowser engine, fall back to Browserbase.
+ * Returns content + which engine succeeded.
+ */
+export async function fetchRenderedHtmlWithFallback(url: string, opts: FetchRenderedHtmlOpts = {}): Promise<{ html: string; title: string; url: string; engine: string }> {
+  // Try primary engine first
+  try {
+    const result = await fetchRenderedHtml(url, opts);
+    if (result.html && result.html.length > 200) {
+      return { ...result, engine: 'cloudbrowser' };
+    }
+    throw new Error('Primary engine returned empty content');
+  } catch (primaryError: any) {
+    // Fall back to Browserbase
+    try {
+      const result = await fetchRenderedHtmlBrowserbase(url, opts);
+      if (result.html && result.html.length > 100) {
+        return { ...result, engine: 'browserbase' };
+      }
+      throw new Error('Browserbase returned empty content');
+    } catch (backupError: any) {
+      throw new Error(`Both engines failed. Primary: ${primaryError.message}. Backup: ${backupError.message}`);
+    }
+  }
+}
