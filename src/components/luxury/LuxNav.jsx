@@ -12,10 +12,9 @@ export default function LuxNav() {
   useEffect(() => { base44.auth.me().then(setUser).catch(() => {}); }, []);
 
   const links = [
-    { label: "Inventory", to: "/listings" },
     { label: "For Investors", href: "/#investors" },
     { label: "For Sellers", href: "/#sellers" },
-    { label: "Calculators", to: "/calculators" },
+    { label: "Smart Contracts", to: "/smart-contracts" },
   ];
 
   const linkClass = "font-brand text-[11px] font-medium uppercase tracking-[0.3em] text-black/70 transition-colors hover:text-black";
@@ -44,15 +43,6 @@ export default function LuxNav() {
         <div className="flex items-center gap-4">
           <AlertsBell user={user} />
           <PWAInstall variant="nav" />
-          {user ? (
-            <Link to="/portal" className="hidden rounded-sm border border-black/15 px-5 py-2.5 font-brand text-[11px] font-medium uppercase tracking-[0.3em] text-black transition-colors hover:bg-black hover:text-white sm:inline-block">
-              My Portal
-            </Link>
-          ) : (
-            <Link to="/login?returnTo=/portal" className="hidden rounded-sm border border-black/15 px-5 py-2.5 font-brand text-[11px] font-medium uppercase tracking-[0.3em] text-black transition-colors hover:bg-black hover:text-white sm:inline-block">
-              Sign In
-            </Link>
-          )}
           <Link to="/seller/post-property" className="hidden rounded-sm bg-black px-5 py-2.5 font-brand text-[11px] font-medium uppercase tracking-[0.3em] text-white transition-colors hover:bg-black/80 sm:inline-block">
             List your property
           </Link>
