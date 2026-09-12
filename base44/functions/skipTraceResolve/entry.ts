@@ -33,12 +33,12 @@ export default async function (req) {
     const { gate, seed_input, property_id, owner_id } = body;
     if (!gate) return Response.json({ error: 'Purpose gate required' }, { status: 400 });
 
-    // ── 1. Purpose gateway ──
-    const gateCheck = validatePurposeGate(gate);
+    // ── 1. Purpose gateway (authorized_user is injected from the authenticated session) ──
+    const purposeGate: PurposeGate = { ...gate, authorized_user: user.id };
+    const gateCheck = validatePurposeGate(purposeGate);
     if (!gateCheck.passed) {
       return Response.json({ error: 'Purpose gate failed', violations: gateCheck.violations }, { status: 400 });
     }
-    const purposeGate: PurposeGate = { ...gate, authorized_user: user.id };
 
     // ── 2. Seed normalization ──
     const seed = normalizeSeed(seed_input || {});
@@ -74,7 +74,7 @@ export default async function (req) {
       started_at: new Date(startedAt).toISOString(),
     });
 
-    // ── 3. Parallel source fan-out ──
+    // ── 3. Source fan-out: InvokeLLM web search (primary) + browser strategies (parallel) ──
     const secrets = (await import('base44:runtime')).secrets;
     const target = {
       name: seed.name || seed_input?.name,
@@ -82,14 +82,70 @@ export default async function (req) {
       entity_type: seed.entity_type,
     };
 
-    // Run browser strategies in parallel (cloudbrowser + browserbase fallback)
+    // Primary: InvokeLLM with live web search (uses restored integration credits)
+    const llmPrompt = `You are an elite skip-trace analyst. Search the LIVE web for contact and identity information about this target:
+
+TARGET:
+Name: ${target.name || 'Unknown'}
+Address: ${target.address || 'Unknown'}
+Entity Type: ${target.entity_type || 'individual'}
+
+Search public records, people-search sites, social media (LinkedIn, Facebook), business filings (Sunbiz, OpenCorporates), property records, and court records.
+
+Find:
+1. Phone numbers (with type: mobile/landline/voip)
+2. Email addresses
+3. Current and previous addresses
+4. Relatives and associates
+5. Social media profiles
+6. Business affiliations (LLC officer, registered agent)
+
+For EVERY finding, name the specific source site where you found it (e.g. "whitepages.com", "linkedin.com", "sunbiz.org"). Score each finding's confidence 0-100 based on corroboration.
+
+CRITICAL: Only return information you actually found on the web. Do NOT invent or guess. If you cannot find something, return an empty array for that field.`;
+
+    const llmPromise = base44.asServiceRole.integrations.Core.InvokeLLM({
+      prompt: llmPrompt,
+      add_context_from_internet: true,
+      model: 'gemini_3_flash',
+      response_json_schema: {
+        type: 'object',
+        properties: {
+          phones: { type: 'array', items: { type: 'object', properties: { number: { type: 'string' }, type: { type: 'string' }, confidence: { type: 'number' }, source: { type: 'string' } } } },
+          emails: { type: 'array', items: { type: 'object', properties: { address: { type: 'string' }, confidence: { type: 'number' }, source: { type: 'string' } } } },
+          addresses: { type: 'array', items: { type: 'object', properties: { line: { type: 'string' }, type: { type: 'string' }, confidence: { type: 'number' }, source: { type: 'string' } } } },
+          relatives: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, relationship: { type: 'string' }, confidence: { type: 'number' }, source: { type: 'string' } } } },
+          associates: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, type: { type: 'string' }, confidence: { type: 'number' }, source: { type: 'string' } } } },
+          social_profiles: { type: 'array', items: { type: 'object', properties: { platform: { type: 'string' }, url: { type: 'string' }, confidence: { type: 'number' } } } },
+          business_affiliations: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, role: { type: 'string' }, status: { type: 'string' } } } },
+          overall_confidence: { type: 'number' },
+          executive_summary: { type: 'string' },
+        },
+      },
+    }).catch((e) => ({ executive_summary: `LLM error: ${e.message}` }));
+
+    // Secondary: browser strategies in parallel (cloudbrowser + browserbase fallback)
     const browserStrategies = SEARCH_STRATEGIES.filter((s) => s.method === 'browser');
     const strategyResults = await Promise.all(
       browserStrategies.map((s) => runBrowserSearch(s, target, secrets).catch((e) => ({ strategy: s.id, status: 'error', message: e.message })))
     );
 
-    // AI corroboration / web-search fallback
-    const aiResult = await runAICorroboration(target, strategyResults, secrets).catch((e) => ({ status: 'error', message: e.message }));
+    // Tertiary: external AI gateway corroboration of browser results (if configured)
+    const gatewayRes: any = await runAICorroboration(target, strategyResults, secrets).catch((e) => ({ status: 'error', message: e.message }));
+
+    // Merge: InvokeLLM web-search results are primary; gateway corroboration supplements
+    const llmRes: any = await llmPromise;
+    const aiResult: any = {
+      phones: [...(llmRes.phones || []), ...(gatewayRes.phones || [])],
+      emails: [...(llmRes.emails || []), ...(gatewayRes.emails || [])],
+      addresses: [...(llmRes.addresses || []), ...(gatewayRes.addresses || [])],
+      relatives: [...(llmRes.relatives || []), ...(gatewayRes.relatives || [])],
+      associates: [...(llmRes.associates || []), ...(gatewayRes.associates || [])],
+      social_profiles: [...(llmRes.social_profiles || []), ...(gatewayRes.social_profiles || [])],
+      business_affiliations: [...(llmRes.business_affiliations || []), ...(gatewayRes.business_affiliations || [])],
+      overall_confidence: llmRes.overall_confidence || gatewayRes.overall_confidence || 0,
+      executive_summary: llmRes.executive_summary || gatewayRes.executive_summary || '',
+    };
 
     // ── 4. Build evidence items with provenance ──
     const evidence: EvidenceItem[] = [];
