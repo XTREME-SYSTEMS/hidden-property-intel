@@ -24,6 +24,12 @@ export default async function(req) {
     if (user.role !== 'admin') return Response.json({ error: 'Admin access required' }, { status: 403 });
 
     const body = await req.json().catch(() => ({}));
+
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+
+      return Response.json({ error: 'JSON object body required' }, { status: 400 });
+
+    }
     const action = body.action || 'trace';
 
     // ─── STRATEGIES: list all search strategies ─────────────────

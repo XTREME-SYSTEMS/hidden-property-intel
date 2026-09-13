@@ -7,6 +7,9 @@ export default async function(req) {
     const user = await base44.auth.me().catch(() => null);
     if (user && user.role !== 'admin') return Response.json({ error: 'Admin only' }, { status: 403 });
     const body = await req.json().catch(() => ({}));
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      return Response.json({ error: 'JSON object body required' }, { status: 400 });
+    }
     const limit = body?.limit || 50;
     const testEmail = body?.test_email || null;
     const r = await emailNewInvestorLeads(base44, limit, testEmail);

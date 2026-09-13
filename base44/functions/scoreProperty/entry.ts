@@ -9,6 +9,12 @@ export default async function(req) {
     if (user.role !== 'admin') return Response.json({ error: 'Admin only' }, { status: 403 });
 
     const body = await req.json();
+
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+
+      return Response.json({ error: 'JSON object body required' }, { status: 400 });
+
+    }
     const property_id = body?.property_id;
     if (!property_id) return Response.json({ error: 'property_id required' }, { status: 400 });
 

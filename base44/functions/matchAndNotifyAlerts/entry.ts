@@ -5,6 +5,9 @@ export default async function(req) {
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json().catch(() => ({}));
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      return Response.json({ error: 'JSON object body required' }, { status: 400 });
+    }
     const propertyId = body.property_id;
     if (!propertyId) return Response.json({ error: 'property_id required' }, { status: 400 });
 

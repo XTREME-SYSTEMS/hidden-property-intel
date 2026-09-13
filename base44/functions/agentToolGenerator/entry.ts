@@ -17,6 +17,12 @@ export default async function(req) {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json().catch(() => ({}));
+
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+
+      return Response.json({ error: 'JSON object body required' }, { status: 400 });
+
+    }
     const action = body.action || 'list';
 
     // ─── LIST: return full tool catalog ─────────────────────────
