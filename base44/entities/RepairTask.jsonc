@@ -1,0 +1,129 @@
+{
+  "name": "RepairTask",
+  "type": "object",
+  "properties": {
+    "task_id": {
+      "type": "string"
+    },
+    "finding_id": {
+      "type": "string"
+    },
+    "subsystem": {
+      "type": "string"
+    },
+    "specialist": {
+      "type": "string",
+      "description": "Specialist id from the swarm registry"
+    },
+    "action": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "queued",
+        "in_progress",
+        "completed",
+        "failed",
+        "blocked",
+        "rolled_back"
+      ],
+      "default": "queued"
+    },
+    "approval_required": {
+      "type": "boolean",
+      "default": false
+    },
+    "approval_state": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "auto_approved",
+        "not_required"
+      ],
+      "default": "not_required"
+    },
+    "source_sha_before": {
+      "type": "string"
+    },
+    "source_sha_after": {
+      "type": "string"
+    },
+    "files_changed": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "entities_changed": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "test_results": {
+      "type": "object"
+    },
+    "regression_results": {
+      "type": "object"
+    },
+    "rollback_method": {
+      "type": "string"
+    },
+    "risk_class": {
+      "type": "string",
+      "enum": [
+        "safe",
+        "reversible",
+        "consequential",
+        "irreversible"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "task_id",
+    "finding_id",
+    "subsystem",
+    "specialist",
+    "action"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
