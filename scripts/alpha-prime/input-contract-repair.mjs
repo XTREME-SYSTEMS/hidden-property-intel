@@ -34,11 +34,25 @@ const targets = [
 
 const marker = 'JSON object body required';
 const parserPattern = /^(\s*)const\s+([A-Za-z_$][\w$]*)\s*=\s*await\s+(?:req|request)\.json\(\)([^;]*);\s*$/m;
+const optionalTryParserPattern = /^(\s*)let\s+([A-Za-z_$][\w$]*)\s*=\s*\{\};\s*\n\s*try\s*\{\s*\2\s*=\s*await\s+(?:req|request)\.json\(\);\s*\}\s*catch\s*(?:\([^)]*\))?\s*\{\s*\}\s*$/m;
+
+function escapedName(variable) {
+  return variable.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
 function hasObjectUse(text, variable, parserEnd) {
   const tail = text.slice(parserEnd);
-  const escaped = variable.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const escaped = escapedName(variable);
   return new RegExp(`(?:\\{[^}]+\\}\\s*=\\s*${escaped}\\b|\\b${escaped}\\s*\\|\\|\\s*\\{|\\b${escaped}(?:\\?|)\\.[A-Za-z_$])`).test(tail);
+}
+
+function hasAnyUse(text, variable, parserEnd) {
+  const tail = text.slice(parserEnd);
+  return new RegExp(`\\b${escapedName(variable)}\\b`).test(tail);
+}
+
+function objectGuard(indent, variable) {
+  return `\n${indent}if (!${variable} || typeof ${variable} !== 'object' || Array.isArray(${variable})) {\n${indent}  return Response.json({ error: '${marker}' }, { status: 400 });\n${indent}}`;
 }
 
 let changed = 0;
@@ -48,18 +62,42 @@ for (const file of targets) {
     console.log(`already hardened: ${file}`);
     continue;
   }
+  if (!/(?:req|request)\.json\s*\(/.test(text)) {
+    console.log(`no request-body parser remains: ${file}`);
+    continue;
+  }
+
+  const optional = optionalTryParserPattern.exec(text);
+  if (optional) {
+    const [statement, indent, variable] = optional;
+    const statementEnd = optional.index + statement.length;
+    if (!hasObjectUse(text, variable, statementEnd)) {
+      throw new Error(`${file}: optional parsed body '${variable}' is not provably used as an object; refusing automatic repair`);
+    }
+    const next = text.slice(0, statementEnd) + objectGuard(indent, variable) + text.slice(statementEnd);
+    fs.writeFileSync(file, next);
+    changed += 1;
+    console.log(`hardened optional body: ${file} (${variable})`);
+    continue;
+  }
 
   const match = parserPattern.exec(text);
-  if (!match) throw new Error(`${file}: could not locate a single-line JSON body assignment`);
+  if (!match) throw new Error(`${file}: could not locate a deterministic JSON body assignment`);
 
   const [statement, indent, variable] = match;
   const statementEnd = match.index + statement.length;
   if (!hasObjectUse(text, variable, statementEnd)) {
-    throw new Error(`${file}: parsed body '${variable}' is not provably used as an object; refusing automatic repair`);
+    if (!hasAnyUse(text, variable, statementEnd)) {
+      const next = text.slice(0, match.index) + text.slice(statementEnd);
+      fs.writeFileSync(file, next);
+      changed += 1;
+      console.log(`removed unused request-body parse: ${file} (${variable})`);
+      continue;
+    }
+    throw new Error(`${file}: parsed body '${variable}' is used but not provably as an object; refusing automatic repair`);
   }
 
-  const guard = `\n${indent}if (!${variable} || typeof ${variable} !== 'object' || Array.isArray(${variable})) {\n${indent}  return Response.json({ error: '${marker}' }, { status: 400 });\n${indent}}`;
-  const next = text.slice(0, statementEnd) + guard + text.slice(statementEnd);
+  const next = text.slice(0, statementEnd) + objectGuard(indent, variable) + text.slice(statementEnd);
   fs.writeFileSync(file, next);
   changed += 1;
   console.log(`hardened: ${file} (${variable})`);
