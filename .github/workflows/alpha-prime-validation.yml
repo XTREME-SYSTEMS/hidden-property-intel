@@ -41,6 +41,37 @@ jobs:
       - run: npm ci
       - run: npm run lint
 
+  repair-lint:
+    name: repair-lint
+    needs: lint
+    if: ${{ always() && needs.lint.result == 'failure' && startsWith(github.ref, 'refs/heads/alpha-prime/') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Apply safe ESLint autofixes
+        run: npm run lint:fix || true
+      - name: Commit only deterministic autofixes
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "No safe ESLint autofix changes produced."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Auto-repair lint findings"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+
   typecheck:
     name: typecheck
     runs-on: ubuntu-latest
