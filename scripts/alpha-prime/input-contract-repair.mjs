@@ -38,7 +38,7 @@ const parserPattern = /^(\s*)const\s+([A-Za-z_$][\w$]*)\s*=\s*await\s+(?:req|req
 function hasObjectUse(text, variable, parserEnd) {
   const tail = text.slice(parserEnd);
   const escaped = variable.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return new RegExp(`(?:\\{[^}]+\\}\\s*=\\s*${escaped}\\b|\\b${escaped}\\s*\\|\\|\\s*\\{|\\b${escaped}\\.[A-Za-z_$])`).test(tail);
+  return new RegExp(`(?:\\{[^}]+\\}\\s*=\\s*${escaped}\\b|\\b${escaped}\\s*\\|\\|\\s*\\{|\\b${escaped}(?:\\?|)\\.[A-Za-z_$])`).test(tail);
 }
 
 let changed = 0;
