@@ -218,3 +218,39 @@ jobs:
           console.log(JSON.stringify({ source_sha: evidence.source_sha, error_count: errors.length, errors }, null, 2));
           if (errors.length !== 0) process.exit(1);
           NODE
+
+  repair-public-auth-probes:
+    name: repair-public-auth-probes
+    needs: frontend-no-console-errors
+    if: ${{ always() && needs.frontend-no-console-errors.result == 'failure' && (startsWith(github.ref, 'refs/heads/alpha-prime/') || startsWith(github.head_ref, 'alpha-prime/')) }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Apply exact-pattern public auth probe repair
+        run: node scripts/alpha-prime/frontend-auth-repair.mjs
+      - name: Independently run safe regression before branch push
+        run: |
+          npm ci
+          npm run lint
+          npm run typecheck
+          npm run build
+      - name: Commit only deterministic frontend auth repair
+        run: |
+          if git diff --quiet; then
+            echo "No deterministic public auth probe repair produced."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/pages/PropertyDetail.jsx
+          git commit -m "Auto-repair anonymous auth probe on public property detail"
+          target_branch="${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}"
+          git push origin "HEAD:${target_branch}"
