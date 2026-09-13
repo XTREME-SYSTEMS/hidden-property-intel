@@ -59,6 +59,7 @@ export default async function (req: Request): Promise<Response> {
     receipts.push(validateCheckRunGate('db.schema_valid', checkRuns, sourceSha, 'schema-valid', 'entity schema JSONC audit'));
     receipts.push(validateCheckRunGate('db.no_oversized_fields', checkRuns, sourceSha, 'oversized-fields', 'entity oversized-field audit'));
     receipts.push(validateCheckRunGate('contracts.deploy_safety', checkRuns, sourceSha, 'contract-safety', 'live-chain mutation primitive audit'));
+    receipts.push(validateCheckRunGate('resil.fallback_chain', checkRuns, sourceSha, 'resilience-fallback-audit', 'static critical-path fallback and SPOF audit'));
 
     // WORKFLOWS
     const heartbeats = await base44.asServiceRole.entities.HeartbeatReceipt.list('-timestamp', 10).catch(() => []);
