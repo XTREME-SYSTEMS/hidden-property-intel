@@ -77,19 +77,21 @@ export default async function(req: Request): Promise<Response> {
     }
 
     // GATE RESOLUTION PRIORITY:
-    //   1. Fresh deterministic gate validator receipt (Wave 1) → authoritative
-    //   2. Otherwise UNKNOWN (never inferred from dimension scores)
+    //   1. Fresh deterministic gate validator receipt for the exact canonical source SHA → authoritative
+    //   2. Otherwise UNKNOWN (never inferred from dimension scores or stale evidence)
     // Legacy dimension scores remain operational telemetry only — never release evidence.
     const gates = RELEASE_CONSTITUTION.map((g) => {
       const updated = { ...g };
       const receipt = receiptMap[g.gate_id];
-      if (receipt) {
+      const receiptIsFresh = Boolean(sourceSha && receipt?.source_sha && receipt.source_sha === sourceSha);
+      if (receiptIsFresh) {
         updated.current_status = receipt.status;
-        updated.source_sha = receipt.source_sha || null;
+        updated.source_sha = receipt.source_sha;
         if (receipt.status === 'PASS') updated.last_passed_at = receipt.completed_at;
       } else {
-        // No gate-specific validator → UNKNOWN (honest). Never infer PASS from telemetry.
+        // No exact-SHA gate-specific validator → UNKNOWN. Never infer PASS from stale evidence or telemetry.
         updated.current_status = 'UNKNOWN';
+        updated.source_sha = sourceSha || null;
       }
       return updated;
     });
@@ -99,13 +101,14 @@ export default async function(req: Request): Promise<Response> {
     // Persist gate results (fresh snapshot for UI + audit)
     for (const g of gates) {
       const receipt = receiptMap[g.gate_id];
+      const receiptIsFresh = Boolean(sourceSha && receipt?.source_sha && receipt.source_sha === sourceSha);
       await base44.asServiceRole.entities.GateResult.create({
         gate_id: g.gate_id, category: g.category, mandatory: g.mandatory,
         status: g.current_status,
-        evidence_refs: receipt?.evidence_refs || (g.current_status === 'PASS' ? [g.validator] : []),
-        detail: receipt ? `${receipt.validator_id} v${receipt.validator_version}: ${receipt.reason}` : g.test,
+        evidence_refs: receiptIsFresh ? (receipt?.evidence_refs || []) : [],
+        detail: receiptIsFresh ? `${receipt.validator_id} v${receipt.validator_version}: ${receipt.reason}` : `${g.test}; exact canonical SHA evidence missing or stale`,
         last_passed_at: g.last_passed_at, source_sha: g.source_sha || null,
-        artifact_refs: receipt?.artifact_refs || g.artifact_refs, evaluated_at: now,
+        artifact_refs: receiptIsFresh ? (receipt?.artifact_refs || []) : [], evaluated_at: now,
       }).catch(() => {});
     }
 
@@ -136,6 +139,11 @@ export default async function(req: Request): Promise<Response> {
     }, '-discovered_at', 20).catch(() => []);
 
     for (const finding of fresh) {
+      // Never dispatch a repair from an unstamped or stale finding. Source lineage is mandatory.
+      if (!sourceSha || !finding.source_sha || finding.source_sha !== sourceSha) {
+        continue;
+      }
+
       const specialist = specialistFor(finding.subsystem);
       const action = `diagnose_and_repair:${finding.category}`;
       const classification = classifyAction(action);
@@ -144,15 +152,25 @@ export default async function(req: Request): Promise<Response> {
         await base44.asServiceRole.entities.Finding.update(finding.id, { status: 'blocked', assigned_specialist: specialist.id }).catch(() => {});
         continue;
       }
+
+      // Do not fan out the same logical repair every heartbeat while one is already active.
+      const activeRepairTasks = await base44.asServiceRole.entities.RepairTask.filter({
+        finding_id: finding.finding_id,
+        action,
+        status: { $in: ['queued', 'in_progress'] },
+      }, '-created_at', 1).catch(() => []);
+      if (activeRepairTasks.length > 0) continue;
+
       // Safe lane — dispatch via agentThink
       const taskId = uid('rt');
-      await base44.asServiceRole.entities.RepairTask.create({
+      const createdRepairTask = await base44.asServiceRole.entities.RepairTask.create({
         task_id: taskId, finding_id: finding.finding_id, subsystem: finding.subsystem,
         specialist: specialist.id, action, reason: finding.description,
         status: 'in_progress', approval_required: false, approval_state: 'auto_approved',
-        risk_class: specialist.risk_class, source_sha_before: finding.source_sha || null,
+        risk_class: specialist.risk_class, source_sha_before: finding.source_sha,
         created_at: now, started_at: now,
-      }).catch(() => {});
+      }).catch(() => null);
+      if (!createdRepairTask?.id) continue;
 
       try {
         const think = await base44.asServiceRole.functions.invoke('agentThink', {
@@ -160,7 +178,7 @@ export default async function(req: Request): Promise<Response> {
           finding_id: finding.finding_id, context: { title: finding.title, description: finding.description, subsystem: finding.subsystem },
         }).catch(() => ({ status: 'error', message: 'agentThink unavailable' }));
 
-        await base44.asServiceRole.entities.RepairTask.update(taskId, {
+        await base44.asServiceRole.entities.RepairTask.update(createdRepairTask.id, {
           status: think?.status === 'error' ? 'failed' : 'completed',
           completed_at: nowIso(), test_results: think || null,
         }).catch(() => {});
@@ -169,7 +187,7 @@ export default async function(req: Request): Promise<Response> {
           // ── 5. Independent validation ──
           const validation = await base44.asServiceRole.functions.invoke('independentValidate', {
             repair_id: taskId, finding_id: finding.finding_id, repair_agent: specialist.id,
-            test_results: think || {}, source_sha: finding.source_sha || null,
+            test_results: think || {}, source_sha: finding.source_sha,
           }).catch(() => ({ verdict: 'blocked', message: 'validator unavailable' }));
 
           const validationId = uid('val');
@@ -179,14 +197,14 @@ export default async function(req: Request): Promise<Response> {
             verdict: validation?.verdict || 'blocked',
             test_results: validation?.test_results || {}, regression_results: validation?.regression_results || null,
             evidence_refs: validation?.verdict === 'pass' ? [validationId] : [],
-            source_sha: finding.source_sha || null, reasoning: validation?.reasoning || validation?.message || '',
+            source_sha: finding.source_sha, reasoning: validation?.reasoning || validation?.message || '',
             timestamp: nowIso(),
           }).catch(() => {});
 
           // ── RepairReceipt ──
           await base44.asServiceRole.entities.RepairReceipt.create({
             repair_id: uid('rr'), finding_id: finding.finding_id, task_id: taskId, subsystem: finding.subsystem,
-            agent: specialist.id, source_sha_before: finding.source_sha || '', source_sha_after: finding.source_sha || '',
+            agent: specialist.id, source_sha_before: finding.source_sha, source_sha_after: finding.source_sha,
             files_changed: [], entities_changed: [], action, reason: finding.description,
             test_results: think || {}, validator: CERTIFIER.id, regression_results: validation?.regression_results || null,
             rollback_method: 'revert_branch_commit', approval_state: 'auto_approved', timestamp: nowIso(),
@@ -206,7 +224,7 @@ export default async function(req: Request): Promise<Response> {
         }
         dispatched++;
       } catch (e) {
-        await base44.asServiceRole.entities.RepairTask.update(taskId, { status: 'failed', completed_at: nowIso() }).catch(() => {});
+        await base44.asServiceRole.entities.RepairTask.update(createdRepairTask.id, { status: 'failed', completed_at: nowIso() }).catch(() => {});
       }
     }
 
