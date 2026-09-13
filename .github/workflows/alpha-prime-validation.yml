@@ -227,6 +227,36 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  repair-input-validation:
+    name: repair-input-validation
+    needs: input-validation
+    if: ${{ always() && needs.input-validation.result == 'failure' && startsWith(github.ref, 'refs/heads/alpha-prime/') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Apply deterministic JSON object-body guards
+        run: node scripts/alpha-prime/input-contract-repair.mjs
+      - name: Independently rerun input-validation after repair
+        run: node scripts/alpha-prime/static-audit.mjs input-validation
+      - name: Commit only validated deterministic input hardening
+        run: |
+          if git diff --quiet; then
+            echo "No deterministic input-contract changes produced."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add base44/functions
+          git commit -m "Auto-repair deterministic input contract findings"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+
   contract-safety:
     name: contract-safety
     runs-on: ubuntu-latest
