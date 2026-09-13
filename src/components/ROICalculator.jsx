@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { money, pct } from "@/lib/format";
 
+/** @param {{label: React.ReactNode, value: string | number, onChange: (value: number) => void, suffix?: React.ReactNode}} props */
 function Field({ label, value, onChange, suffix }) {
   return (
     <label className="block">
@@ -18,6 +19,7 @@ function Field({ label, value, onChange, suffix }) {
   );
 }
 
+/** @param {{label: React.ReactNode, value: React.ReactNode}} props */
 function Out({ label, value }) {
   return (
     <div className="rounded-xl bg-black p-4 text-white">
@@ -29,6 +31,7 @@ function Out({ label, value }) {
 
 const TABS = ["Rental", "Fix & Flip", "Wholesale", "Short-term"];
 
+/** @param {{defaultPrice?: number, defaultRepairs?: number, defaultArv?: number}} props */
 export default function ROICalculator({ defaultPrice = 250000, defaultRepairs = 40000, defaultArv = 380000 }) {
   const [tab, setTab] = useState(0);
   const [s, setS] = useState({
@@ -39,6 +42,7 @@ export default function ROICalculator({ defaultPrice = 250000, defaultRepairs = 
   });
   const set = (k) => (v) => setS((p) => ({ ...p, [k]: v }));
 
+  /** @type {{label: string, value: string}[]} */
   let outputs = [];
   if (tab === 0) {
     const loan = s.price * (1 - s.down / 100);
