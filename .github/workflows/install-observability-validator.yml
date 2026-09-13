@@ -1,0 +1,58 @@
+name: Install Alpha Prime Observability Validator
+
+on:
+  push:
+    branches:
+      - alpha-prime/autonomous-completion-v2
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: alpha-prime-observability-installer
+  cancel-in-progress: false
+
+jobs:
+  install-observability-validator:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: alpha-prime/autonomous-completion-v2
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Verify installer syntax
+        run: node --check scripts/alpha-prime/install-observability-validator.mjs
+      - name: Apply deterministic observability validator patch
+        run: node scripts/alpha-prime/install-observability-validator.mjs
+      - name: Run safe pre-push regression packet
+        run: |
+          npm ci
+          npm run lint
+          npm run typecheck
+          npm run build
+          npm audit --audit-level=critical
+          node scripts/alpha-prime/static-audit.mjs schema-valid
+          node scripts/alpha-prime/static-audit.mjs oversized-fields
+          node scripts/alpha-prime/static-audit.mjs input-validation
+          node scripts/alpha-prime/static-audit.mjs contract-safety
+      - name: Remove one-shot installer surface
+        run: |
+          rm -f scripts/alpha-prime/install-observability-validator.mjs
+          rm -f .github/workflows/install-observability-validator.yml
+      - name: Commit only validated observability changes
+        run: |
+          if git diff --quiet; then
+            echo "No deterministic observability changes produced."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add base44/functions/runValidators/entry.ts base44/entities/RuntimeLogReceipt.jsonc
+          git add -u scripts/alpha-prime/install-observability-validator.mjs .github/workflows/install-observability-validator.yml
+          git commit -m "Add exact-SHA runtime observability validator"
+          git push origin HEAD:alpha-prime/autonomous-completion-v2
