@@ -46,6 +46,12 @@ export default async function (req: Request): Promise<Response> {
     receipts.push(validateCheckRunGate('code.lint', checkRuns, sourceSha, 'lint', 'npm run lint'));
     receipts.push(validateCheckRunGate('code.typecheck', checkRuns, sourceSha, 'typecheck', 'npm run typecheck'));
 
+    // FRONTEND deterministic CI. These checks are exact-SHA evidence only; absence or
+    // non-success must remain UNKNOWN/FAIL through validateCheckRunGate rather than
+    // being inferred from unrelated build success.
+    receipts.push(validateCheckRunGate('frontend.render', checkRuns, sourceSha, 'frontend-render', 'Playwright primary-route render validation'));
+    receipts.push(validateCheckRunGate('frontend.no_console_errors', checkRuns, sourceSha, 'frontend-no-console-errors', 'Playwright uncaught console/page error validation'));
+
     // SECURITY + DATABASE static deterministic CI
     receipts.push(validateCheckRunGate('security.dependency_scan', checkRuns, sourceSha, 'dependency-scan', 'npm audit --audit-level=critical'));
     receipts.push(validateCheckRunGate('security.secret_scan', checkRuns, sourceSha, 'secret-scan', 'repository secret scan'));
