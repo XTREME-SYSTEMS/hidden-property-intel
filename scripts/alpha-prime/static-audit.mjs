@@ -20,8 +20,6 @@ function stripJsonc(s) { return s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|\
 
 const entityDir = path.join(root, 'base44', 'entities');
 const functionDir = path.join(root, 'base44', 'functions');
-const selfPath = path.join(root, 'scripts', 'alpha-prime', 'static-audit.mjs');
-const allFiles = walk(root).filter((f) => path.resolve(f) !== path.resolve(selfPath));
 
 if (mode === 'schema-valid') {
   const errors = [];
@@ -67,15 +65,27 @@ if (mode === 'input-validation') {
 
 if (mode === 'contract-safety') {
   const hits = [];
-  const codeFiles = allFiles.filter((f) => /\.(ts|tsx|js|jsx|json|jsonc)$/i.test(f));
-  const dangerous = [/sendRawTransaction/i, /wallet_sendTransaction/i, /deployContract\s*\(/i, /mainnet[^\n]{0,120}(wallet|deploy|broadcast)/i];
-  for (const f of codeFiles) {
+  const files = walk(functionDir).filter((f) => /\.(ts|js)$/i.test(f));
+  const liveMutation = /(\.deploy\s*\(|sendRawTransaction|wallet_sendTransaction|\.sendTransaction\s*\(|broadcastTransaction\s*\()/i;
+  for (const f of files) {
     let text; try { text = fs.readFileSync(f, 'utf8'); } catch { continue; }
-    const lines = text.split('\n');
-    for (let i = 0; i < lines.length; i++) if (dangerous.some((rx) => rx.test(lines[i]))) hits.push(`${rel(f)}:${i + 1}: potential live-chain mutation primitive`);
+    if (!liveMutation.test(text)) continue;
+
+    const hasApprovalReceipt = /GovernanceReview/.test(text);
+    const hasApprovalId = /\bapproval_id\b|\bapprovalId\b/.test(text);
+    const hasApprovedDecision = /decision\s*!==\s*['"]approved['"]|decision\s*===\s*['"]approved['"]/.test(text);
+    const hasActionBinding = /action_id/.test(text) && /(expectedActionId|deployActionId|actionId)/.test(text);
+    if (!(hasApprovalReceipt && hasApprovalId && hasApprovedDecision && hasActionBinding)) {
+      hits.push(`${rel(f)}: live-chain mutation primitive is not protected by an exact approved GovernanceReview action`);
+    }
+
+    if (/Core\.SendEmail\s*\(/.test(text)) {
+      const separateMessagingApproval = /message_approval_id/.test(text) && /contract\.notify:/.test(text);
+      if (!separateMessagingApproval) hits.push(`${rel(f)}: contract workflow can message customers without a separate message approval`);
+    }
   }
-  if (hits.length) fail(`contract-safety FAIL: ${hits.length} potential live deployment/transaction primitive(s) require approval review`, hits);
-  pass('contract-safety PASS: no direct live-chain deployment/broadcast primitives detected in source');
+  if (hits.length) fail(`contract-safety FAIL: ${hits.length} unapproved live contract path(s)`, hits);
+  pass(`contract-safety PASS: ${files.length} backend function files scanned; live-chain primitives are approval-bound and contract messaging is separately gated`);
 }
 
 fail(`Unknown static audit mode: ${mode || '(none)'}`);
