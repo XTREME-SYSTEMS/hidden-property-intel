@@ -87,17 +87,24 @@ export async function resolveSourceSha(
     Authorization: `Bearer ${GITHUB_TOKEN}`,
     Accept: 'application/vnd.github+json',
     'X-GitHub-Api-Version': '2022-11-28',
+    'User-Agent': 'PropertyIntel-AlphaPrime-Validator',
   };
   const raw = (GITHUB_BASE_BRANCH || 'main').trim();
   const candidates = Array.from(new Set([raw, raw.toLowerCase(), 'main', 'master']));
+  const statuses: string[] = [];
   for (const candidate of candidates) {
     try {
       const r = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/branches/${candidate}`, { headers });
       if (r.ok) {
         const d = await r.json();
-        if (d?.commit?.sha) return { sha: d.commit.sha as string, branch: candidate };
+        if (d?.commit?.sha) return { sha: d.commit.sha as string, branch: candidate, statuses };
+      } else {
+        const body = await r.text().catch(() => '');
+        statuses.push(`${candidate}:${r.status}:${body.slice(0, 300)}`);
       }
-    } catch { /* try next */ }
+    } catch (e) {
+      statuses.push(`${candidate}:ERR:${e.message}`);
+    }
   }
   // Fallback: repo default branch
   try {
@@ -114,7 +121,7 @@ export async function resolveSourceSha(
       }
     }
   } catch { /* fallthrough */ }
-  return { sha: null, branch: raw, error: 'could not resolve branch HEAD' };
+  return { sha: null, branch: raw, error: 'could not resolve branch HEAD', statuses };
 }
 
 export interface CheckRun {
@@ -137,6 +144,7 @@ export async function fetchCheckRuns(secrets: GithubSecrets, sha: string): Promi
     Authorization: `Bearer ${GITHUB_TOKEN}`,
     Accept: 'application/vnd.github+json',
     'X-GitHub-Api-Version': '2022-11-28',
+    'User-Agent': 'PropertyIntel-AlphaPrime-Validator',
   };
   try {
     const r = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/commits/${sha}/check-runs?per_page=100`, { headers });

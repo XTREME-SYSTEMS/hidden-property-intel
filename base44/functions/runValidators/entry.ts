@@ -34,10 +34,11 @@ export default async function (req: Request): Promise<Response> {
 
     const startedAt = Date.now();
     const now = new Date().toISOString();
+    const runtimeSecrets: any = (await import('base44:runtime')).secrets;
     const secrets: GithubSecrets = {
-      GITHUB_REPO: process.env.GITHUB_REPO || '',
-      GITHUB_TOKEN: process.env.GITHUB_TOKEN || '',
-      GITHUB_BASE_BRANCH: process.env.GITHUB_BASE_BRANCH || 'main',
+      GITHUB_REPO: runtimeSecrets.get ? runtimeSecrets.get('GITHUB_REPO') : (runtimeSecrets.GITHUB_REPO || ''),
+      GITHUB_TOKEN: runtimeSecrets.get ? runtimeSecrets.get('GITHUB_TOKEN') : (runtimeSecrets.GITHUB_TOKEN || ''),
+      GITHUB_BASE_BRANCH: (runtimeSecrets.get ? runtimeSecrets.get('GITHUB_BASE_BRANCH') : runtimeSecrets.GITHUB_BASE_BRANCH) || 'main',
     };
 
     // ── 1. Resolve source SHA ──
