@@ -243,11 +243,22 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
       - name: Apply deterministic JSON object-body guards
         run: node scripts/alpha-prime/input-contract-repair.mjs
       - name: Independently rerun input-validation after repair
         run: node scripts/alpha-prime/static-audit.mjs input-validation
-      - name: Commit only validated deterministic input hardening
+      - name: Run full safe regression on repaired tree before push
+        run: |
+          npm ci
+          npm run lint
+          npm run typecheck
+          npm run build
+          npm audit --audit-level=critical
+          node scripts/alpha-prime/static-audit.mjs schema-valid
+          node scripts/alpha-prime/static-audit.mjs oversized-fields
+          node scripts/alpha-prime/static-audit.mjs contract-safety
+      - name: Commit only fully revalidated deterministic input hardening
         run: |
           if git diff --quiet; then
             echo "No deterministic input-contract changes produced."
