@@ -299,7 +299,7 @@ function AgentCard({ agent, selected, onSelect }) {
 }
 
 // ─── Meter (progress bar) ─────────────────────────────────────────
-function Meter({ label, value, color, suffix }) {
+function Meter({ label, value, color, suffix = "" }) {
   return (
     <div>
       <div className="flex items-center justify-between text-[9px] text-[#6f6a60]">

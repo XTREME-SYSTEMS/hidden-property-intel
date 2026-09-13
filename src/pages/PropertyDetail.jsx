@@ -16,7 +16,7 @@ import { money, num, pct } from "@/lib/format";
 import Seo from "@/components/Seo";
 import { Lock, MapPin, Phone, Mail, ArrowLeft, ShieldAlert } from "lucide-react";
 
-function Card({ title, children, className = "" }) {
+function Card({ title = "", children, className = "" }) {
   return (
     <section className={`rounded-3xl bg-white p-6 ring-1 ring-[#E5EDEA] sm:p-8 ${className}`}>
       {title && <h2 className="font-display text-xl font-semibold tracking-tight">{title}</h2>}

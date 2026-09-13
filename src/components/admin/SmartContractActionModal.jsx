@@ -299,7 +299,7 @@ function Stat({ label, value }) {
   return <div className="rounded-lg border border-black/10 p-3"><p className="text-[10px] uppercase tracking-[0.2em] text-black/40">{label}</p><p className="mt-1 text-sm font-medium">{value}</p></div>;
 }
 
-function ActionBtn({ label, onClick, loading, disabled, variant }) {
+function ActionBtn({ label, onClick, loading, disabled, variant = "default" }) {
   const cls = variant === "success" ? "bg-emerald-700" : variant === "danger" ? "bg-red-700" : "bg-black";
   return (
     <button onClick={onClick} disabled={loading || disabled} className={`inline-flex items-center justify-center gap-1.5 rounded-md ${cls} px-4 py-2.5 text-xs text-white disabled:opacity-40`}>
