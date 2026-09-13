@@ -44,19 +44,18 @@ jobs:
           node scripts/alpha-prime/static-audit.mjs oversized-fields
           node scripts/alpha-prime/static-audit.mjs input-validation
           node scripts/alpha-prime/static-audit.mjs contract-safety
-      - name: Commit only permanent validator changes
+      - name: Commit non-workflow permanent validator changes
         run: |
-          if git diff --quiet; then
-            echo "No permanent backend-deploy validator changes produced."
-            exit 0
-          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add \
-            .github/workflows/alpha-prime-validation.yml \
             base44/entities/BackendDeployReceipt.jsonc \
             base44/functions/runValidators/entry.ts \
             scripts/alpha-prime/static-audit.mjs \
             docs/alpha-prime/BACKEND_DEPLOY_EVIDENCE.md
+          if git diff --cached --quiet; then
+            echo "No non-workflow permanent backend-deploy validator changes produced."
+            exit 0
+          fi
           git commit -m "Add exact-SHA backend deployment validator"
           git push origin HEAD:alpha-prime/autonomous-completion-v2
