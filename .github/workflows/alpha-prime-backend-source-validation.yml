@@ -1,0 +1,51 @@
+name: Alpha Prime Backend Source Validation
+
+on:
+  push:
+    branches:
+      - main
+      - 'alpha-prime/**'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alpha-prime-backend-source-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  backend-functions-source-audit:
+    name: backend-functions-source-audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Audit all Base44 function entrypoints for source-level boot readiness
+        run: |
+          set +e
+          node scripts/alpha-prime/static-audit.mjs backend-functions-source 2>&1 | tee backend-functions-source.log
+          ec=${PIPESTATUS[0]}
+          echo "$ec" > backend-functions-source.exit
+          exit "$ec"
+      - name: Upload backend source-boot evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alpha-prime-backend-functions-source-evidence
+          path: |
+            backend-functions-source.log
+            backend-functions-source.exit
+          if-no-files-found: error
+          retention-days: 7
