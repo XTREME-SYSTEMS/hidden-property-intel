@@ -43,6 +43,9 @@ export interface GithubSecrets {
   GITHUB_BASE_BRANCH?: string;
 }
 
+export const CANONICAL_GITHUB_REPO = 'XTREME-SYSTEMS/hidden-property-intel';
+export const CANONICAL_GITHUB_BRANCH = 'main';
+
 export function nowIso(): string { return new Date().toISOString(); }
 
 export function buildReceipt(
@@ -71,57 +74,64 @@ export function buildReceipt(
   };
 }
 
-/**
- * SOURCE SHA RESOLVER — obtains the exact current canonical Git SHA for the validated code.
- * Uses the GitHub branches API. Normalizes the base-branch secret (case-insensitive).
- * Never forges a SHA — returns null if resolution fails.
- */
-export async function resolveSourceSha(
-  secrets: GithubSecrets,
-): Promise<{ sha: string | null; branch: string; error?: string }> {
-  const { GITHUB_REPO, GITHUB_TOKEN, GITHUB_BASE_BRANCH } = secrets;
-  if (!GITHUB_REPO || !GITHUB_TOKEN) {
-    return { sha: null, branch: '', error: 'missing GITHUB_REPO or GITHUB_TOKEN' };
-  }
+function githubHeaders(token?: string): Record<string, string> {
   const headers: Record<string, string> = {
-    Authorization: `Bearer ${GITHUB_TOKEN}`,
     Accept: 'application/vnd.github+json',
     'X-GitHub-Api-Version': '2022-11-28',
     'User-Agent': 'PropertyIntel-AlphaPrime-Validator',
   };
-  const raw = (GITHUB_BASE_BRANCH || 'main').trim();
-  const candidates = Array.from(new Set([raw, raw.toLowerCase(), 'main', 'master']));
+  if (token) headers.Authorization = `Bearer ${token}`;
+  return headers;
+}
+
+/**
+ * SOURCE SHA RESOLVER — canonical repo + main are immutable release authority.
+ * Runtime values may supply authentication, but they may not redirect evidence lineage.
+ * This function also rewrites the in-memory secret object so downstream probes in the same
+ * validator run use the same canonical repo/branch authority.
+ */
+export async function resolveSourceSha(
+  secrets: GithubSecrets,
+): Promise<{ sha: string | null; branch: string; error?: string; statuses?: string[] }> {
+  const configuredRepo = (secrets.GITHUB_REPO || '').trim();
+  const configuredBranch = (secrets.GITHUB_BASE_BRANCH || '').trim();
+  const token = secrets.GITHUB_TOKEN;
   const statuses: string[] = [];
-  for (const candidate of candidates) {
-    try {
-      const r = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/branches/${candidate}`, { headers });
-      if (r.ok) {
-        const d = await r.json();
-        if (d?.commit?.sha) return { sha: d.commit.sha as string, branch: candidate, statuses };
-      } else {
-        const body = await r.text().catch(() => '');
-        statuses.push(`${candidate}:${r.status}:${body.slice(0, 300)}`);
-      }
-    } catch (e) {
-      statuses.push(`${candidate}:ERR:${e.message}`);
-    }
+
+  if (configuredRepo && configuredRepo !== CANONICAL_GITHUB_REPO) {
+    statuses.push(`runtime_repo_mismatch:${configuredRepo}!=${CANONICAL_GITHUB_REPO}`);
   }
-  // Fallback: repo default branch
+  if (configuredBranch && configuredBranch.toLowerCase() !== CANONICAL_GITHUB_BRANCH) {
+    statuses.push(`runtime_branch_mismatch:${configuredBranch}!=${CANONICAL_GITHUB_BRANCH}`);
+  }
+
+  // Normalize the shared object for all downstream probes in this validator execution.
+  secrets.GITHUB_REPO = CANONICAL_GITHUB_REPO;
+  secrets.GITHUB_BASE_BRANCH = CANONICAL_GITHUB_BRANCH;
+
+  const headers = githubHeaders(token);
   try {
-    const rr = await fetch(`https://api.github.com/repos/${GITHUB_REPO}`, { headers });
-    if (rr.ok) {
-      const rd = await rr.json();
-      const db = rd?.default_branch;
-      if (db) {
-        const r2 = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/branches/${db}`, { headers });
-        if (r2.ok) {
-          const d2 = await r2.json();
-          if (d2?.commit?.sha) return { sha: d2.commit.sha as string, branch: db as string };
-        }
+    const r = await fetch(
+      `https://api.github.com/repos/${CANONICAL_GITHUB_REPO}/branches/${CANONICAL_GITHUB_BRANCH}`,
+      { headers },
+    );
+    if (r.ok) {
+      const d = await r.json();
+      if (d?.commit?.sha) {
+        return { sha: d.commit.sha as string, branch: CANONICAL_GITHUB_BRANCH, statuses };
       }
     }
-  } catch { /* fallthrough */ }
-  return { sha: null, branch: raw, error: 'could not resolve branch HEAD', statuses };
+    statuses.push(`main:${r.status}`);
+  } catch (e) {
+    statuses.push(`main:ERR:${e.message}`);
+  }
+
+  return {
+    sha: null,
+    branch: CANONICAL_GITHUB_BRANCH,
+    error: `could not resolve canonical HEAD for ${CANONICAL_GITHUB_REPO}@${CANONICAL_GITHUB_BRANCH}`,
+    statuses,
+  };
 }
 
 export interface CheckRun {
@@ -132,22 +142,12 @@ export interface CheckRun {
   url: string;
 }
 
-/**
- * Fetch GitHub Actions check runs for a commit SHA.
- * Used by code.build / code.lint / code.typecheck validators to obtain deterministic CI evidence.
- * Returns [] if the API is unavailable or no check runs exist.
- */
+/** Fetch GitHub Actions check runs for the canonical repository and exact source SHA. */
 export async function fetchCheckRuns(secrets: GithubSecrets, sha: string): Promise<CheckRun[]> {
-  const { GITHUB_REPO, GITHUB_TOKEN } = secrets;
-  if (!GITHUB_REPO || !GITHUB_TOKEN || !sha) return [];
-  const headers: Record<string, string> = {
-    Authorization: `Bearer ${GITHUB_TOKEN}`,
-    Accept: 'application/vnd.github+json',
-    'X-GitHub-Api-Version': '2022-11-28',
-    'User-Agent': 'PropertyIntel-AlphaPrime-Validator',
-  };
+  if (!sha) return [];
+  const headers = githubHeaders(secrets.GITHUB_TOKEN);
   try {
-    const r = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/commits/${sha}/check-runs?per_page=100`, { headers });
+    const r = await fetch(`https://api.github.com/repos/${CANONICAL_GITHUB_REPO}/commits/${sha}/check-runs?per_page=100`, { headers });
     if (!r.ok) return [];
     const d = await r.json();
     return (d?.check_runs || []).map((c: any) => ({
@@ -168,16 +168,6 @@ export function findCheckRun(checkRuns: CheckRun[], pattern: string): CheckRun |
   return checkRuns.find((c) => c.name.toLowerCase().includes(p)) || null;
 }
 
-/**
- * SCHEDULER INVENTORY — known scheduling authorities in the project.
- * Alpha Prime (Convergence Heartbeat) is the intended governor.
- * Conflicting schedulers are independent authorities capable of executing
- * consequential workflows concurrently outside the governor architecture.
- *
- * This inventory is deterministic evidence for the workflows.no_duplicate_cron gate.
- * When a conflicting scheduler is consolidated (removed/migrated under the governor),
- * update this inventory and the gate re-evaluates.
- */
 export interface SchedulerEntry {
   id: string;
   authority: string;
@@ -272,4 +262,4 @@ export const WAVE1_VALIDATORS = [
   'workflows.no_duplicate_cron',
 ];
 
-export const VALIDATOR_VERSION = '1.0.0';
+export const VALIDATOR_VERSION = '1.2.0';
