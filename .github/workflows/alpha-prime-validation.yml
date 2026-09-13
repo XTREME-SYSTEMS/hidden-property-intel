@@ -296,3 +296,29 @@ jobs:
             contract-safety.exit
           if-no-files-found: error
           retention-days: 7
+
+  resilience-fallback-audit:
+    name: resilience-fallback-audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Audit core fallback chains and declared single points of failure
+        run: |
+          set +e
+          node scripts/alpha-prime/static-audit.mjs resilience-fallback 2>&1 | tee resilience-fallback.log
+          ec=${PIPESTATUS[0]}
+          echo "$ec" > resilience-fallback.exit
+          exit "$ec"
+      - name: Upload resilience evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alpha-prime-resilience-fallback-evidence
+          path: |
+            resilience-fallback.log
+            resilience-fallback.exit
+          if-no-files-found: error
+          retention-days: 7
