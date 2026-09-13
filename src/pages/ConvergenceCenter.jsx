@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import {
   Activity, ShieldCheck, AlertTriangle, CheckCircle2, XCircle, Clock,
-  Cpu, GitCommit, Play, RefreshCw, Lock, Unlock, ChevronRight, Gauge,
+  Cpu, GitCommit, Play, RefreshCw, Lock, ChevronRight, Gauge,
 } from "lucide-react";
 
 const MODE_STYLES = {

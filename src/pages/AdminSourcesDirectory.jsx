@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {
   Database, Globe, Search, ExternalLink,
-  Building2, FileText, Users, Landmark, Scale, Home, DollarSign, AlertTriangle,
+  Building2, Users, Landmark, Scale, Home, DollarSign, AlertTriangle,
 } from "lucide-react";
 
 const SOURCE_CATEGORIES = [

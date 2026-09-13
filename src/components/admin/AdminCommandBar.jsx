@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import { Search, Calendar, ChevronDown, Hash, ArrowRight } from "lucide-react";
 
 /**

@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  Scale, FileText, ShieldCheck, Building2, Bitcoin, DollarSign, Users, AlertTriangle,
-  CheckCircle2, ExternalLink as ExternalLinkIcon, ChevronDown, ChevronUp, BookOpen, Gavel, Lock, HeartCrack,
+  Scale, FileText, ShieldCheck, Bitcoin, DollarSign, Users, AlertTriangle, ExternalLink as ExternalLinkIcon, ChevronDown, ChevronUp, BookOpen, Lock, HeartCrack,
 } from "lucide-react";
 
 const SECTIONS = [

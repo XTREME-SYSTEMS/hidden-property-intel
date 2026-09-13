@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Search, Mail, Building2, ShieldCheck, FlaskConical, Dna, Send, Reply, Clock, X, Phone, MessageSquare, Calendar, Zap } from "lucide-react";
+import { Search, Mail, Building2, ShieldCheck, FlaskConical, Dna, Send, Reply, Clock, X, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function AdminOutreach() {

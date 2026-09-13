@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Radar, Brain, FileSignature, Users, ShieldCheck } from "lucide-react";
+import { Radar, Brain, FileSignature, Users } from "lucide-react";
 import Seo from "@/components/Seo";
 
 export default function About() {

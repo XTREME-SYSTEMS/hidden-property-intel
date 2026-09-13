@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { BookOpen, Radar, Zap, Loader2, RefreshCw, TrendingUp, AlertTriangle, CheckCircle2, Activity } from "lucide-react";
+import { Radar, Zap, Loader2, RefreshCw, TrendingUp, AlertTriangle, CheckCircle2, Activity } from "lucide-react";
 
 const DISTRESS_CATEGORIES = [
   { key: "pre_foreclosure", label: "Pre-Foreclosure", icon: "🏠", fn: "scrapeProperties", color: "text-amber-600 bg-amber-50 border-amber-200" },

@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Bell, CheckCheck, Mail, Smartphone, MessageSquare } from "lucide-react";
-import { money } from "@/lib/format";
+import { Bell, CheckCheck, Mail, MessageSquare } from "lucide-react";
 
 export default function Alerts() {
   const [alerts, setAlerts] = useState([]);

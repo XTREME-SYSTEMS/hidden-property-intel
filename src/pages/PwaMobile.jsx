@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
-  Home, Search, User, Calculator, Bell, FileText, Sparkles, Menu, X,
-  TrendingUp, MapPin, Shield, ChevronRight, Mic, Eye, Database,
+  Home, Search, User, Calculator, Bell, Sparkles, Menu, X,
+  TrendingUp, Shield, ChevronRight, Mic, Eye, Database,
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import Seo from "@/components/Seo";

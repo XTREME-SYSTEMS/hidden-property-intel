@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Sparkles, Loader2, TrendingUp, Target } from "lucide-react";
-import { money } from "@/lib/format";
+import { Sparkles, Loader2, Target } from "lucide-react";
 
 export default function PortfolioOptimizer({ investor }) {
   const [loading, setLoading] = useState(false);
