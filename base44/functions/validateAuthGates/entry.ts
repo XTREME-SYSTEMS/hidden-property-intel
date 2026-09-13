@@ -3,6 +3,14 @@ import { buildReceipt, resolveSourceSha, type GithubSecrets, type ValidatorRecei
 
 const MAX_RECEIPT_AGE_MS = 24 * 60 * 60 * 1000;
 const MAX_FUTURE_SKEW_MS = 5 * 60 * 1000;
+const BOOLEAN_FIELDS = [
+  'login_ok',
+  'register_ok',
+  'reset_request_ok',
+  'reset_complete_ok',
+  'session_persist_ok',
+  'session_restore_ok',
+] as const;
 
 function isEligibleReceipt(row: any, sourceSha: string, nowMs: number): boolean {
   const testedMs = Date.parse(row?.tested_at || '');
@@ -11,7 +19,10 @@ function isEligibleReceipt(row: any, sourceSha: string, nowMs: number): boolean 
   if (!['sandbox', 'test'].includes(row?.environment)) return false;
   if (row?.producer !== 'playwright-auth-validator') return false;
   if (row?.live_side_effects !== false) return false;
+  if (typeof row?.receipt_id !== 'string' || row.receipt_id.trim().length === 0) return false;
   if (typeof row?.artifact_ref !== 'string' || row.artifact_ref.trim().length === 0) return false;
+  if (!Number.isInteger(row?.error_count) || row.error_count < 0) return false;
+  if (BOOLEAN_FIELDS.some((field) => typeof row?.[field] !== 'boolean')) return false;
   if (testedMs > nowMs + MAX_FUTURE_SKEW_MS) return false;
   if (nowMs - testedMs > MAX_RECEIPT_AGE_MS) return false;
   return true;
@@ -34,16 +45,12 @@ function unknownReceipt(gateId: string, sourceSha: string | null, reason: string
 
 function validateLoginFlow(row: any, sourceSha: string): ValidatorReceipt {
   const checks = {
-    login_ok: row.login_ok === true,
-    register_ok: row.register_ok === true,
-    reset_request_ok: row.reset_request_ok === true,
-    reset_complete_ok: row.reset_complete_ok === true,
+    login_ok: row.login_ok,
+    register_ok: row.register_ok,
+    reset_request_ok: row.reset_request_ok,
+    reset_complete_ok: row.reset_complete_ok,
   };
-  const errorCount = Number(row.error_count);
-  const malformed = !Number.isInteger(errorCount) || errorCount < 0 || Object.values(checks).some((v) => typeof v !== 'boolean');
-  if (malformed) {
-    return unknownReceipt('auth.login_flow', sourceSha, 'Latest eligible auth receipt is malformed; PASS cannot be inferred.');
-  }
+  const errorCount = row.error_count as number;
   const pass = Object.values(checks).every(Boolean) && errorCount === 0;
   return buildReceipt({
     gate_id: 'auth.login_flow',
@@ -64,12 +71,9 @@ function validateLoginFlow(row: any, sourceSha: string): ValidatorReceipt {
 }
 
 function validateSession(row: any, sourceSha: string): ValidatorReceipt {
-  const persistOk = row.session_persist_ok === true;
-  const restoreOk = row.session_restore_ok === true;
-  const errorCount = Number(row.error_count);
-  if (!Number.isInteger(errorCount) || errorCount < 0) {
-    return unknownReceipt('auth.session', sourceSha, 'Latest eligible auth receipt has invalid error_count; PASS cannot be inferred.');
-  }
+  const persistOk = row.session_persist_ok as boolean;
+  const restoreOk = row.session_restore_ok as boolean;
+  const errorCount = row.error_count as number;
   const pass = persistOk && restoreOk && errorCount === 0;
   return buildReceipt({
     gate_id: 'auth.session',
@@ -122,8 +126,8 @@ export default async function (req: Request): Promise<Response> {
     let receipts: ValidatorReceipt[];
     if (exactRows.length === 0) {
       receipts = [
-        unknownReceipt('auth.login_flow', sourceSha, 'No fresh exact-SHA sandbox/test AuthValidationReceipt from the independent Playwright producer exists.'),
-        unknownReceipt('auth.session', sourceSha, 'No fresh exact-SHA sandbox/test AuthValidationReceipt from the independent Playwright producer exists.'),
+        unknownReceipt('auth.login_flow', sourceSha, 'No fresh, well-formed, exact-SHA sandbox/test AuthValidationReceipt from the independent Playwright producer exists.'),
+        unknownReceipt('auth.session', sourceSha, 'No fresh, well-formed, exact-SHA sandbox/test AuthValidationReceipt from the independent Playwright producer exists.'),
       ];
     } else {
       const latest = exactRows[0];
