@@ -30,27 +30,33 @@ jobs:
           cache: npm
       - name: Install locked application dependencies
         run: npm ci
-      - name: Install pinned browser validator without mutating lockfile
+      - name: Install pinned validation tools without mutating lockfile
         run: |
           npm install --no-save --package-lock=false --ignore-scripts playwright@1.55.0
+          npm install --global base44@0.1.14
           npx playwright install --with-deps chromium
       - name: Build application
         run: npm run build
-      - name: Start isolated preview server
+      - name: Start isolated Base44 development backend and frontend
         run: |
-          nohup npm run preview -- --host 127.0.0.1 --port 4173 > preview.log 2>&1 &
-          echo $! > preview.pid
+          nohup base44 dev > base44-dev.log 2>&1 &
+          echo $! > base44-dev.pid
           ready=0
-          for attempt in $(seq 1 60); do
-            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then
+          for attempt in $(seq 1 90); do
+            if curl -fsS http://127.0.0.1:5173/ >/dev/null; then
               ready=1
               break
             fi
             sleep 1
           done
           if [ "$ready" -ne 1 ]; then
-            echo "Preview server did not become ready" >&2
-            cat preview.log || true
+            echo "Base44 local development frontend did not become ready on 127.0.0.1:5173" >&2
+            cat base44-dev.log || true
+            exit 1
+          fi
+          if grep -q "No Base44 backend configured" base44-dev.log; then
+            echo "Base44 local backend was not configured; refusing invalid frontend evidence." >&2
+            cat base44-dev.log
             exit 1
           fi
       - name: Validate mandatory render routes and capture console evidence
@@ -59,7 +65,7 @@ jobs:
           import fs from 'node:fs';
           import { chromium } from 'playwright';
 
-          const base = 'http://127.0.0.1:4173';
+          const base = 'http://127.0.0.1:5173';
           const routes = [
             { id: 'home', path: '/' },
             { id: 'listings', path: '/listings' },
@@ -108,8 +114,9 @@ jobs:
           }
 
           const evidence = {
-            validator: 'alpha-prime-playwright-render-v1',
+            validator: 'alpha-prime-playwright-render-v2-base44-local',
             source_sha: process.env.GITHUB_SHA,
+            backend_mode: 'base44-local-throwaway',
             threshold: 'home, listings, and property-detail routes return <500 and render non-empty body',
             generated_at: new Date().toISOString(),
             routes: results,
@@ -127,7 +134,7 @@ jobs:
           name: alpha-prime-frontend-evidence-${{ github.sha }}
           path: |
             frontend-validation-evidence.json
-            preview.log
+            base44-dev.log
           if-no-files-found: warn
           retention-days: 7
 
@@ -148,6 +155,10 @@ jobs:
           const evidence = JSON.parse(fs.readFileSync('frontend-validation-evidence.json', 'utf8'));
           if (evidence.source_sha !== process.env.GITHUB_SHA) {
             console.error(`Stale SHA evidence rejected: evidence=${evidence.source_sha} current=${process.env.GITHUB_SHA}`);
+            process.exit(1);
+          }
+          if (evidence.backend_mode !== 'base44-local-throwaway') {
+            console.error(`Invalid backend mode for console evidence: ${evidence.backend_mode}`);
             process.exit(1);
           }
           const errors = evidence.routes.flatMap((row) => [
