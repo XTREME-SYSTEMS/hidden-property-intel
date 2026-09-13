@@ -9,6 +9,7 @@ const STRATEGIES = [
   { id: "wholesale", label: "Wholesale", icon: Briefcase },
 ];
 
+/** @param {{label: React.ReactNode, value: string | number, onChange: (value: string) => void, prefix?: React.ReactNode}} props */
 function Field({ label, value, onChange, prefix = "$" }) {
   return (
     <label className="block">
@@ -26,6 +27,7 @@ function Field({ label, value, onChange, prefix = "$" }) {
   );
 }
 
+/** @param {{label: React.ReactNode, value: React.ReactNode, accent?: string}} props */
 function Stat({ label, value, accent }) {
   return (
     <div className="rounded-xl bg-[#F8FAF9] p-4 ring-1 ring-[#E5EDEA]">
@@ -35,6 +37,7 @@ function Stat({ label, value, accent }) {
   );
 }
 
+/** @param {{defaultPrice?: number, defaultRepairs?: number, defaultArv?: number, defaultRent?: number}} props */
 export default function ExitStrategyModel({
   defaultPrice = 250000, defaultRepairs = 40000, defaultArv = 380000, defaultRent = 2200,
 }) {
