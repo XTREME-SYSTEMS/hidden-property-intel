@@ -132,4 +132,32 @@ if (mode === 'resilience-fallback') {
   pass('resilience-fallback PASS: zero declared core SPOFs and required browser/job fallback contracts are present');
 }
 
+if (mode === 'backend-functions-source') {
+  const ts = await import('typescript');
+  const issues = [];
+  const files = walk(functionDir).filter((f) => f.endsWith('entry.ts') || f.endsWith('entry.js'));
+  if (files.length === 0) issues.push('base44/functions: no function entrypoints found');
+
+  for (const f of files) {
+    const text = fs.readFileSync(f, 'utf8');
+    const kind = f.endsWith('.ts') ? ts.ScriptKind.TS : ts.ScriptKind.JS;
+    const sf = ts.createSourceFile(rel(f), text, ts.ScriptTarget.Latest, true, kind);
+    for (const d of sf.parseDiagnostics || []) {
+      const pos = typeof d.start === 'number' ? sf.getLineAndCharacterOfPosition(d.start) : null;
+      const where = pos ? ':' + (pos.line + 1) + ':' + (pos.character + 1) : '';
+      const msg = ts.flattenDiagnosticMessageText(d.messageText, ' ');
+      issues.push(rel(f) + where + ': syntax parse error: ' + msg);
+    }
+    if (!/export\s+default\s+/.test(text)) {
+      issues.push(rel(f) + ': missing default export entrypoint');
+    }
+    if (/^\s*(throw\s+new\s+Error|throw\s+[^;]+);/m.test(text)) {
+      issues.push(rel(f) + ': top-level throw detected; function cannot boot safely');
+    }
+  }
+
+  if (issues.length) fail('backend-functions-source FAIL: ' + issues.length + ' source boot issue(s)', issues);
+  pass('backend-functions-source PASS: ' + files.length + ' function entrypoints parse and expose default handlers');
+}
+
 fail(`Unknown static audit mode: ${mode || '(none)'}`);

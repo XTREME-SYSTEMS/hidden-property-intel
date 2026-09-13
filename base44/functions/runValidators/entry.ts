@@ -52,6 +52,13 @@ export default async function (req: Request): Promise<Response> {
     receipts.push(validateCheckRunGate('frontend.render', checkRuns, sourceSha, 'frontend-render', 'Playwright primary-route render validation'));
     receipts.push(validateCheckRunGate('frontend.no_console_errors', checkRuns, sourceSha, 'frontend-no-console-errors', 'Playwright uncaught console/page error validation'));
 
+
+    // BACKEND deploy gate is intentionally two-layered: current-SHA source boot audit
+    // plus an independently produced exact-SHA production deployment receipt. Source
+    // compilation alone can never satisfy a deployment gate.
+    const backendDeployReceipts = await base44.asServiceRole.entities.BackendDeployReceipt.list('-timestamp', 20).catch(() => []);
+    receipts.push(validateBackendFunctionsDeploy(checkRuns, backendDeployReceipts, sourceSha));
+
     // SECURITY + DATABASE static deterministic CI
     receipts.push(validateCheckRunGate('security.dependency_scan', checkRuns, sourceSha, 'dependency-scan', 'npm audit --audit-level=critical'));
     receipts.push(validateCheckRunGate('security.secret_scan', checkRuns, sourceSha, 'secret-scan', 'repository secret scan'));
@@ -222,6 +229,81 @@ function validateCheckRunGate(
     reason: pass
       ? `Deterministic check '${cr.name}' passed for SHA ${sourceSha.slice(0, 8)}.`
       : `Deterministic check '${cr.name}' failed with conclusion '${cr.conclusion}' for SHA ${sourceSha.slice(0, 8)}.`,
+  });
+}
+
+function validateBackendFunctionsDeploy(checkRuns: any[], deployReceipts: any[], sourceSha: string | null): ValidatorReceipt {
+  const threshold = 'backend-functions-source-audit success + exact-SHA production deploy receipt + function_count>0 + boot_failures=0';
+  const probe = 'GitHub backend-functions-source-audit + BackendDeployReceipt exact source_sha production evidence';
+  if (!sourceSha) {
+    return buildReceipt({
+      gate_id: 'backend.functions_deploy', validator_id: 'backend_deploy_evidence_probe', status: 'BLOCKED',
+      source_sha: null, metric_value: 0, threshold, command_or_probe: probe,
+      reason: 'Canonical source SHA is unavailable; backend deployment evidence cannot be bound to source truth.',
+    });
+  }
+
+  const sourceCheck = findCheckRun(checkRuns, 'backend-functions-source-audit');
+  if (!sourceCheck) {
+    return buildReceipt({
+      gate_id: 'backend.functions_deploy', validator_id: 'backend_deploy_evidence_probe', status: 'UNKNOWN',
+      source_sha: sourceSha, metric_value: 0, threshold, command_or_probe: probe,
+      reason: 'No backend-functions-source-audit check exists for current SHA ' + sourceSha.slice(0, 8) + '.',
+    });
+  }
+  if (sourceCheck.status !== 'completed') {
+    return buildReceipt({
+      gate_id: 'backend.functions_deploy', validator_id: 'backend_deploy_evidence_probe', status: 'UNKNOWN',
+      source_sha: sourceSha, metric_value: sourceCheck.status, threshold, command_or_probe: probe,
+      evidence_refs: [sourceCheck.url || sourceCheck.name],
+      reason: 'Backend source audit is not complete for current SHA (status=' + sourceCheck.status + ').',
+    });
+  }
+  if (sourceCheck.conclusion !== 'success') {
+    return buildReceipt({
+      gate_id: 'backend.functions_deploy', validator_id: 'backend_deploy_evidence_probe', status: 'FAIL',
+      source_sha: sourceSha, metric_value: sourceCheck.conclusion, threshold, command_or_probe: probe,
+      exit_code: 1, evidence_refs: [sourceCheck.url || sourceCheck.name],
+      reason: 'Backend source boot audit failed for current SHA with conclusion ' + sourceCheck.conclusion + '.',
+    });
+  }
+
+  const exactProduction = (deployReceipts || []).filter((row: any) =>
+    row?.source_sha === sourceSha && row?.environment === 'production' && row?.timestamp
+  ).sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+  if (exactProduction.length === 0) {
+    return buildReceipt({
+      gate_id: 'backend.functions_deploy', validator_id: 'backend_deploy_evidence_probe', status: 'UNKNOWN',
+      source_sha: sourceSha, metric_value: 0, threshold, command_or_probe: probe,
+      evidence_refs: [sourceCheck.url || sourceCheck.name],
+      reason: 'Source-level boot audit passed, but no exact-SHA production BackendDeployReceipt exists. Deployment is not inferred from compilation.',
+    });
+  }
+
+  const latest = exactProduction[0];
+  const functionCount = Number(latest.function_count);
+  const bootFailures = Number(latest.boot_failures);
+  if (!Number.isInteger(functionCount) || functionCount <= 0 || !Number.isInteger(bootFailures) || bootFailures < 0) {
+    return buildReceipt({
+      gate_id: 'backend.functions_deploy', validator_id: 'backend_deploy_evidence_probe', status: 'UNKNOWN',
+      source_sha: sourceSha, metric_value: latest.receipt_id || 'malformed', threshold, command_or_probe: probe,
+      evidence_refs: [sourceCheck.url || sourceCheck.name, latest.receipt_id, latest.deployment_id, latest.artifact_ref].filter(Boolean),
+      reason: 'Exact-SHA production deployment receipt is malformed or lacks a positive function_count / non-negative boot_failures value.',
+    });
+  }
+
+  const pass = bootFailures === 0;
+  return buildReceipt({
+    gate_id: 'backend.functions_deploy', validator_id: 'backend_deploy_evidence_probe', status: pass ? 'PASS' : 'FAIL',
+    source_sha: sourceSha, metric_value: bootFailures, threshold, command_or_probe: probe,
+    exit_code: pass ? 0 : 1,
+    evidence_refs: [sourceCheck.url || sourceCheck.name, latest.receipt_id, latest.deployment_id, latest.artifact_ref].filter(Boolean),
+    stdout_summary: 'function_count=' + functionCount + '; boot_failures=' + bootFailures + '; producer=' + (latest.producer || 'unknown'),
+    stderr_summary: bootFailures > 0 ? (latest.boot_failure_functions || []).join(', ') : '',
+    reason: pass
+      ? 'Exact-SHA production deploy receipt proves ' + functionCount + ' function(s) deployed with zero boot failures.'
+      : 'Exact-SHA production deploy receipt reports ' + bootFailures + ' boot failure(s) across ' + functionCount + ' deployed function(s).',
   });
 }
 
