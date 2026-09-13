@@ -88,4 +88,48 @@ if (mode === 'contract-safety') {
   pass(`contract-safety PASS: ${files.length} backend function files scanned; live-chain primitives are approval-bound and contract messaging is separately gated`);
 }
 
+if (mode === 'resilience-fallback') {
+  const issues = [];
+  const systemAuditPath = path.join(root, 'base44', 'functions', 'systemAudit', 'entry.ts');
+  const browserEnginePath = path.join(root, 'base44', 'shared', 'browserEngine.ts');
+  const jobEnginePath = path.join(root, 'base44', 'shared', 'jobEngine.ts');
+
+  if (!fs.existsSync(systemAuditPath)) {
+    issues.push('base44/functions/systemAudit/entry.ts: authoritative core-SPOF inventory is missing');
+  } else {
+    const auditText = fs.readFileSync(systemAuditPath, 'utf8');
+    const inventory = auditText.match(/critical_spof\s*:\s*\[([\s\S]*?)\]/);
+    if (!inventory) {
+      issues.push('base44/functions/systemAudit/entry.ts: critical_spof inventory is absent; zero core SPOFs cannot be proven');
+    } else {
+      const entries = [...inventory[1].matchAll(/['"`]([^'"`]+)['"`]/g)].map((m) => m[1].trim()).filter(Boolean);
+      for (const entry of entries) issues.push(`declared core single point of failure: ${entry}`);
+    }
+  }
+
+  if (!fs.existsSync(browserEnginePath)) {
+    issues.push('base44/shared/browserEngine.ts: browser fallback implementation is missing');
+  } else {
+    const browserText = fs.readFileSync(browserEnginePath, 'utf8');
+    if (!/fetchRenderedHtmlWithFallback/.test(browserText) || !/Browserbase/i.test(browserText)) {
+      issues.push('base44/shared/browserEngine.ts: primary-to-secondary browser fallback cannot be proven');
+    }
+  }
+
+  if (!fs.existsSync(jobEnginePath)) {
+    issues.push('base44/shared/jobEngine.ts: durable retry/dead-letter job fallback is missing');
+  } else {
+    const jobText = fs.readFileSync(jobEnginePath, 'utf8');
+    const hasRetry = /status:\s*["']retrying["']/.test(jobText) && /next_retry_at/.test(jobText) && /Math\.pow\s*\(\s*2\s*,\s*attempts\s*\)/.test(jobText);
+    const hasDeadLetter = /status:\s*["']dead_letter["']/.test(jobText) && /getDeadLetterJobs/.test(jobText);
+    const hasCheckpoint = /saveCheckpoint/.test(jobText) && /checkpoint/.test(jobText);
+    if (!(hasRetry && hasDeadLetter && hasCheckpoint)) {
+      issues.push('base44/shared/jobEngine.ts: retry, dead-letter, and resumability fallback contract is incomplete');
+    }
+  }
+
+  if (issues.length) fail(`resilience-fallback FAIL: ${issues.length} core resilience issue(s); threshold is 0 single-points-of-failure on core`, issues);
+  pass('resilience-fallback PASS: zero declared core SPOFs and required browser/job fallback contracts are present');
+}
+
 fail(`Unknown static audit mode: ${mode || '(none)'}`);
