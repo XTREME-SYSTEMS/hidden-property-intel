@@ -66,11 +66,14 @@ export default async function(req: Request): Promise<Response> {
     } catch (e) { /* may fail */ }
 
     // Map validator outputs onto the constitution gates.
-    // preflight.dimensions is an ARRAY of { dimension, score, status, findings }.
+    // functions.invoke returns { data: ... }; normalize to the payload.
+    const pf: any = preflight?.data ?? preflight;
+    const au: any = audit?.data ?? audit;
+    // pf.dimensions is an ARRAY of { dimension, score, status, findings }.
     // We map known dimension names to specific gate_ids; unmapped gates stay UNKNOWN (honest).
     const dimMap: Record<string, number> = {};
-    if (Array.isArray(preflight?.dimensions)) {
-      for (const d of preflight.dimensions) dimMap[d.dimension] = d.score;
+    if (Array.isArray(pf?.dimensions)) {
+      for (const d of pf.dimensions) dimMap[d.dimension] = d.score;
     }
     const DIM_TO_GATE: Record<string, string[]> = {
       data_acquisition: ['ingest.scrape_success'],
@@ -98,8 +101,8 @@ export default async function(req: Request): Promise<Response> {
         if (score >= 80) updated.last_passed_at = now;
       }
       // Validators that failed to invoke are themselves failures
-      if (g.gate_id === 'backend.functions_deploy' && !preflight) updated.current_status = 'FAIL';
-      if (g.gate_id === 'obs.logs_available' && !audit) updated.current_status = 'FAIL';
+      if (g.gate_id === 'backend.functions_deploy' && !pf) updated.current_status = 'FAIL';
+      if (g.gate_id === 'obs.logs_available' && !au) updated.current_status = 'FAIL';
       return updated;
     });
 
