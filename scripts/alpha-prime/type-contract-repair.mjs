@@ -61,8 +61,8 @@ changed = repair(
 
 changed = repair(
   'src/pages/AdminSmartContracts.jsx',
-  'function Stat({ label, value, color }) {',
-  'function Stat({ label, value, color = "" }) {'
+  'function StatCard({ label, value, color }) {',
+  'function StatCard({ label, value, color = "" }) {'
 ) || changed;
 
 changed = repair(
