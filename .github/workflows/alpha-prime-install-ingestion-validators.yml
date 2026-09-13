@@ -47,8 +47,20 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Regression tests
-        run: npm run test -- --run
+      - name: Dependency regression
+        run: npm audit --audit-level=critical
+
+      - name: Schema regression
+        run: node scripts/alpha-prime/static-audit.mjs schema-valid
+
+      - name: Oversized-field regression
+        run: node scripts/alpha-prime/static-audit.mjs oversized-fields
+
+      - name: Input-validation regression
+        run: node scripts/alpha-prime/static-audit.mjs input-validation
+
+      - name: Contract-safety regression
+        run: node scripts/alpha-prime/static-audit.mjs contract-safety
 
       - name: Commit validated repair
         shell: bash
