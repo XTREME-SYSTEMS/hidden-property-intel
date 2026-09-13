@@ -1,0 +1,162 @@
+name: Alpha Prime Frontend Validation
+
+on:
+  push:
+    branches:
+      - main
+      - 'alpha-prime/**'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alpha-prime-frontend-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  frontend-render:
+    name: frontend-render
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked application dependencies
+        run: npm ci
+      - name: Install pinned browser validator without mutating lockfile
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Build application
+        run: npm run build
+      - name: Start isolated preview server
+        run: |
+          nohup npm run preview -- --host 127.0.0.1 --port 4173 > preview.log 2>&1 &
+          echo $! > preview.pid
+          ready=0
+          for attempt in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then
+            echo "Preview server did not become ready" >&2
+            cat preview.log || true
+            exit 1
+          fi
+      - name: Validate mandatory render routes and capture console evidence
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import { chromium } from 'playwright';
+
+          const base = 'http://127.0.0.1:4173';
+          const routes = [
+            { id: 'home', path: '/' },
+            { id: 'listings', path: '/listings' },
+            { id: 'property-detail', path: '/properties/alpha-prime-smoke' },
+          ];
+          const results = [];
+          const browser = await chromium.launch({ headless: true });
+
+          try {
+            for (const route of routes) {
+              const page = await browser.newPage();
+              const consoleErrors = [];
+              const pageErrors = [];
+              page.on('console', (message) => {
+                if (message.type() === 'error') consoleErrors.push(message.text());
+              });
+              page.on('pageerror', (error) => pageErrors.push(String(error?.stack || error?.message || error)));
+
+              let status = null;
+              let navigationError = null;
+              let bodyLength = 0;
+              try {
+                const response = await page.goto(base + route.path, { waitUntil: 'domcontentloaded', timeout: 30000 });
+                status = response?.status() ?? null;
+                await page.waitForTimeout(2000);
+                bodyLength = (await page.locator('body').innerText()).trim().length;
+              } catch (error) {
+                navigationError = String(error?.stack || error?.message || error);
+              }
+
+              const renderPass = navigationError === null && status !== null && status < 500 && bodyLength > 0;
+              results.push({
+                route_id: route.id,
+                path: route.path,
+                http_status: status,
+                body_text_length: bodyLength,
+                render_pass: renderPass,
+                navigation_error: navigationError,
+                console_errors: consoleErrors,
+                page_errors: pageErrors,
+              });
+              await page.close();
+            }
+          } finally {
+            await browser.close();
+          }
+
+          const evidence = {
+            validator: 'alpha-prime-playwright-render-v1',
+            source_sha: process.env.GITHUB_SHA,
+            threshold: 'home, listings, and property-detail routes return <500 and render non-empty body',
+            generated_at: new Date().toISOString(),
+            routes: results,
+            render_pass: results.every((row) => row.render_pass),
+            no_console_errors_pass: results.every((row) => row.console_errors.length === 0 && row.page_errors.length === 0),
+          };
+          fs.writeFileSync('frontend-validation-evidence.json', JSON.stringify(evidence, null, 2));
+          console.log(JSON.stringify(evidence, null, 2));
+          if (!evidence.render_pass) process.exit(1);
+          NODE
+      - name: Upload exact-SHA frontend evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alpha-prime-frontend-evidence-${{ github.sha }}
+          path: |
+            frontend-validation-evidence.json
+            preview.log
+          if-no-files-found: warn
+          retention-days: 7
+
+  frontend-no-console-errors:
+    name: frontend-no-console-errors
+    needs: frontend-render
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download exact-SHA frontend evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: alpha-prime-frontend-evidence-${{ github.sha }}
+      - name: Enforce zero uncaught browser errors
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const evidence = JSON.parse(fs.readFileSync('frontend-validation-evidence.json', 'utf8'));
+          if (evidence.source_sha !== process.env.GITHUB_SHA) {
+            console.error(`Stale SHA evidence rejected: evidence=${evidence.source_sha} current=${process.env.GITHUB_SHA}`);
+            process.exit(1);
+          }
+          const errors = evidence.routes.flatMap((row) => [
+            ...row.console_errors.map((message) => ({ route: row.path, type: 'console', message })),
+            ...row.page_errors.map((message) => ({ route: row.path, type: 'pageerror', message })),
+          ]);
+          console.log(JSON.stringify({ source_sha: evidence.source_sha, error_count: errors.length, errors }, null, 2));
+          if (errors.length !== 0) process.exit(1);
+          NODE
