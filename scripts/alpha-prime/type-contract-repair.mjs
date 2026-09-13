@@ -95,4 +95,88 @@ changed = repair(
   'function Card({ title = "", children, className = "" }) {'
 ) || changed;
 
+changed = repair(
+  'src/components/admin/EdenBubble.jsx',
+  'const existing = await base44.agents.listConversations({ agent_name: AGENT_NAME });',
+  'const existing = await base44.agents.listConversations({ q: { agent_name: AGENT_NAME }, sort: "-updated_date", limit: 1 });'
+) || changed;
+
+changed = repair(
+  'src/components/admin/InvestorCommandCenter.jsx',
+  '<FollowUpControls targetType="investor" record={investor} onUpdate={onUpdate} expanded />',
+  '<FollowUpControls targetType="investor" record={investor} onUpdate={onUpdate} />'
+) || changed;
+
+changed = repair(
+  'src/components/admin/InvestorCommandCenter.jsx',
+  'setOutput(typeof res === "string" ? res : res.content || JSON.stringify(res));',
+  'setOutput(typeof res === "string" ? res : (res && typeof res === "object" && "content" in res ? String(res.content || "") : JSON.stringify(res)));'
+) || changed;
+
+changed = repair(
+  'src/components/admin/OutreachEditor.jsx',
+  '  nextOfKin,',
+  '  nextOfKin = [],'
+) || changed;
+
+changed = repair(
+  'src/components/admin/OutreachEditor.jsx',
+  '  recipientEmail: overrideEmail,',
+  '  recipientEmail: overrideEmail = null,'
+) || changed;
+
+changed = repair(
+  'src/pages/AdminSources.jsx',
+  'onChange={(e) => setForm({ ...form, max_results: e.target.value })}',
+  'onChange={(e) => setForm({ ...form, max_results: Number(e.target.value) })}'
+) || changed;
+
+changed = repair(
+  'src/pages/AdminTestLab.jsx',
+  'const TEST_GROUPS = [',
+  '/** @type {Array<{ name: string, icon: any, color: string, tests: Array<{ name: string, desc: string, payload: Record<string, any> }> }>} */\nconst TEST_GROUPS = ['
+) || changed;
+
+changed = repair(
+  'src/pages/EdenSkyeChat.jsx',
+  'const existing = base44.agents.listConversations({ agent_name: AGENT_NAME });\n        // listConversations is synchronous in the SDK\n        const list = existing || [];',
+  'const list = await base44.agents.listConversations({ q: { agent_name: AGENT_NAME }, sort: "-updated_date", limit: 1 });'
+) || changed;
+
+changed = repair(
+  'src/pages/EdenSkyeChat.jsx',
+  'const conv = base44.agents.getConversation(list[0].id);',
+  'const conv = await base44.agents.getConversation(list[0].id);'
+) || changed;
+
+changed = repair(
+  'src/pages/EdenSkyeChat.jsx',
+  'const conv = base44.agents.createConversation({',
+  'const conv = await base44.agents.createConversation({'
+) || changed;
+
+changed = repair(
+  'src/pages/EdenSkyeChat.jsx',
+  'const updated = base44.agents.addMessage(conversation, { role: "user", content: msg });\n      setConversation(updated);',
+  'await base44.agents.addMessage(conversation, { role: "user", content: msg });'
+) || changed;
+
+changed = repair(
+  'src/lib/app-params.js',
+  "const isNode = typeof window === 'undefined';",
+  "/// <reference types=\"vite/client\" />\nconst isNode = typeof window === 'undefined';"
+) || changed;
+
+changed = repair(
+  'src/pages/OAuthConsent.jsx',
+  '        const infoHeaders = {};',
+  '        /** @type {Record<string, string>} */\n        const infoHeaders = {};'
+) || changed;
+
+changed = repair(
+  'src/pages/TheProcess.jsx',
+  '            const idx = Number(e.target.dataset.idx);',
+  '            const idx = Number(/** @type {HTMLElement} */ (e.target).dataset.idx);'
+) || changed;
+
 console.log(JSON.stringify({ changed }));
