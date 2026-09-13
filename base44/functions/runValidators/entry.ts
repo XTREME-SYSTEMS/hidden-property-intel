@@ -59,8 +59,10 @@ export default async function (req: Request): Promise<Response> {
     receipts.push(validateHeartbeatActive(heartbeats, sourceSha));
     receipts.push(validateNoDuplicateCron(sourceSha));
 
-    // RUNTIME + GOVERNANCE validators
-    receipts.push(await validateBackendApiSmoke(base44, sourceSha));
+    // RUNTIME + GOVERNANCE validators. Runtime probes must first prove that the live
+    // runtime is stamping the exact canonical source SHA; foreign/stale runtime state
+    // can never be promoted to PASS for current source truth.
+    receipts.push(await validateBackendApiSmoke(base44, sourceSha, heartbeats));
     receipts.push(await validateAgentGovernance(base44, sourceSha));
     receipts.push(await validateRollbackMethods(base44, sourceSha));
     receipts.push(await validateRequiredChecks(secrets, sourceSha, shaResult.branch || secrets.GITHUB_BASE_BRANCH || 'main'));
@@ -88,9 +90,11 @@ export default async function (req: Request): Promise<Response> {
     }
 
     // 4. FAIL -> Finding. Alpha Prime handles risk classification + safe repair routing.
+    // Existing findings only suppress a new finding when they belong to this exact SHA.
     for (const r of receipts.filter((x) => x.status === 'FAIL')) {
       const existing = await base44.asServiceRole.entities.Finding.filter({
         category: r.gate_id,
+        source_sha: r.source_sha,
         status: { $in: ['discovered', 'diagnosed', 'repair_planned', 'repair_implemented', 'tested', 'failed', 'blocked'] },
       }, '-discovered_at', 1).catch(() => []);
       if (existing[0]) continue;
@@ -129,6 +133,7 @@ export default async function (req: Request): Promise<Response> {
       source_sha: sourceSha,
       source_branch: shaResult.branch,
       source_sha_error: shaResult.error || null,
+      source_configuration_statuses: shaResult.statuses || [],
       check_runs_found: checkRuns.length,
       receipts,
       validator_results: results,
@@ -193,15 +198,30 @@ function validateCheckRunGate(
 }
 
 function validateHeartbeatActive(heartbeats: any[], sourceSha: string | null): ValidatorReceipt {
+  if (!sourceSha) {
+    return buildReceipt({
+      gate_id: 'workflows.heartbeat_active', validator_id: 'heartbeat_history_probe', status: 'BLOCKED',
+      source_sha: null, metric_value: 0,
+      threshold: '>=3 exact-SHA advancing receipts in 20m; max gap <=15m',
+      command_or_probe: 'HeartbeatReceipt.list(-timestamp,10)',
+      reason: 'Canonical source SHA is unavailable; heartbeat lineage cannot be verified.',
+    });
+  }
+
   const now = Date.now();
-  const recent = heartbeats.filter((h) => now - new Date(h.timestamp).getTime() < 20 * 60 * 1000);
+  const withinWindow = heartbeats.filter((h) => now - new Date(h.timestamp).getTime() < 20 * 60 * 1000);
+  const recent = withinWindow.filter((h) => h.source_sha === sourceSha);
+  const foreignRecent = withinWindow.filter((h) => h.source_sha && h.source_sha !== sourceSha);
   if (recent.length < 3) {
+    const foreignShas = Array.from(new Set(foreignRecent.map((h: any) => h.source_sha))).filter(Boolean);
     return buildReceipt({
       gate_id: 'workflows.heartbeat_active', validator_id: 'heartbeat_history_probe', status: 'UNKNOWN',
       source_sha: sourceSha, metric_value: recent.length,
-      threshold: '>=3 advancing receipts in 20m; max gap <=15m',
-      command_or_probe: 'HeartbeatReceipt.list(-timestamp,10)',
-      reason: `Only ${recent.length} recent heartbeat receipt(s); insufficient cadence proof.`,
+      threshold: '>=3 exact-SHA advancing receipts in 20m; max gap <=15m',
+      command_or_probe: 'HeartbeatReceipt.list(-timestamp,10) exact source_sha filter',
+      evidence_refs: recent.map((r) => r.heartbeat_id).filter(Boolean),
+      stderr_summary: foreignShas.length ? `foreign recent heartbeat SHA(s): ${foreignShas.join(', ')}` : '',
+      reason: `Only ${recent.length} recent heartbeat receipt(s) stamp canonical SHA ${sourceSha.slice(0, 8)}; ${foreignRecent.length} recent receipt(s) are foreign/stale and cannot count as evidence.`,
     });
   }
   const sorted = [...recent].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
@@ -217,12 +237,12 @@ function validateHeartbeatActive(heartbeats: any[], sourceSha: string | null): V
   return buildReceipt({
     gate_id: 'workflows.heartbeat_active', validator_id: 'heartbeat_history_probe', status: pass ? 'PASS' : 'FAIL',
     source_sha: sourceSha, metric_value: recent.length,
-    threshold: '>=3 advancing receipts in 20m; max gap <=15m',
-    command_or_probe: 'HeartbeatReceipt.list(-timestamp,10)',
+    threshold: '>=3 exact-SHA advancing receipts in 20m; max gap <=15m',
+    command_or_probe: 'HeartbeatReceipt.list(-timestamp,10) exact source_sha filter',
     evidence_refs: recent.map((r) => r.heartbeat_id).filter(Boolean),
     reason: pass
-      ? `${recent.length} advancing heartbeats; max gap ${maxGapMin.toFixed(1)}m.`
-      : `Heartbeat cadence invalid: advancing=${advancing}, max gap=${maxGapMin.toFixed(1)}m.`,
+      ? `${recent.length} exact-SHA advancing heartbeats; max gap ${maxGapMin.toFixed(1)}m.`
+      : `Exact-SHA heartbeat cadence invalid: advancing=${advancing}, max gap=${maxGapMin.toFixed(1)}m.`,
   });
 }
 
@@ -242,33 +262,74 @@ function validateNoDuplicateCron(sourceSha: string | null): ValidatorReceipt {
   });
 }
 
-async function validateBackendApiSmoke(base44: any, sourceSha: string | null): Promise<ValidatorReceipt> {
+function latestExactShaHeartbeat(heartbeats: any[], sourceSha: string | null): any | null {
+  if (!sourceSha) return null;
+  const cutoff = Date.now() - 20 * 60 * 1000;
+  return heartbeats.find((h) =>
+    h?.source_sha === sourceSha &&
+    h?.timestamp &&
+    new Date(h.timestamp).getTime() >= cutoff
+  ) || null;
+}
+
+async function validateBackendApiSmoke(base44: any, sourceSha: string | null, heartbeats: any[]): Promise<ValidatorReceipt> {
+  const runtimeLineage = latestExactShaHeartbeat(heartbeats, sourceSha);
+  if (!sourceSha || !runtimeLineage) {
+    return buildReceipt({
+      gate_id: 'backend.api_smoke', validator_id: 'critical_function_smoke', status: sourceSha ? 'UNKNOWN' : 'BLOCKED',
+      source_sha: sourceSha, metric_value: 0, threshold: 'exact-SHA live runtime + critical read-only function returns structured response',
+      command_or_probe: 'HeartbeatReceipt exact source_sha proof -> functions.invoke(systemPreflight)',
+      reason: sourceSha
+        ? `Live runtime has not produced a recent heartbeat stamped with canonical SHA ${sourceSha.slice(0, 8)}; backend smoke is withheld rather than using stale runtime evidence.`
+        : 'Canonical source SHA is unavailable; backend runtime lineage cannot be proven.',
+    });
+  }
+
   try {
     const result = await base44.asServiceRole.functions.invoke('systemPreflight', {});
     const data = result?.data ?? result;
     const ok = data && !data.error;
     return buildReceipt({
       gate_id: 'backend.api_smoke', validator_id: 'critical_function_smoke', status: ok ? 'PASS' : 'FAIL',
-      source_sha: sourceSha, metric_value: ok ? 1 : 0, threshold: 'critical read-only function returns structured response',
+      source_sha: sourceSha, metric_value: ok ? 1 : 0, threshold: 'exact-SHA live runtime + critical read-only function returns structured response',
       command_or_probe: 'functions.invoke(systemPreflight)',
       exit_code: ok ? 0 : 1,
-      evidence_refs: ok ? ['systemPreflight'] : [],
-      reason: ok ? 'Critical backend function invocation returned a structured response.' : 'systemPreflight returned an error/empty response.',
+      evidence_refs: ok ? [runtimeLineage.heartbeat_id, 'systemPreflight'].filter(Boolean) : [runtimeLineage.heartbeat_id].filter(Boolean),
+      reason: ok ? 'Exact-SHA live runtime was proven and critical backend function invocation returned a structured response.' : 'systemPreflight returned an error/empty response on an exact-SHA live runtime.',
     });
   } catch (e) {
     return buildReceipt({
       gate_id: 'backend.api_smoke', validator_id: 'critical_function_smoke', status: 'FAIL',
-      source_sha: sourceSha, metric_value: 0, threshold: 'critical read-only function returns structured response',
+      source_sha: sourceSha, metric_value: 0, threshold: 'exact-SHA live runtime + critical read-only function returns structured response',
       command_or_probe: 'functions.invoke(systemPreflight)',
-      exit_code: 1, stderr_summary: e.message,
-      reason: `Critical backend function invocation failed: ${e.message}`,
+      exit_code: 1, evidence_refs: [runtimeLineage.heartbeat_id].filter(Boolean), stderr_summary: e.message,
+      reason: `Critical backend function invocation failed on exact-SHA runtime: ${e.message}`,
     });
   }
 }
 
 async function validateAgentGovernance(base44: any, sourceSha: string | null): Promise<ValidatorReceipt> {
+  if (!sourceSha) {
+    return buildReceipt({
+      gate_id: 'agents.governance_loop', validator_id: 'repair_task_governance_audit', status: 'BLOCKED',
+      source_sha: null, threshold: '0 consequential/irreversible auto-approved repair tasks',
+      command_or_probe: 'RepairTask.list(-created_at,500)',
+      reason: 'Canonical source SHA is unavailable; governance task lineage cannot be verified.',
+    });
+  }
+
   const tasks = await base44.asServiceRole.entities.RepairTask.list('-created_at', 500).catch(() => []);
-  const violations = tasks.filter((t: any) =>
+  const exactTasks = tasks.filter((t: any) => t.source_sha_before === sourceSha || t.source_sha_after === sourceSha);
+  if (exactTasks.length === 0) {
+    return buildReceipt({
+      gate_id: 'agents.governance_loop', validator_id: 'repair_task_governance_audit', status: 'UNKNOWN',
+      source_sha: sourceSha, metric_value: 0, threshold: '0 consequential/irreversible auto-approved repair tasks',
+      command_or_probe: 'RepairTask.list(-created_at,500) exact source SHA filter',
+      reason: `No repair tasks among the inspected rows are stamped with canonical SHA ${sourceSha.slice(0, 8)}; stale or unstamped tasks cannot prove governance compliance.`,
+    });
+  }
+
+  const violations = exactTasks.filter((t: any) =>
     (t.risk_class === 'consequential' || t.risk_class === 'irreversible') &&
     (t.approval_state === 'auto_approved' || t.approval_state === 'not_required')
   );
@@ -276,33 +337,43 @@ async function validateAgentGovernance(base44: any, sourceSha: string | null): P
     gate_id: 'agents.governance_loop', validator_id: 'repair_task_governance_audit',
     status: violations.length === 0 ? 'PASS' : 'FAIL',
     source_sha: sourceSha, metric_value: violations.length, threshold: '0 consequential/irreversible auto-approved repair tasks',
-    command_or_probe: 'RepairTask.list(-created_at,500)',
-    evidence_refs: tasks.slice(0, 25).map((t: any) => t.task_id).filter(Boolean),
+    command_or_probe: 'RepairTask.list(-created_at,500) exact source SHA filter',
+    evidence_refs: exactTasks.slice(0, 25).map((t: any) => t.task_id).filter(Boolean),
     reason: violations.length === 0
-      ? `No approval-bypass violations found across ${tasks.length} recent repair task(s).`
-      : `${violations.length} consequential/irreversible repair task(s) bypassed required approval.`,
+      ? `No approval-bypass violations found across ${exactTasks.length} exact-SHA repair task(s).`
+      : `${violations.length} consequential/irreversible exact-SHA repair task(s) bypassed required approval.`,
   });
 }
 
 async function validateRollbackMethods(base44: any, sourceSha: string | null): Promise<ValidatorReceipt> {
-  const rows = await base44.asServiceRole.entities.RepairReceipt.list('-timestamp', 500).catch(() => []);
-  if (rows.length === 0) {
+  if (!sourceSha) {
     return buildReceipt({
-      gate_id: 'rollback.method_recorded', validator_id: 'repair_receipt_rollback_audit', status: 'UNKNOWN',
-      source_sha: sourceSha, metric_value: 0, threshold: '0 repair receipts missing rollback_method',
+      gate_id: 'rollback.method_recorded', validator_id: 'repair_receipt_rollback_audit', status: 'BLOCKED',
+      source_sha: null, metric_value: 0, threshold: '0 exact-SHA repair receipts missing rollback_method',
       command_or_probe: 'RepairReceipt.list(-timestamp,500)',
-      reason: 'No repair receipts exist to prove rollback-method coverage.',
+      reason: 'Canonical source SHA is unavailable; rollback receipt lineage cannot be verified.',
     });
   }
-  const missing = rows.filter((r: any) => !r.rollback_method || !String(r.rollback_method).trim());
+
+  const rows = await base44.asServiceRole.entities.RepairReceipt.list('-timestamp', 500).catch(() => []);
+  const exactRows = rows.filter((r: any) => r.source_sha_before === sourceSha || r.source_sha_after === sourceSha);
+  if (exactRows.length === 0) {
+    return buildReceipt({
+      gate_id: 'rollback.method_recorded', validator_id: 'repair_receipt_rollback_audit', status: 'UNKNOWN',
+      source_sha: sourceSha, metric_value: 0, threshold: '0 exact-SHA repair receipts missing rollback_method',
+      command_or_probe: 'RepairReceipt.list(-timestamp,500) exact source SHA filter',
+      reason: `No repair receipts stamp canonical SHA ${sourceSha.slice(0, 8)}; stale receipts cannot prove rollback-method coverage.`,
+    });
+  }
+  const missing = exactRows.filter((r: any) => !r.rollback_method || !String(r.rollback_method).trim());
   return buildReceipt({
     gate_id: 'rollback.method_recorded', validator_id: 'repair_receipt_rollback_audit', status: missing.length === 0 ? 'PASS' : 'FAIL',
-    source_sha: sourceSha, metric_value: missing.length, threshold: '0 repair receipts missing rollback_method',
-    command_or_probe: 'RepairReceipt.list(-timestamp,500)',
-    evidence_refs: rows.slice(0, 25).map((r: any) => r.repair_id).filter(Boolean),
+    source_sha: sourceSha, metric_value: missing.length, threshold: '0 exact-SHA repair receipts missing rollback_method',
+    command_or_probe: 'RepairReceipt.list(-timestamp,500) exact source SHA filter',
+    evidence_refs: exactRows.slice(0, 25).map((r: any) => r.repair_id).filter(Boolean),
     reason: missing.length === 0
-      ? `All ${rows.length} inspected repair receipt(s) include rollback_method.`
-      : `${missing.length}/${rows.length} repair receipt(s) are missing rollback_method.`,
+      ? `All ${exactRows.length} exact-SHA repair receipt(s) include rollback_method.`
+      : `${missing.length}/${exactRows.length} exact-SHA repair receipt(s) are missing rollback_method.`,
   });
 }
 
@@ -432,12 +503,15 @@ async function upsertValidationTask(base44: any, args: {
   const nextAttempt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
   if (existing[0]) {
     const e = existing[0];
-    if (e.status === 'PASS' || e.status === 'FAIL') return;
+    // Terminal evidence is only terminal for the exact same source SHA. A new canonical
+    // source must reopen the task rather than inheriting stale PASS/FAIL state.
+    if ((e.status === 'PASS' || e.status === 'FAIL') && e.source_sha === args.source_sha) return;
     await base44.asServiceRole.entities.ValidationTask.update(e.id, {
       status: args.status, validator_id: args.validator_id, source_sha: args.source_sha,
       reason: args.reason, blocker: args.blocker, wave: args.wave,
       attempt_count: (e.attempt_count || 0) + 1,
       last_attempt_at: args.now, next_attempt_at: nextAttempt, updated_at: args.now,
+      evidence_refs: [],
     }).catch(() => {});
   } else {
     await base44.asServiceRole.entities.ValidationTask.create({
