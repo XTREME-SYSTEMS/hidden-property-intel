@@ -1,5 +1,6 @@
 import React from "react";
 
+/** @param {{score?: number, size?: number, label?: React.ReactNode}} props */
 export default function ScoreGauge({ score = 0, size = 56, label }) {
   const r = (size - 8) / 2;
   const c = 2 * Math.PI * r;
