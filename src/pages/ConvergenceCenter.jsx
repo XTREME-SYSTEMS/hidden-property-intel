@@ -19,19 +19,22 @@ export default function ConvergenceCenter() {
   const [tasks, setTasks] = useState([]);
   const [validations, setValidations] = useState([]);
   const [subsystems, setSubsystems] = useState([]);
+  const [validationTasks, setValidationTasks] = useState([]);
+  const [runningValidators, setRunningValidators] = useState(false);
   const [running, setRunning] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [beats, gateRes, fnds, tks, vals, subs] = await Promise.all([
+      const [beats, gateRes, fnds, tks, vals, subs, vtasks] = await Promise.all([
         base44.entities.HeartbeatReceipt.list("-timestamp", 1).catch(() => []),
         base44.entities.GateResult.list("-evaluated_at", 60).catch(() => []),
         base44.entities.Finding.filter({ status: { $in: ["discovered", "diagnosed", "repair_planned", "failed", "blocked"] } }, "-discovered_at", 30).catch(() => []),
         base44.entities.RepairTask.filter({ status: { $in: ["queued", "in_progress"] } }, "-created_at", 20).catch(() => []),
         base44.entities.ValidationReceipt.list("-timestamp", 10).catch(() => []),
         base44.entities.SubsystemState.list("-updated_at", 20).catch(() => []),
+        base44.entities.ValidationTask.filter({ status: { $in: ["UNKNOWN", "VALIDATOR_REQUIRED", "VALIDATOR_READY", "VALIDATING", "BLOCKED"] } }, "-updated_at", 40).catch(() => []),
       ]);
       setHeartbeat(beats[0] || null);
       setGates(gateRes || []);
@@ -39,6 +42,7 @@ export default function ConvergenceCenter() {
       setTasks(tks || []);
       setValidations(vals || []);
       setSubsystems(subs || []);
+      setValidationTasks(vtasks || []);
     } finally {
       setLoading(false);
     }
@@ -51,6 +55,15 @@ export default function ConvergenceCenter() {
     try { await base44.functions.invoke("alphaPrime", {}); await load(); }
     finally { setRunning(false); }
   };
+
+  const runValidatorsNow = async () => {
+    setRunningValidators(true);
+    try { await base44.functions.invoke("runValidators", {}); await load(); }
+    finally { setRunningValidators(false); }
+  };
+
+  const WAVE1_GATES = ["ci.sha_stamped", "code.build", "code.lint", "code.typecheck", "workflows.heartbeat_active", "workflows.no_duplicate_cron"];
+  const latestGate = (gid) => gates.find((g) => g.gate_id === gid);
 
   const mode = heartbeat?.mode || "completion";
   const modeStyle = MODE_STYLES[mode];
@@ -79,14 +92,24 @@ export default function ConvergenceCenter() {
             </div>
             <p className="mt-1 text-sm text-[#8d8f92]">Alpha Prime governor — evidence-backed autonomous convergence</p>
           </div>
-          <button
-            onClick={runHeartbeat}
-            disabled={running}
-            className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-[#e4b653] to-[#c38a1b] px-5 py-2.5 text-sm font-bold text-[#120e07] transition hover:opacity-90 disabled:opacity-50"
-          >
-            {running ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
-            {running ? "Running heartbeat…" : "Run heartbeat now"}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={runValidatorsNow}
+              disabled={runningValidators}
+              className="inline-flex items-center gap-2 rounded-lg border border-[#3a3a2a] bg-[#1a1a14] px-4 py-2.5 text-sm font-bold text-[#c9b45a] transition hover:border-[#c9b45a] disabled:opacity-50"
+            >
+              {runningValidators ? <RefreshCw className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
+              {runningValidators ? "Validating…" : "Run Wave 1 validators"}
+            </button>
+            <button
+              onClick={runHeartbeat}
+              disabled={running}
+              className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-[#e4b653] to-[#c38a1b] px-5 py-2.5 text-sm font-bold text-[#120e07] transition hover:opacity-90 disabled:opacity-50"
+            >
+              {running ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
+              {running ? "Running heartbeat…" : "Run heartbeat now"}
+            </button>
+          </div>
         </div>
 
         {/* Top status bar */}
@@ -158,6 +181,50 @@ export default function ConvergenceCenter() {
                       <Lock className="h-3 w-3 text-[#b33a31]" />
                     </div>
                     <div className="mt-1 text-[10px] text-[#8d8f92]">{f.subsystem} · awaiting operator approval</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Panel>
+        </div>
+
+        {/* Wave 1 validator results + Validation task queue */}
+        <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <Panel title="Wave 1 Validator Results" icon={<ShieldCheck className="h-4 w-4 text-[#f0bf54]" />}>
+            <div className="space-y-2">
+              {WAVE1_GATES.map((gid) => {
+                const g = latestGate(gid);
+                const status = g?.status || "UNKNOWN";
+                const tone = status === "PASS" ? "#3bbd72" : status === "FAIL" ? "#b33a31" : status === "BLOCKED" ? "#b33a31" : "#8d8f92";
+                return (
+                  <div key={gid} className="flex items-start justify-between gap-3 rounded-lg border border-[#2b2c2f] bg-[#141516] px-3 py-2.5">
+                    <div className="min-w-0">
+                      <div className="text-xs font-semibold text-white">{gid}</div>
+                      <div className="mt-0.5 truncate text-[10px] text-[#8d8f92]">{g?.detail || "no validator receipt yet"}</div>
+                    </div>
+                    <span className="shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold" style={{ color: tone, background: `${tone}22` }}>{status}</span>
+                  </div>
+                );
+              })}
+              <div className="mt-2 rounded-lg border border-[#3a3a2a] bg-[#1a1a14] px-3 py-2 text-[10px] text-[#c9b45a]">
+                Source SHA: <span className="font-mono text-white">{heartbeat?.source_sha ? heartbeat.source_sha.slice(0, 12) : "pending"}</span> — stamped on every receipt
+              </div>
+            </div>
+          </Panel>
+
+          <Panel title="Validation Task Queue (UNKNOWN gates)" icon={<Clock className="h-4 w-4 text-[#f0bf54]" />} count={validationTasks.length}>
+            {validationTasks.length === 0 ? <Empty text="No validation tasks — all gates resolved or validated" tone="good" /> : (
+              <div className="max-h-72 space-y-2 overflow-auto">
+                {validationTasks.slice(0, 20).map((vt) => (
+                  <div key={vt.id} className="rounded-lg border border-[#2b2c2f] bg-[#141516] px-3 py-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-white">{vt.gate_id}</span>
+                      <span className="rounded-full bg-[#241e12] px-2 py-0.5 text-[9px] font-bold text-[#f0c05b]">{vt.status}</span>
+                    </div>
+                    <div className="mt-1 text-[10px] text-[#8d8f92]">{vt.reason || vt.blocker}</div>
+                    <div className="mt-1 flex items-center gap-2 text-[9px] text-[#6a6a6a]">
+                      <span>{vt.validator_id}</span>·<span>{vt.wave || "unassigned"}</span>
+                    </div>
                   </div>
                 ))}
               </div>

@@ -55,66 +55,57 @@ export default async function(req: Request): Promise<Response> {
       await base44.asServiceRole.entities.CacheEntry.create({ cache_key: leaseKey, source: 'alpha_prime', query: 'lease', response: { owner: heartbeatId }, cached_at: now, expires_at: expires, ttl_seconds: LEASE_TTL_SECONDS, provenance: 'alpha_prime', status: 'fresh' });
     }
 
-    // ── 2. Recompute gates from existing validators ──
+    // ── 2. Run Wave 1 validators (gate-specific deterministic evidence) ──
+    let validatorResult: any = null;
+    try {
+      validatorResult = await base44.asServiceRole.functions.invoke('runValidators', {});
+    } catch (e) { /* validator factory unavailable — gates stay UNKNOWN */ }
+    const vr: any = validatorResult?.data ?? validatorResult;
+    const sourceSha: string | null = vr?.source_sha ?? null;
+    const receiptMap: Record<string, any> = {};
+    for (const r of (vr?.receipts || [])) receiptMap[r.gate_id] = r;
+
+    // Operational telemetry (systemPreflight) — kept as telemetry, NOT release evidence.
     let preflight: any = null;
-    let audit: any = null;
     try {
       preflight = await base44.asServiceRole.functions.invoke('systemPreflight', {});
-    } catch (e) { /* may fail — that itself is a finding */ }
-    try {
-      audit = await base44.asServiceRole.functions.invoke('systemAudit', {});
     } catch (e) { /* may fail */ }
-
-    // Map validator outputs onto the constitution gates.
-    // functions.invoke returns { data: ... }; normalize to the payload.
     const pf: any = preflight?.data ?? preflight;
-    const au: any = audit?.data ?? audit;
-    // pf.dimensions is an ARRAY of { dimension, score, status, findings }.
-    // We map known dimension names to specific gate_ids; unmapped gates stay UNKNOWN (honest).
-    const dimMap: Record<string, number> = {};
+    const telemetryDims: Record<string, number> = {};
     if (Array.isArray(pf?.dimensions)) {
-      for (const d of pf.dimensions) dimMap[d.dimension] = d.score;
-    }
-    const DIM_TO_GATE: Record<string, string[]> = {
-      data_acquisition: ['ingest.scrape_success'],
-      scraping_engine: ['browser.engine_reachable', 'ingest.scrape_success'],
-      normalization: ['dq.ownership_coverage'],
-      sources_seeds: ['ingest.florida_only'],
-      enrichment: ['dq.title_risk_coverage', 'dq.image_coverage'],
-      owner_identification: ['dq.ownership_coverage'],
-      security_compliance: ['security.input_validation', 'rls.admin_only_entities'],
-      system_intelligence: ['ai.gateway_available'],
-      seo_visibility: ['seo.sitemap_valid', 'seo.indexability'],
-      outreach_engine: ['agents.governance_loop'],
-    };
-    const gateScores: Record<string, number> = {};
-    for (const [dim, gateIds] of Object.entries(DIM_TO_GATE)) {
-      const score = dimMap[dim];
-      if (score !== undefined) for (const gid of gateIds) gateScores[gid] = score;
+      for (const d of pf.dimensions) telemetryDims[d.dimension] = d.score;
     }
 
+    // GATE RESOLUTION PRIORITY:
+    //   1. Fresh deterministic gate validator receipt (Wave 1) → authoritative
+    //   2. Otherwise UNKNOWN (never inferred from dimension scores)
+    // Legacy dimension scores remain operational telemetry only — never release evidence.
     const gates = RELEASE_CONSTITUTION.map((g) => {
       const updated = { ...g };
-      const score = gateScores[g.gate_id];
-      if (score !== undefined) {
-        updated.current_status = score >= 80 ? 'PASS' : 'FAIL';
-        if (score >= 80) updated.last_passed_at = now;
+      const receipt = receiptMap[g.gate_id];
+      if (receipt) {
+        updated.current_status = receipt.status;
+        updated.source_sha = receipt.source_sha || null;
+        if (receipt.status === 'PASS') updated.last_passed_at = receipt.completed_at;
+      } else {
+        // No gate-specific validator → UNKNOWN (honest). Never infer PASS from telemetry.
+        updated.current_status = 'UNKNOWN';
       }
-      // Validators that failed to invoke are themselves failures
-      if (g.gate_id === 'backend.functions_deploy' && !pf) updated.current_status = 'FAIL';
-      if (g.gate_id === 'obs.logs_available' && !au) updated.current_status = 'FAIL';
       return updated;
     });
 
     const readiness = computeReleaseReady(gates);
 
-    // Persist gate results
+    // Persist gate results (fresh snapshot for UI + audit)
     for (const g of gates) {
+      const receipt = receiptMap[g.gate_id];
       await base44.asServiceRole.entities.GateResult.create({
         gate_id: g.gate_id, category: g.category, mandatory: g.mandatory,
-        status: g.current_status, evidence_refs: g.current_status === 'PASS' ? [g.validator] : [],
-        detail: g.test, last_passed_at: g.last_passed_at, source_sha: g.source_sha || null,
-        artifact_refs: g.artifact_refs, evaluated_at: now,
+        status: g.current_status,
+        evidence_refs: receipt?.evidence_refs || (g.current_status === 'PASS' ? [g.validator] : []),
+        detail: receipt ? `${receipt.validator_id} v${receipt.validator_version}: ${receipt.reason}` : g.test,
+        last_passed_at: g.last_passed_at, source_sha: g.source_sha || null,
+        artifact_refs: receipt?.artifact_refs || g.artifact_refs, evaluated_at: now,
       }).catch(() => {});
     }
 
@@ -268,14 +259,20 @@ export default async function(req: Request): Promise<Response> {
       gate_failures: failingGates.map((g) => g.gate_id), open_findings: openFindings.length,
       release_ready: readiness.release_ready, duration_ms: Date.now() - startedAt,
       next_due_smoke: nextSmoke, next_due_optimize: nextOptimize, next_due_benchmark: nextBenchmark,
-      source_sha: null, notes: pendingApprovals.length ? `${pendingApprovals.length} actions awaiting approval` : '',
+      source_sha: sourceSha,
+      notes: pendingApprovals.length
+        ? `${pendingApprovals.length} actions awaiting approval`
+        : `source_sha=${sourceSha?.slice(0, 8) || 'none'}; telemetry=${Object.keys(telemetryDims).length} dims`,
     });
 
     return Response.json({
       heartbeat_id: heartbeatId, mode, release_ready: readiness.release_ready,
       mandatory_pass: readiness.mandatory_pass, mandatory_total: readiness.mandatory_total,
+      mandatory_fail: readiness.failing.length, mandatory_unknown: readiness.unknown.length,
+      source_sha: sourceSha,
       failing_gates: readiness.failing.map((g) => g.gate_id),
       unknown_gates: readiness.unknown.map((g) => g.gate_id),
+      wave1_results: Object.fromEntries(Object.entries(receiptMap).map(([k, v]: [string, any]) => [k, v.status])),
       jobs_due: fresh.length, jobs_dispatched: dispatched, receipts_collected: receipts,
       pending_approvals: pendingApprovals, duration_ms: Date.now() - startedAt, timestamp: now,
     });
