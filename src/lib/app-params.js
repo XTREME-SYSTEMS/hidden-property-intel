@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 const isNode = typeof window === 'undefined';
 const memoryStorage = new Map();
 const storage = isNode
