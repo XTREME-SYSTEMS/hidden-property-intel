@@ -64,6 +64,11 @@ export default async function (req: Request): Promise<Response> {
     // WORKFLOWS
     const heartbeats = await base44.asServiceRole.entities.HeartbeatReceipt.list('-timestamp', 10).catch(() => []);
     receipts.push(validateHeartbeatActive(heartbeats, sourceSha));
+
+    // OBSERVABILITY. The durable runtime log stream is source-SHA stamped and must
+    // demonstrate advancing exact-SHA records. Missing or foreign logs remain UNKNOWN.
+    const runtimeLogs = await base44.asServiceRole.entities.RuntimeLogReceipt.list('-timestamp', 20).catch(() => []);
+    receipts.push(validateObservabilityLogs(runtimeLogs, sourceSha));
     receipts.push(validateNoDuplicateCron(sourceSha));
 
     // RUNTIME + GOVERNANCE validators. Runtime probes must first prove that the live
@@ -135,6 +140,20 @@ export default async function (req: Request): Promise<Response> {
         wave: 'autonomous_completion',
         now,
       });
+    }
+
+    // Emit a durable application-level runtime log receipt for the NEXT validator cycle.
+    // The current cycle never counts the record it is about to write, preventing self-proof.
+    if (sourceSha) {
+      await base44.asServiceRole.entities.RuntimeLogReceipt.create({
+        log_id: uid('rlog'),
+        timestamp: now,
+        source_sha: sourceSha,
+        subsystem: 'runValidators',
+        level: 'info',
+        event: 'validator_cycle',
+        detail: 'implemented=' + receipts.length + '; unimplemented_mandatory=' + unimplementedMandatory.length,
+      }).catch(() => {});
     }
 
     const results = Object.fromEntries(receipts.map((r) => [r.gate_id, r.status]));
@@ -268,6 +287,58 @@ function validateNoDuplicateCron(sourceSha: string | null): ValidatorReceipt {
     reason: pass
       ? 'No conflicting independent scheduler remains.'
       : `${conflicting.length} conflicting scheduler(s) remain. Production scheduler removal is approval-gated; the rest of the mission must continue.`,
+  });
+}
+
+function validateObservabilityLogs(runtimeLogs: any[], sourceSha: string | null): ValidatorReceipt {
+  const threshold = '>=2 exact-SHA advancing runtime log receipts in 20m; max gap <=15m';
+  const probe = 'RuntimeLogReceipt.list(-timestamp,20) exact source_sha stream audit';
+  if (!sourceSha) {
+    return buildReceipt({
+      gate_id: 'obs.logs_available', validator_id: 'runtime_log_stream_probe', status: 'BLOCKED',
+      source_sha: null, metric_value: 0, threshold, command_or_probe: probe,
+      reason: 'Canonical source SHA is unavailable; runtime log lineage cannot be verified.',
+    });
+  }
+
+  const cutoff = Date.now() - 20 * 60 * 1000;
+  const exact = runtimeLogs.filter((row: any) => {
+    if (row?.source_sha !== sourceSha || !row?.timestamp) return false;
+    const ts = new Date(row.timestamp).getTime();
+    return Number.isFinite(ts) && ts >= cutoff;
+  });
+  const foreign = runtimeLogs.filter((row: any) => row?.source_sha && row.source_sha !== sourceSha);
+
+  if (exact.length < 2) {
+    return buildReceipt({
+      gate_id: 'obs.logs_available', validator_id: 'runtime_log_stream_probe', status: 'UNKNOWN',
+      source_sha: sourceSha, metric_value: exact.length, threshold, command_or_probe: probe,
+      evidence_refs: exact.map((row: any) => row.log_id).filter(Boolean),
+      stderr_summary: foreign.length ? String(foreign.length) + ' foreign/stale runtime log receipt(s) ignored' : '',
+      reason: 'Only ' + exact.length + ' recent runtime log receipt(s) stamp canonical SHA ' + sourceSha.slice(0, 8) + '; at least 2 are required to prove an advancing stream.',
+    });
+  }
+
+  const sorted = [...exact].sort((a: any, b: any) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+  let advancing = true;
+  let maxGapMs = 0;
+  for (let i = 1; i < sorted.length; i++) {
+    const gap = new Date(sorted[i].timestamp).getTime() - new Date(sorted[i - 1].timestamp).getTime();
+    if (gap <= 0) advancing = false;
+    maxGapMs = Math.max(maxGapMs, gap);
+  }
+  const maxGapMin = maxGapMs / 60000;
+  const malformed = sorted.filter((row: any) => !row.log_id || !row.event || !row.subsystem);
+  const pass = advancing && maxGapMin <= 15 && malformed.length === 0;
+  return buildReceipt({
+    gate_id: 'obs.logs_available', validator_id: 'runtime_log_stream_probe', status: pass ? 'PASS' : 'FAIL',
+    source_sha: sourceSha, metric_value: sorted.length, threshold, command_or_probe: probe,
+    exit_code: pass ? 0 : 1,
+    evidence_refs: sorted.map((row: any) => row.log_id).filter(Boolean),
+    stdout_summary: 'exact_sha_logs=' + sorted.length + '; max_gap_min=' + maxGapMin.toFixed(1) + '; malformed=' + malformed.length,
+    reason: pass
+      ? String(sorted.length) + ' source-stamped runtime log receipts are advancing for SHA ' + sourceSha.slice(0, 8) + ' with max gap ' + maxGapMin.toFixed(1) + 'm.'
+      : 'Runtime log stream failed exact-SHA continuity: advancing=' + advancing + ', max gap=' + maxGapMin.toFixed(1) + 'm, malformed=' + malformed.length + '.',
   });
 }
 

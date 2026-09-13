@@ -1,0 +1,20 @@
+{
+  "name": "RuntimeLogReceipt",
+  "type": "object",
+  "properties": {
+    "log_id": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "source_sha": { "type": "string" },
+    "subsystem": { "type": "string" },
+    "level": { "type": "string", "enum": ["info", "warn", "error"] },
+    "event": { "type": "string" },
+    "detail": { "type": "string" }
+  },
+  "required": ["log_id", "timestamp", "source_sha", "subsystem", "level", "event"],
+  "rls": {
+    "read": { "user_condition": { "role": "admin" } },
+    "create": { "user_condition": { "role": "admin" } },
+    "update": { "user_condition": { "role": "admin" } },
+    "delete": { "user_condition": { "role": "admin" } }
+  }
+}
