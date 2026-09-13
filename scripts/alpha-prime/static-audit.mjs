@@ -20,7 +20,8 @@ function stripJsonc(s) { return s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|\
 
 const entityDir = path.join(root, 'base44', 'entities');
 const functionDir = path.join(root, 'base44', 'functions');
-const allFiles = walk(root);
+const selfPath = path.join(root, 'scripts', 'alpha-prime', 'static-audit.mjs');
+const allFiles = walk(root).filter((f) => path.resolve(f) !== path.resolve(selfPath));
 
 if (mode === 'schema-valid') {
   const errors = [];
