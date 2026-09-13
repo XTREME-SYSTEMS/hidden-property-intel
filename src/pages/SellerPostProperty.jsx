@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { ArrowRight, ArrowLeft, Sparkles } from "lucide-react";
+import { ArrowRight, ArrowLeft } from "lucide-react";
 import { DISTRESS_TYPES as DISTRESS, PROPERTY_TYPES as TYPES } from "@/lib/constants";
 const inputCls = "w-full rounded-sm border border-black/15 bg-white px-4 py-3 text-sm outline-none focus:border-black";
 

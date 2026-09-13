@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import {
-  CheckCircle2, AlertCircle, XCircle, Copy, Check, ChevronDown,
+import { Copy, Check,
   Database, Brain, Scale, Blocks, Mail, Smartphone, Shield, Zap,
   BarChart3, DollarSign, ShieldCheck, Sparkles, Search
 } from "lucide-react";

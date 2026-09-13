@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import {
-  Sparkles, Loader2, Search, Activity, Database, AlertTriangle, CheckCircle2,
-  Brain, FileSearch, TrendingUp, Zap, ChevronRight, Clock, Target, X, Wrench, ShieldCheck,
+  Sparkles, Loader2, Activity, Database, AlertTriangle, CheckCircle2,
+  Brain, FileSearch, Zap, ChevronRight, X, Wrench, ShieldCheck,
 } from "lucide-react";
 import IntelligenceTools from "@/components/intelligence/IntelligenceTools";
 

@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
-import {
-  Users, DollarSign, Brain, Loader2, Target, TrendingUp,
-  FileText, ArrowRight, Zap, Handshake,
+import { DollarSign, Brain, Loader2, Target, TrendingUp,
+  FileText, Zap, Handshake,
 } from "lucide-react";
 
 export default function WholesalerDashboard() {

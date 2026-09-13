@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import {
-  Building2, FileText, ShieldCheck, DollarSign, Brain, Loader2,
-  AlertTriangle, CheckCircle2, Clock, ArrowRight, Scale, Home,
+  Building2, ShieldCheck, DollarSign, Brain, Loader2,
+  AlertTriangle, Clock, Scale,
 } from "lucide-react";
 
 export default function TitleEscrowDashboard() {

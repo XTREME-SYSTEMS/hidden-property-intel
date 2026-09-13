@@ -1,5 +1,5 @@
 import React from "react";
-import { Users, Check, AlertTriangle, TrendingUp, DollarSign, Scale } from "lucide-react";
+import { Users, Check, AlertTriangle, Scale } from "lucide-react";
 
 const COLOR_MAP = {
   blue: "bg-blue-50 text-blue-700 border-blue-200",

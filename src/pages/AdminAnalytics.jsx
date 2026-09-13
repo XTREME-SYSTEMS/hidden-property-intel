@@ -2,10 +2,10 @@ import React, { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import {
-  TrendingUp, DollarSign, Target, Mail, Activity, BarChart3, PieChart, Award, RefreshCw, ArrowRight,
+  TrendingUp, DollarSign, Target, Mail, Activity, BarChart3, PieChart, ArrowRight,
 } from "lucide-react";
 import {
-  BarChart, Bar, LineChart, Line, PieChart as RechartsPie, Pie, Cell, XAxis, YAxis, CartesianGrid,
+  BarChart, Bar, PieChart as RechartsPie, Pie, Cell, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 

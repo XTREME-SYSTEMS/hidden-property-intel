@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import {
-  Radar, Brain, FileSignature, Users, RefreshCw, Mail, ShieldCheck, Database,
+  Radar, Brain, Users, Mail, ShieldCheck, Database,
   TrendingUp, Target, Zap, ArrowRight, Activity, AlertTriangle, CheckCircle2,
-  Image, Phone, Eye, Bug, Copy, MapPin, Cpu, Server, Gauge, Layers,
+  Image, Phone, Eye, Bug, Copy, Cpu, Gauge, Layers,
   Scale, BarChart3, Trophy, Blocks,
 } from "lucide-react";
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import {
   Mail, Briefcase, Globe, Wallet, Image as ImageIcon, Zap, Loader2,
-  CheckCircle2, AlertCircle, Lock, Sparkles, Play, ArrowLeft, ChevronDown,
+  CheckCircle2, AlertCircle, Lock, Play, ArrowLeft, ChevronDown,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 

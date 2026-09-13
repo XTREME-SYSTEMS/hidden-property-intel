@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
-  Lock, Wallet, FileSignature, BadgeCheck, CheckCircle2, ArrowRight,
-  Clock, TrendingDown, Sparkles, Zap, RefreshCw, ChevronRight, Building2, Gavel,
+  Lock, Wallet, FileSignature, BadgeCheck, CheckCircle2,
+  Clock, TrendingDown, Sparkles, Zap, RefreshCw, ChevronRight, Building2,
 } from "lucide-react";
 
 const PHASES = [

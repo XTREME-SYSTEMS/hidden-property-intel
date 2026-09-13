@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { base44 } from "@/api/base44Client";
 import { Layers, AlertTriangle, FileX, Scale, Home, DollarSign, ShieldAlert } from "lucide-react";
 
 /**
