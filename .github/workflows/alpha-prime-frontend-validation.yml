@@ -22,6 +22,9 @@ jobs:
   frontend-render:
     name: frontend-render
     runs-on: ubuntu-latest
+    env:
+      VITE_BASE44_APP_ID: 6a8ba268665196e93b7d57f7
+      VITE_BASE44_APP_BASE_URL: https://my-property-intel.base44.app
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -33,30 +36,24 @@ jobs:
       - name: Install pinned validation tools without mutating lockfile
         run: |
           npm install --no-save --package-lock=false --ignore-scripts playwright@1.55.0
-          npm install --global base44@0.1.14
           npx playwright install --with-deps chromium
-      - name: Build application
+      - name: Build exact branch frontend against real read-only Base44 backend
         run: npm run build
-      - name: Start isolated Base44 development backend and frontend
+      - name: Start isolated production frontend preview
         run: |
-          nohup base44 dev > base44-dev.log 2>&1 &
-          echo $! > base44-dev.pid
+          nohup npm run preview -- --host 127.0.0.1 --port 4173 > vite-preview.log 2>&1 &
+          echo $! > vite-preview.pid
           ready=0
-          for attempt in $(seq 1 90); do
-            if curl -fsS http://127.0.0.1:5173/ >/dev/null; then
+          for attempt in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then
               ready=1
               break
             fi
             sleep 1
           done
           if [ "$ready" -ne 1 ]; then
-            echo "Base44 local development frontend did not become ready on 127.0.0.1:5173" >&2
-            cat base44-dev.log || true
-            exit 1
-          fi
-          if grep -q "No Base44 backend configured" base44-dev.log; then
-            echo "Base44 local backend was not configured; refusing invalid frontend evidence." >&2
-            cat base44-dev.log
+            echo "Vite production preview did not become ready on 127.0.0.1:4173" >&2
+            cat vite-preview.log || true
             exit 1
           fi
       - name: Validate mandatory render routes and capture console evidence
@@ -65,63 +62,112 @@ jobs:
           import fs from 'node:fs';
           import { chromium } from 'playwright';
 
-          const base = 'http://127.0.0.1:5173';
-          const routes = [
+          const base = 'http://127.0.0.1:4173';
+          const staticRoutes = [
             { id: 'home', path: '/' },
             { id: 'listings', path: '/listings' },
-            { id: 'property-detail', path: '/properties/alpha-prime-smoke' },
           ];
           const results = [];
           const browser = await chromium.launch({ headless: true });
 
+          async function validateRoute(route) {
+            const page = await browser.newPage();
+            const consoleErrors = [];
+            const pageErrors = [];
+            const failedRequests = [];
+            page.on('console', (message) => {
+              if (message.type() === 'error') consoleErrors.push(message.text());
+            });
+            page.on('pageerror', (error) => pageErrors.push(String(error?.stack || error?.message || error)));
+            page.on('requestfailed', (request) => failedRequests.push({
+              url: request.url(),
+              failure: request.failure()?.errorText || 'request failed',
+            }));
+
+            let status = null;
+            let navigationError = null;
+            let bodyLength = 0;
+            try {
+              const response = await page.goto(base + route.path, { waitUntil: 'domcontentloaded', timeout: 30000 });
+              status = response?.status() ?? null;
+              await page.waitForTimeout(3000);
+              bodyLength = (await page.locator('body').innerText()).trim().length;
+            } catch (error) {
+              navigationError = String(error?.stack || error?.message || error);
+            }
+
+            const renderPass = navigationError === null && status !== null && status < 500 && bodyLength > 0;
+            const row = {
+              route_id: route.id,
+              path: route.path,
+              http_status: status,
+              body_text_length: bodyLength,
+              render_pass: renderPass,
+              navigation_error: navigationError,
+              console_errors: consoleErrors,
+              page_errors: pageErrors,
+              failed_requests: failedRequests,
+            };
+            results.push(row);
+            return { page, row };
+          }
+
           try {
-            for (const route of routes) {
-              const page = await browser.newPage();
-              const consoleErrors = [];
-              const pageErrors = [];
-              page.on('console', (message) => {
-                if (message.type() === 'error') consoleErrors.push(message.text());
-              });
-              page.on('pageerror', (error) => pageErrors.push(String(error?.stack || error?.message || error)));
+            await validateRoute(staticRoutes[0]).then(({ page }) => page.close());
+            const listings = await validateRoute(staticRoutes[1]);
 
-              let status = null;
-              let navigationError = null;
-              let bodyLength = 0;
-              try {
-                const response = await page.goto(base + route.path, { waitUntil: 'domcontentloaded', timeout: 30000 });
-                status = response?.status() ?? null;
-                await page.waitForTimeout(2000);
-                bodyLength = (await page.locator('body').innerText()).trim().length;
-              } catch (error) {
-                navigationError = String(error?.stack || error?.message || error);
-              }
-
-              const renderPass = navigationError === null && status !== null && status < 500 && bodyLength > 0;
+            let detailPath = null;
+            try {
+              const hrefs = await listings.page.locator('a[href*="/properties/"]').evaluateAll((anchors) =>
+                anchors.map((anchor) => anchor.getAttribute('href')).filter(Boolean)
+              );
+              detailPath = hrefs.find((href) => /^\/properties\/[^/]+$/.test(href)) || null;
+            } catch (error) {
               results.push({
-                route_id: route.id,
-                path: route.path,
-                http_status: status,
-                body_text_length: bodyLength,
-                render_pass: renderPass,
-                navigation_error: navigationError,
-                console_errors: consoleErrors,
-                page_errors: pageErrors,
+                route_id: 'property-detail-discovery',
+                path: null,
+                http_status: null,
+                body_text_length: 0,
+                render_pass: false,
+                navigation_error: `Could not discover a real property detail route: ${String(error?.message || error)}`,
+                console_errors: [],
+                page_errors: [],
+                failed_requests: [],
               });
-              await page.close();
+            }
+            await listings.page.close();
+
+            if (!detailPath) {
+              results.push({
+                route_id: 'property-detail',
+                path: null,
+                http_status: null,
+                body_text_length: 0,
+                render_pass: false,
+                navigation_error: 'No real property detail link was rendered by /listings; refusing a mock/fabricated property id.',
+                console_errors: [],
+                page_errors: [],
+                failed_requests: [],
+              });
+            } else {
+              await validateRoute({ id: 'property-detail', path: detailPath }).then(({ page }) => page.close());
             }
           } finally {
             await browser.close();
           }
 
           const evidence = {
-            validator: 'alpha-prime-playwright-render-v2-base44-local',
+            validator: 'alpha-prime-playwright-render-v3-live-readonly',
             source_sha: process.env.GITHUB_SHA,
-            backend_mode: 'base44-local-throwaway',
-            threshold: 'home, listings, and property-detail routes return <500 and render non-empty body',
+            backend_mode: 'base44-live-readonly',
+            backend_app_id: process.env.VITE_BASE44_APP_ID,
+            backend_url: process.env.VITE_BASE44_APP_BASE_URL,
+            data_policy: 'real-live-readonly-no-mock-identities-or-fabricated-property-ids',
+            threshold: 'home, listings, and one discovered real property-detail route return <500 and render non-empty body',
             generated_at: new Date().toISOString(),
             routes: results,
-            render_pass: results.every((row) => row.render_pass),
-            no_console_errors_pass: results.every((row) => row.console_errors.length === 0 && row.page_errors.length === 0),
+            render_pass: results.length === 3 && results.every((row) => row.render_pass),
+            no_console_errors_pass: results.length === 3 && results.every((row) => row.console_errors.length === 0 && row.page_errors.length === 0),
           };
           fs.writeFileSync('frontend-validation-evidence.json', JSON.stringify(evidence, null, 2));
           console.log(JSON.stringify(evidence, null, 2));
@@ -134,7 +180,7 @@ jobs:
           name: alpha-prime-frontend-evidence-${{ github.sha }}
           path: |
             frontend-validation-evidence.json
-            base44-dev.log
+            vite-preview.log
           if-no-files-found: warn
           retention-days: 7
 
@@ -157,8 +203,12 @@ jobs:
             console.error(`Stale SHA evidence rejected: evidence=${evidence.source_sha} current=${process.env.GITHUB_SHA}`);
             process.exit(1);
           }
-          if (evidence.backend_mode !== 'base44-local-throwaway') {
+          if (evidence.backend_mode !== 'base44-live-readonly') {
             console.error(`Invalid backend mode for console evidence: ${evidence.backend_mode}`);
+            process.exit(1);
+          }
+          if (evidence.data_policy !== 'real-live-readonly-no-mock-identities-or-fabricated-property-ids') {
+            console.error(`Invalid data policy for console evidence: ${evidence.data_policy}`);
             process.exit(1);
           }
           const errors = evidence.routes.flatMap((row) => [
