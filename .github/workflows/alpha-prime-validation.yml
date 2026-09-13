@@ -104,6 +104,52 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  repair-typecheck:
+    name: repair-typecheck
+    needs: typecheck
+    if: ${{ always() && needs.typecheck.result == 'failure' && startsWith(github.ref, 'refs/heads/alpha-prime/') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Apply deterministic type contract repairs
+        run: node scripts/alpha-prime/type-contract-repair.mjs
+      - name: Capture post-repair typecheck evidence
+        run: |
+          set +e
+          npm run typecheck 2>&1 | tee typecheck-post-repair.log
+          ec=${PIPESTATUS[0]}
+          echo "$ec" > typecheck-post-repair.exit
+          exit 0
+      - name: Upload post-repair typecheck evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: alpha-prime-typecheck-post-repair-evidence
+          path: |
+            typecheck-post-repair.log
+            typecheck-post-repair.exit
+          if-no-files-found: error
+          retention-days: 7
+      - name: Commit deterministic repairs only when source changed
+        run: |
+          if git diff --quiet; then
+            echo "No deterministic type contract changes produced."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src
+          git commit -m "Auto-repair deterministic type contract findings"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+
   dependency-scan:
     name: dependency-scan
     runs-on: ubuntu-latest
