@@ -6,6 +6,7 @@ import Logo from "@/components/luxury/Logo";
  * PWA install prompt with a branded "Download" button and a "Get on mobile" button.
  * variant="nav"  -> compact single icon button for the header
  * variant="card" -> full branded card with both buttons (for landing pages)
+ * @param {{variant?: "nav" | "card" | "mobiletab", active?: boolean}} props
  */
 export default function PWAInstall({ variant = "nav", active = false }) {
   const [deferred, setDeferred] = useState(null);
@@ -21,7 +22,8 @@ export default function PWAInstall({ variant = "nav", active = false }) {
 
     const ios = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
     setIsIos(ios);
-    const standalone = window.matchMedia('(display-mode: standalone)').matches || (ios && window.navigator.standalone === true);
+    const nav = /** @type {Navigator & {standalone?: boolean}} */ (window.navigator);
+    const standalone = window.matchMedia('(display-mode: standalone)').matches || (ios && nav.standalone === true);
     if (standalone) setInstalled(true);
 
     return () => {
@@ -41,7 +43,6 @@ export default function PWAInstall({ variant = "nav", active = false }) {
   const onMobile = () => {
     if (deferred) { install(); return; }
     if (isIos) { setShowIosTip(true); return; }
-    // non-iOS without a prompt yet: nudge the user
     setShowIosTip(true);
   };
 
@@ -78,7 +79,6 @@ export default function PWAInstall({ variant = "nav", active = false }) {
     );
   }
 
-  // variant === "card"
   return (
     <div className="relative rounded-sm border border-black/10 bg-white p-6 sm:p-8">
       <div className="flex items-center gap-3">
