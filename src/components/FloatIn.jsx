@@ -5,7 +5,8 @@ import React, { useEffect, useRef, useState } from "react";
  * the first time the element scrolls into view. Pure additive effect;
  * does not alter layout or styling beyond the entrance animation.
  */
-export default function FloatIn({ children, className = "", delay = 0, as: Tag = "div" }) {
+export default function FloatIn({ children, className = "", delay = 0, as = "div" }) {
+  const Tag = /** @type {React.ElementType} */ (as);
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
 
