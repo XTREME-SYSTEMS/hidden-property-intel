@@ -49,9 +49,30 @@ if (createTask >= 0 && agentInvoke > createTask) {
 const createCount = (text.match(/entities\.RepairTask\.create\s*\(/g) || []).length;
 if (createCount !== 1) failures.push(`expected exactly 1 RepairTask.create path in Alpha Prime governor, found ${createCount}`);
 
-// A stale/foreign Finding with the same gate category must not suppress a new exact-SHA finding.
-const exactSourceFindingDedup = /openFindings\s*\.filter\(\(f:\s*any\)\s*=>\s*Boolean\(sourceSha\s*&&\s*f\.source_sha\s*&&\s*f\.source_sha\s*===\s*sourceSha\)\)\s*\.map\(\(f:\s*any\)\s*=>\s*f\.category\)/s;
-if (!exactSourceFindingDedup.test(text)) failures.push('mandatory-gate Finding deduplication is not restricted to the exact current source SHA');
+// Current operational queues and health must be derived from exact-source Findings only.
+if (!/const\s+currentSourceOpenFindings\s*=\s*openFindings\.filter\(\(f:\s*any\)\s*=>\s*\s*Boolean\(sourceSha\s*&&\s*f\.source_sha\s*&&\s*f\.source_sha\s*===\s*sourceSha\)/s.test(text)) {
+  failures.push('current-source open Finding view is missing or not exact-SHA filtered');
+}
+if (!/const\s+existingCategories\s*=\s*new Set\(currentSourceOpenFindings\.map\(\(f:\s*any\)\s*=>\s*f\.category\)\)/.test(text)) {
+  failures.push('mandatory-gate Finding deduplication does not use the exact-source Finding view');
+}
+if (!/const\s+currentSourceFresh\s*=\s*fresh\.filter\(\(f:\s*any\)\s*=>\s*\s*Boolean\(sourceSha\s*&&\s*f\.source_sha\s*&&\s*f\.source_sha\s*===\s*sourceSha\)/s.test(text)) {
+  failures.push('repair queue due-view is missing exact-SHA filtering');
+}
+if (!/for\s*\(const\s+finding\s+of\s+currentSourceFresh\)/.test(text)) {
+  failures.push('repair dispatcher is not iterating the exact-source due queue');
+}
+if (!/const\s+noCriticalOpen\s*=\s*!currentSourceOpenFindings\.some/.test(text)) {
+  failures.push('preservation eligibility can still be poisoned by stale/foreign Findings');
+}
+if (!/const\s+subFindings\s*=\s*currentSourceOpenFindings\.filter/.test(text)) {
+  failures.push('subsystem health can still be poisoned by stale/foreign Findings');
+}
+const sourceBoundDueCounts = (text.match(/jobs_due:\s*currentSourceFresh\.length/g) || []).length;
+if (sourceBoundDueCounts < 2) failures.push(`expected source-bound jobs_due in heartbeat and response, found ${sourceBoundDueCounts}`);
+if (!/open_findings:\s*currentSourceOpenFindings\.length/.test(text)) {
+  failures.push('HeartbeatReceipt open_findings is not restricted to exact-source Findings');
+}
 
 // Historical heartbeats may only contribute to the preservation clean streak when they belong to the same exact source SHA.
 const exactSourceCleanStreak = /if\s*\(sourceSha\s*&&\s*b\.source_sha\s*===\s*sourceSha\s*&&\s*b\.release_ready\s*&&\s*\(b\.gate_failures\s*\|\|\s*\[\]\)\.length\s*===\s*0\)/;
@@ -74,4 +95,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log('repair-dispatch-safety PASS: exact-SHA finding lifecycle, repair dispatch, receipt lineage, and heartbeat preservation streak are enforced.');
+console.log('repair-dispatch-safety PASS: exact-SHA finding lifecycle, current-source queue/health telemetry, repair dispatch, receipt lineage, and heartbeat preservation streak are enforced.');
