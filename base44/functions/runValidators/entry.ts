@@ -5,6 +5,12 @@ import {
   type ValidatorReceipt, type GithubSecrets,
 } from '../../shared/validatorContract.ts';
 import { RELEASE_CONSTITUTION } from '../../shared/releaseConstitution.ts';
+import {
+  validateAuthEvidence,
+  validateRlsEvidence,
+  validateAiGatewayEvidence,
+  validatePaymentEvidence,
+} from '../../shared/externalGateValidators.ts';
 
 /**
  * ALPHA PRIME VALIDATOR FACTORY — Autonomous Mega-Wave Worker
@@ -58,6 +64,21 @@ export default async function (req: Request): Promise<Response> {
     // compilation alone can never satisfy a deployment gate.
     const backendDeployReceipts = await base44.asServiceRole.entities.BackendDeployReceipt.list('-timestamp', 20).catch(() => []);
     receipts.push(validateBackendFunctionsDeploy(checkRuns, backendDeployReceipts, sourceSha));
+
+    // AUTH, RLS, AI GATEWAY, and PAYMENTS are evidence-consumer gates. These validators
+    // never perform login mutations, policy changes, AI spend, or payment actions. They
+    // only consume fresh exact-SHA receipts produced independently in sandbox/test scope.
+    const authValidationReceipts = await base44.asServiceRole.entities.AuthValidationReceipt.list('-tested_at', 50).catch(() => []);
+    receipts.push(...validateAuthEvidence(authValidationReceipts, sourceSha));
+
+    const rlsValidationReceipts = await base44.asServiceRole.entities.RlsValidationReceipt.list('-tested_at', 50).catch(() => []);
+    receipts.push(...validateRlsEvidence(rlsValidationReceipts, sourceSha));
+
+    const aiGatewayValidationReceipts = await base44.asServiceRole.entities.AiGatewayValidationReceipt.list('-tested_at', 50).catch(() => []);
+    receipts.push(...validateAiGatewayEvidence(aiGatewayValidationReceipts, sourceSha));
+
+    const paymentValidationReceipts = await base44.asServiceRole.entities.PaymentValidationReceipt.list('-tested_at', 50).catch(() => []);
+    receipts.push(...validatePaymentEvidence(paymentValidationReceipts, sourceSha));
 
     // SECURITY + DATABASE static deterministic CI
     receipts.push(validateCheckRunGate('security.dependency_scan', checkRuns, sourceSha, 'dependency-scan', 'npm audit --audit-level=critical'));
