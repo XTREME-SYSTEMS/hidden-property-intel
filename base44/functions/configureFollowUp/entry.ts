@@ -18,6 +18,12 @@ export default async function (req) {
     if (user && user.role !== 'admin') return Response.json({ error: 'Admin only' }, { status: 403 });
 
     const body = await req.json().catch(() => ({}));
+
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+
+      return Response.json({ error: 'JSON object body required' }, { status: 400 });
+
+    }
     const { entity_type, record_id, enabled = true, frequency_days = 7, automation_enabled } = body;
     if (!entity_type || !record_id) return Response.json({ error: 'entity_type and record_id required' }, { status: 400 });
 

@@ -1,0 +1,49 @@
+name: Alpha Prime Scheduler Surface Audit
+
+on:
+  push:
+    branches:
+      - main
+      - 'alpha-prime/**'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alpha-prime-scheduler-surface-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  scheduler-surface-audit:
+    name: scheduler-surface-audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Discover recurring scheduler authorities
+        run: |
+          set +e
+          node scripts/alpha-prime/scheduler-surface-audit.mjs 2>&1 | tee scheduler-surface-audit.log
+          ec=${PIPESTATUS[0]}
+          echo "$ec" > scheduler-surface-audit.exit
+          exit "$ec"
+      - name: Upload scheduler surface evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alpha-prime-scheduler-surface-evidence
+          path: |
+            scheduler-surface-audit.log
+            scheduler-surface-audit.exit
+          if-no-files-found: error
+          retention-days: 7

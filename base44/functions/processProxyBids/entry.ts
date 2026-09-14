@@ -8,6 +8,12 @@ export default async function(req) {
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json();
+
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+
+      return Response.json({ error: 'JSON object body required' }, { status: 400 });
+
+    }
     const { property_id, new_bid_amount, exclude_investor_id } = body || {};
     if (!property_id || !new_bid_amount) {
       return Response.json({ error: 'property_id and new_bid_amount required' }, { status: 400 });

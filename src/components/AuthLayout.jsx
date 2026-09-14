@@ -1,12 +1,24 @@
 import React from "react";
 import Logo from "@/components/luxury/Logo";
 
-export default function AuthLayout({ title, subtitle, footer, children }) {
+/**
+ * @typedef {{
+ *   title: React.ReactNode,
+ *   subtitle?: React.ReactNode,
+ *   footer?: React.ReactNode,
+ *   children?: React.ReactNode,
+ *   icon?: React.ComponentType<{className?: string}>
+ * }} AuthLayoutProps
+ */
+
+/** @param {AuthLayoutProps} props */
+export default function AuthLayout({ title, subtitle, footer, children, icon: Icon }) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-off-white px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
           <Logo variant="dark" className="mx-auto h-12 w-auto" />
+          {Icon && <Icon className="mx-auto mt-5 h-5 w-5 text-muted-text" />}
           <h1 className="mt-6 text-2xl font-heading font-semibold tracking-tight text-ink">{title}</h1>
           {subtitle && <p className="text-muted-text mt-2 text-sm">{subtitle}</p>}
         </div>

@@ -3,26 +3,26 @@ import { Link } from "react-router-dom";
 import { Sparkles, Mail, Phone, Calendar, MessageSquare, Brain, Heart, Shield, Zap, Mic, ArrowRight } from "lucide-react";
 
 const PROFILE_IMAGES = [
-  { url: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/87e41f08f_generated_image.png", label: "Professional — Blazer & Glasses" },
-  { url: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/b1209aa63_generated_image.png", label: "Executive — Skirt Suit" },
-  { url: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/0d11db576_generated_image.png", label: "Evening — Formal Gown" },
-  { url: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/9e7cd7535_generated_image.png", label: "Approachable — Office Desk" },
+  { url: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/87e41f08f_generated_image.png", label: "Generated AI avatar — professional" },
+  { url: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/b1209aa63_generated_image.png", label: "Generated AI avatar — executive" },
+  { url: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/0d11db576_generated_image.png", label: "Generated AI avatar — formal" },
+  { url: "https://media.base44.com/images/public/6a8ba268665196e93b7d57f7/9e7cd7535_generated_image.png", label: "Generated AI avatar — office" },
 ];
 
 const CAPABILITIES = [
-  { icon: Mail, title: "Email Communications", desc: "Drafts, sends, and responds to all outreach emails — investors, owners, heirs, agents — with human-quality personalization." },
-  { icon: MessageSquare, title: "Social Media", desc: "Manages LinkedIn, Facebook, Instagram, and Twitter/X communications. Builds brand voice and community." },
-  { icon: Phone, title: "Phone Assistant", desc: "Incoming and outgoing calls via Twilio. Ultra-lifelike voice — sweet, calm, intelligent. Handles scheduling and inquiries." },
-  { icon: Calendar, title: "Scheduling & Calendar", desc: "Coordinates meetings, calls, closings, and deadlines. Full executive assistant calendar management." },
-  { icon: Brain, title: "Industry Intelligence", desc: "Expert in Florida real estate — distressed properties, probate, wholesaling, fix-and-flip, smart contracts, compliance." },
-  { icon: Shield, title: "Compliance Guardian", desc: "Fair Housing compliant, RESPA-aware, Florida statute knowledgeable. Every communication is audited for compliance." },
+  { icon: Mail, title: "Email Workflow Support", desc: "Drafts and organizes outreach content. External sending requires a connected provider, applicable permissions, and an approved workflow." },
+  { icon: MessageSquare, title: "Social Workflow Support", desc: "Drafts social content and assists with campaign workflows. Publishing depends on connected tools, permissions, and approvals." },
+  { icon: Phone, title: "Voice Workflow Support", desc: "Supports voice-workflow orchestration when an approved telephony provider is connected. Eden remains an AI assistant and does not represent a human caller." },
+  { icon: Calendar, title: "Scheduling Support", desc: "Helps organize meetings, calls, closings, and deadlines when authorized calendar integrations are available." },
+  { icon: Brain, title: "Industry Intelligence", desc: "Uses configured knowledge and available data to assist with Florida real-estate research and investment workflows; outputs require verification." },
+  { icon: Shield, title: "Compliance Assistance", desc: "Applies configured compliance checks and guardrails. It is not legal advice and does not replace licensed legal or real-estate professionals." },
 ];
 
 const VOICE_TRAITS = [
-  { trait: "Sweet", desc: "Warm and genuinely caring in every interaction" },
-  { trait: "Calm", desc: "Steady and composed, even in high-stress situations" },
-  { trait: "Intelligent", desc: "Sharp, knowledgeable, and quick to understand" },
-  { trait: "Humanistic", desc: "Indistinguishable from a human assistant — personality, warmth, wit" },
+  { trait: "Warm", desc: "Designed for respectful, considerate conversation" },
+  { trait: "Calm", desc: "Steady and composed in high-stress workflows" },
+  { trait: "Knowledgeable", desc: "Uses configured domain context and available data while flagging uncertainty" },
+  { trait: "Natural", desc: "Conversational and approachable while clearly identifying itself as AI" },
 ];
 
 export default function EdenSkyeProfile() {
@@ -34,7 +34,7 @@ export default function EdenSkyeProfile() {
       <div className="grid items-center gap-10 lg:grid-cols-[1fr_1.2fr]">
         <div>
           <div className="relative overflow-hidden rounded-sm border border-black/10">
-            <img src={PROFILE_IMAGES[activeImage].url} alt="Eden Skye" className="w-full object-cover" style={{ aspectRatio: "3/4" }} />
+            <img src={PROFILE_IMAGES[activeImage].url} alt="Generated avatar for Eden Skye AI" className="w-full object-cover" style={{ aspectRatio: "3/4" }} />
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
               <p className="text-[10px] uppercase tracking-[0.3em] text-white/60">{PROFILE_IMAGES[activeImage].label}</p>
             </div>
@@ -53,26 +53,30 @@ export default function EdenSkyeProfile() {
         </div>
 
         <div>
-          <p className="text-[11px] uppercase tracking-[0.4em] text-black/40">Humanistic AI Agent</p>
+          <p className="text-[11px] uppercase tracking-[0.4em] text-black/40">AI Virtual Assistant</p>
           <h1 className="mt-3 font-display text-5xl font-light tracking-tight">Eden Skye</h1>
-          <p className="mt-2 text-lg text-black/60">Executive Assistant & Communications Director</p>
-          <p className="mt-1 text-sm text-black/50">Hidden Property Intel · Licensed Real Estate Support</p>
+          <p className="mt-2 text-lg text-black/60">Executive Assistant & Communications AI</p>
+          <p className="mt-1 text-sm text-black/50">Hidden Property Intel · AI Real Estate Support</p>
 
           <div className="mt-6 flex flex-wrap gap-2">
-            {["Email", "Phone (Twilio)", "Social Media", "Scheduling", "Deal Coordination", "Compliance"].map((tag) => (
+            {["Email Drafting", "Voice Workflows", "Social Drafting", "Scheduling Support", "Deal Coordination", "Compliance Checks"].map((tag) => (
               <span key={tag} className="rounded-full border border-black/15 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-black/60">{tag}</span>
             ))}
           </div>
 
+          <div className="mt-6 rounded-sm border border-gold/30 bg-gold/5 p-4 text-xs leading-relaxed text-black/70">
+            <strong>AI identity notice:</strong> Eden Skye is an AI system with generated avatar imagery, not a human employee, licensed broker, attorney, or other licensed professional. External actions are limited by connected tools, permissions, and approval policies.
+          </div>
+
           <p className="mt-6 max-w-xl text-sm leading-relaxed text-black/70">
-            Eden Skye is Hidden Property Intel's ultra-humanistic AI agent — designed to be indistinguishable from a
-            warm, intelligent, sophisticated human executive assistant. She handles every communication channel with
-            genuine empathy, deep industry expertise, and a voice that makes people feel heard.
+            Eden Skye is Hidden Property Intel's conversational AI assistant for research, drafting, coordination, and
+            governed workflow support. The experience is designed to feel natural and helpful while remaining clearly
+            disclosed as AI and subject to system permissions, validation, and operator controls.
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
             <Link to="/eden-skye/chat" className="inline-flex items-center gap-2 rounded-sm bg-black px-6 py-3 text-[11px] uppercase tracking-[0.3em] text-white hover:bg-gold-warm">
-              <MessageSquare className="h-4 w-4" /> Chat with Eden
+              <MessageSquare className="h-4 w-4" /> Chat with Eden AI
             </Link>
             <Link to="/admin/email-gallery" className="inline-flex items-center gap-2 rounded-sm border border-black/15 px-6 py-3 text-[11px] uppercase tracking-[0.3em] text-black/70 hover:bg-black hover:text-white">
               <Mail className="h-4 w-4" /> Email Templates
@@ -85,9 +89,9 @@ export default function EdenSkyeProfile() {
       <section className="mt-16">
         <div className="flex items-center gap-2">
           <Mic className="h-5 w-5 text-gold" />
-          <h2 className="font-display text-2xl font-light">Voice & Personality Blueprint</h2>
+          <h2 className="font-display text-2xl font-light">Voice & Interaction Blueprint</h2>
         </div>
-        <p className="mt-2 text-xs text-black/50">Eden's voice is modeled to be ultra-lifelike — sweet, calm, and intelligent. She speaks like a trusted advisor who happens to be an expert.</p>
+        <p className="mt-2 text-xs text-black/50">Eden is configured for a warm, calm, natural conversational style while remaining explicitly identified as an AI assistant.</p>
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {VOICE_TRAITS.map((v) => (
             <div key={v.trait} className="rounded-sm border border-black/10 p-5">
@@ -105,7 +109,7 @@ export default function EdenSkyeProfile() {
       <section className="mt-16">
         <div className="flex items-center gap-2">
           <Zap className="h-5 w-5 text-gold" />
-          <h2 className="font-display text-2xl font-light">Capabilities</h2>
+          <h2 className="font-display text-2xl font-light">Governed Capabilities</h2>
         </div>
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {CAPABILITIES.map((c) => (
@@ -125,18 +129,17 @@ export default function EdenSkyeProfile() {
           <h2 className="font-display text-2xl font-light">Industry Intelligence</h2>
         </div>
         <p className="mt-5 max-w-3xl text-sm leading-relaxed text-white/70">
-          Eden is an expert in Florida real estate investment. She understands distressed property types
-          (pre-foreclosure, probate, tax-delinquent, code violations, divorce, bankruptcy), investment strategies
-          (wholesaling, fix-and-flip, BRRRR, buy-and-hold), smart-contract escrow on Polygon, ownership chain
-          tracing, skip-tracing, and all applicable regulations — Florida Chapter 475, Fair Housing Act, UETA,
-          RESPA, and the Florida probate code.
+          Eden is configured to assist with Florida real-estate investment research, including distressed-property
+          categories, investment strategies, ownership-chain research, skip-tracing workflows, and compliance-aware
+          drafting. Legal, licensing, title, investment, and transaction conclusions require verification by the
+          appropriate licensed professional or authoritative source.
         </p>
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            { label: "Distress Types", value: "10+" },
+            { label: "Distress Categories", value: "10+" },
             { label: "Investment Strategies", value: "6+" },
-            { label: "FL Counties Covered", value: "67" },
-            { label: "Data Sources Tracked", value: "317+" },
+            { label: "Florida Counties", value: "67" },
+            { label: "Configured Data Sources", value: "317+" },
           ].map((s) => (
             <div key={s.label} className="border border-white/10 p-5">
               <p className="font-display text-3xl font-light text-gold">{s.value}</p>
@@ -154,10 +157,10 @@ export default function EdenSkyeProfile() {
         </div>
         <div className="mt-6 grid gap-4 lg:grid-cols-2">
           {[
-            { audience: "Investors", approach: "Peer-level and direct. Lead with value — specific properties, specific numbers. Never waste their time with fluff." },
-            { audience: "Property Owners", approach: "Empathetic and respectful. These are often people in difficult situations. Never pushy. Position as a problem-solver." },
-            { audience: "Probate Heirs", approach: "Deeply empathetic and patient. Lead with condolences, never business. Give them space and time." },
-            { audience: "Agents & Professionals", approach: "Collaborative and professional. Focus on mutual benefit and respect their license and expertise." },
+            { audience: "Investors", approach: "Peer-level and direct. Lead with relevant property and deal facts, and clearly separate verified data from estimates." },
+            { audience: "Property Owners", approach: "Empathetic and respectful. Avoid pressure and present options clearly when an approved outreach workflow is used." },
+            { audience: "Probate Heirs", approach: "Sensitive and patient. Avoid business pressure and use only approved, compliant outreach workflows." },
+            { audience: "Agents & Professionals", approach: "Collaborative and professional. Respect licensing boundaries and verify facts before operational use." },
           ].map((p) => (
             <div key={p.audience} className="rounded-sm border border-black/10 p-6">
               <p className="font-display text-base text-gold">{p.audience}</p>
@@ -170,7 +173,7 @@ export default function EdenSkyeProfile() {
       {/* CTA */}
       <section className="mt-16 text-center">
         <Link to="/eden-skye/chat" className="inline-flex items-center gap-2 rounded-sm bg-black px-8 py-4 text-[11px] uppercase tracking-[0.3em] text-white hover:bg-gold-warm">
-          Start a conversation with Eden <ArrowRight className="h-4 w-4" />
+          Start a conversation with Eden AI <ArrowRight className="h-4 w-4" />
         </Link>
       </section>
     </div>

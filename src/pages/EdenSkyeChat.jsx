@@ -18,17 +18,15 @@ export default function EdenSkyeChat() {
   useEffect(() => {
     (async () => {
       try {
-        const existing = base44.agents.listConversations({ agent_name: AGENT_NAME });
-        // listConversations is synchronous in the SDK
-        const list = existing || [];
+        const list = await base44.agents.listConversations({ q: { agent_name: AGENT_NAME }, sort: "-updated_date", limit: 1 });
         if (list.length > 0) {
-          const conv = base44.agents.getConversation(list[0].id);
+          const conv = await base44.agents.getConversation(list[0].id);
           setConversation(conv);
           setMessages(conv.messages || []);
         } else {
-          const conv = base44.agents.createConversation({
+          const conv = await base44.agents.createConversation({
             agent_name: AGENT_NAME,
-            metadata: { name: "Eden Skye Chat", description: "Direct conversation with Eden Skye" },
+            metadata: { name: "Eden Skye AI Chat", description: "Direct conversation with the Eden Skye AI assistant" },
           });
           setConversation(conv);
           setMessages(conv.messages || []);
@@ -58,8 +56,7 @@ export default function EdenSkyeChat() {
     setInput("");
     setSending(true);
     try {
-      const updated = base44.agents.addMessage(conversation, { role: "user", content: msg });
-      setConversation(updated);
+      await base44.agents.addMessage(conversation, { role: "user", content: msg });
     } catch (e) {
       console.error("Failed to send message:", e);
     }
@@ -69,7 +66,7 @@ export default function EdenSkyeChat() {
   if (loading) {
     return (
       <div className="flex h-[calc(100vh-200px)] items-center justify-center">
-        <div className="text-sm text-black/50">Connecting to Eden…</div>
+        <div className="text-sm text-black/50">Connecting to Eden AI…</div>
       </div>
     );
   }
@@ -77,18 +74,23 @@ export default function EdenSkyeChat() {
   return (
     <div className="mx-auto flex h-[calc(100vh-120px)] max-w-4xl flex-col px-4 py-4">
       {/* Header */}
-      <div className="flex items-center gap-3 border-b border-black/10 pb-4">
-        <Link to="/eden-skye" className="rounded-sm p-1.5 text-black/40 hover:bg-black/5">
-          <ArrowLeft className="h-5 w-5" />
-        </Link>
-        <img src={AVATAR_URL} alt="Eden Skye" className="h-10 w-10 rounded-full object-cover" />
-        <div className="flex-1">
-          <p className="font-display text-base">Eden Skye</p>
-          <p className="flex items-center gap-1.5 text-xs text-emerald-600">
-            <span className="h-2 w-2 rounded-full bg-emerald-500" /> Online · Executive Assistant
-          </p>
+      <div className="border-b border-black/10 pb-4">
+        <div className="flex items-center gap-3">
+          <Link to="/eden-skye" className="rounded-sm p-1.5 text-black/40 hover:bg-black/5">
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+          <img src={AVATAR_URL} alt="Generated avatar for Eden Skye AI" className="h-10 w-10 rounded-full object-cover" />
+          <div className="flex-1">
+            <p className="font-display text-base">Eden Skye</p>
+            <p className="flex items-center gap-1.5 text-xs text-emerald-600">
+              <span className="h-2 w-2 rounded-full bg-emerald-500" /> Online · AI Executive Assistant
+            </p>
+          </div>
+          <Sparkles className="h-5 w-5 text-gold" />
         </div>
-        <Sparkles className="h-5 w-5 text-gold" />
+        <p className="mt-2 pl-14 text-[11px] leading-relaxed text-black/45">
+          AI-generated assistant. Responses can be incomplete or mistaken. External actions require connected tools, permissions, and applicable approvals.
+        </p>
       </div>
 
       {/* Messages */}
@@ -96,14 +98,14 @@ export default function EdenSkyeChat() {
         <div className="space-y-4">
           {messages.length === 0 && (
             <div className="text-center text-sm text-black/40">
-              <p>Hi! I'm Eden Skye, your executive assistant at Hidden Property Intel.</p>
-              <p className="mt-2">Ask me about properties, deals, outreach, scheduling, or anything else — I'm here to help.</p>
+              <p>Hi! I'm Eden Skye, an AI executive assistant for Hidden Property Intel.</p>
+              <p className="mt-2">Ask me about properties, deals, drafting, scheduling support, or research. I'll identify uncertainty when I can, and external actions remain governed by connected tools and approvals.</p>
             </div>
           )}
           {messages.map((msg, i) => (
             <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
               {msg.role === "assistant" && (
-                <img src={AVATAR_URL} alt="Eden" className="mr-2 h-8 w-8 rounded-full object-cover" />
+                <img src={AVATAR_URL} alt="Eden Skye AI avatar" className="mr-2 h-8 w-8 rounded-full object-cover" />
               )}
               <div
                 className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${
@@ -127,7 +129,7 @@ export default function EdenSkyeChat() {
           ))}
           {sending && (
             <div className="flex justify-start">
-              <img src={AVATAR_URL} alt="Eden" className="mr-2 h-8 w-8 rounded-full object-cover" />
+              <img src={AVATAR_URL} alt="Eden Skye AI avatar" className="mr-2 h-8 w-8 rounded-full object-cover" />
               <div className="rounded-2xl bg-black/5 px-4 py-3">
                 <div className="flex gap-1">
                   <span className="h-2 w-2 animate-bounce rounded-full bg-black/30" style={{ animationDelay: "0ms" }} />
@@ -148,7 +150,7 @@ export default function EdenSkyeChat() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-            placeholder="Message Eden…"
+            placeholder="Message Eden AI…"
             disabled={sending}
             className="flex-1 rounded-full border border-black/15 px-4 py-3 text-sm outline-none focus:border-black disabled:opacity-50"
           />

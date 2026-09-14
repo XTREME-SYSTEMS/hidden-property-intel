@@ -43,6 +43,9 @@ export interface GithubSecrets {
   GITHUB_BASE_BRANCH?: string;
 }
 
+export const CANONICAL_GITHUB_REPO = 'XTREME-SYSTEMS/hidden-property-intel';
+export const CANONICAL_GITHUB_BRANCH = 'main';
+
 export function nowIso(): string { return new Date().toISOString(); }
 
 export function buildReceipt(
@@ -71,57 +74,64 @@ export function buildReceipt(
   };
 }
 
-/**
- * SOURCE SHA RESOLVER — obtains the exact current canonical Git SHA for the validated code.
- * Uses the GitHub branches API. Normalizes the base-branch secret (case-insensitive).
- * Never forges a SHA — returns null if resolution fails.
- */
-export async function resolveSourceSha(
-  secrets: GithubSecrets,
-): Promise<{ sha: string | null; branch: string; error?: string }> {
-  const { GITHUB_REPO, GITHUB_TOKEN, GITHUB_BASE_BRANCH } = secrets;
-  if (!GITHUB_REPO || !GITHUB_TOKEN) {
-    return { sha: null, branch: '', error: 'missing GITHUB_REPO or GITHUB_TOKEN' };
-  }
+function githubHeaders(token?: string): Record<string, string> {
   const headers: Record<string, string> = {
-    Authorization: `Bearer ${GITHUB_TOKEN}`,
     Accept: 'application/vnd.github+json',
     'X-GitHub-Api-Version': '2022-11-28',
     'User-Agent': 'PropertyIntel-AlphaPrime-Validator',
   };
-  const raw = (GITHUB_BASE_BRANCH || 'main').trim();
-  const candidates = Array.from(new Set([raw, raw.toLowerCase(), 'main', 'master']));
+  if (token) headers.Authorization = `Bearer ${token}`;
+  return headers;
+}
+
+/**
+ * SOURCE SHA RESOLVER — canonical repo + main are immutable release authority.
+ * Runtime values may supply authentication, but they may not redirect evidence lineage.
+ * This function also rewrites the in-memory secret object so downstream probes in the same
+ * validator run use the same canonical repo/branch authority.
+ */
+export async function resolveSourceSha(
+  secrets: GithubSecrets,
+): Promise<{ sha: string | null; branch: string; error?: string; statuses?: string[] }> {
+  const configuredRepo = (secrets.GITHUB_REPO || '').trim();
+  const configuredBranch = (secrets.GITHUB_BASE_BRANCH || '').trim();
+  const token = secrets.GITHUB_TOKEN;
   const statuses: string[] = [];
-  for (const candidate of candidates) {
-    try {
-      const r = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/branches/${candidate}`, { headers });
-      if (r.ok) {
-        const d = await r.json();
-        if (d?.commit?.sha) return { sha: d.commit.sha as string, branch: candidate, statuses };
-      } else {
-        const body = await r.text().catch(() => '');
-        statuses.push(`${candidate}:${r.status}:${body.slice(0, 300)}`);
-      }
-    } catch (e) {
-      statuses.push(`${candidate}:ERR:${e.message}`);
-    }
+
+  if (configuredRepo && configuredRepo !== CANONICAL_GITHUB_REPO) {
+    statuses.push(`runtime_repo_mismatch:${configuredRepo}!=${CANONICAL_GITHUB_REPO}`);
   }
-  // Fallback: repo default branch
+  if (configuredBranch && configuredBranch.toLowerCase() !== CANONICAL_GITHUB_BRANCH) {
+    statuses.push(`runtime_branch_mismatch:${configuredBranch}!=${CANONICAL_GITHUB_BRANCH}`);
+  }
+
+  // Normalize the shared object for all downstream probes in this validator execution.
+  secrets.GITHUB_REPO = CANONICAL_GITHUB_REPO;
+  secrets.GITHUB_BASE_BRANCH = CANONICAL_GITHUB_BRANCH;
+
+  const headers = githubHeaders(token);
   try {
-    const rr = await fetch(`https://api.github.com/repos/${GITHUB_REPO}`, { headers });
-    if (rr.ok) {
-      const rd = await rr.json();
-      const db = rd?.default_branch;
-      if (db) {
-        const r2 = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/branches/${db}`, { headers });
-        if (r2.ok) {
-          const d2 = await r2.json();
-          if (d2?.commit?.sha) return { sha: d2.commit.sha as string, branch: db as string };
-        }
+    const r = await fetch(
+      `https://api.github.com/repos/${CANONICAL_GITHUB_REPO}/branches/${CANONICAL_GITHUB_BRANCH}`,
+      { headers },
+    );
+    if (r.ok) {
+      const d = await r.json();
+      if (d?.commit?.sha) {
+        return { sha: d.commit.sha as string, branch: CANONICAL_GITHUB_BRANCH, statuses };
       }
     }
-  } catch { /* fallthrough */ }
-  return { sha: null, branch: raw, error: 'could not resolve branch HEAD', statuses };
+    statuses.push(`main:${r.status}`);
+  } catch (e) {
+    statuses.push(`main:ERR:${e.message}`);
+  }
+
+  return {
+    sha: null,
+    branch: CANONICAL_GITHUB_BRANCH,
+    error: `could not resolve canonical HEAD for ${CANONICAL_GITHUB_REPO}@${CANONICAL_GITHUB_BRANCH}`,
+    statuses,
+  };
 }
 
 export interface CheckRun {
@@ -132,22 +142,12 @@ export interface CheckRun {
   url: string;
 }
 
-/**
- * Fetch GitHub Actions check runs for a commit SHA.
- * Used by code.build / code.lint / code.typecheck validators to obtain deterministic CI evidence.
- * Returns [] if the API is unavailable or no check runs exist.
- */
+/** Fetch GitHub Actions check runs for the canonical repository and exact source SHA. */
 export async function fetchCheckRuns(secrets: GithubSecrets, sha: string): Promise<CheckRun[]> {
-  const { GITHUB_REPO, GITHUB_TOKEN } = secrets;
-  if (!GITHUB_REPO || !GITHUB_TOKEN || !sha) return [];
-  const headers: Record<string, string> = {
-    Authorization: `Bearer ${GITHUB_TOKEN}`,
-    Accept: 'application/vnd.github+json',
-    'X-GitHub-Api-Version': '2022-11-28',
-    'User-Agent': 'PropertyIntel-AlphaPrime-Validator',
-  };
+  if (!sha) return [];
+  const headers = githubHeaders(secrets.GITHUB_TOKEN);
   try {
-    const r = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/commits/${sha}/check-runs?per_page=100`, { headers });
+    const r = await fetch(`https://api.github.com/repos/${CANONICAL_GITHUB_REPO}/commits/${sha}/check-runs?per_page=100`, { headers });
     if (!r.ok) return [];
     const d = await r.json();
     return (d?.check_runs || []).map((c: any) => ({
@@ -168,16 +168,6 @@ export function findCheckRun(checkRuns: CheckRun[], pattern: string): CheckRun |
   return checkRuns.find((c) => c.name.toLowerCase().includes(p)) || null;
 }
 
-/**
- * SCHEDULER INVENTORY — known scheduling authorities in the project.
- * Alpha Prime (Convergence Heartbeat) is the intended governor.
- * Conflicting schedulers are independent authorities capable of executing
- * consequential workflows concurrently outside the governor architecture.
- *
- * This inventory is deterministic evidence for the workflows.no_duplicate_cron gate.
- * When a conflicting scheduler is consolidated (removed/migrated under the governor),
- * update this inventory and the gate re-evaluates.
- */
 export interface SchedulerEntry {
   id: string;
   authority: string;
@@ -188,6 +178,15 @@ export interface SchedulerEntry {
   proposed_consolidation: string;
 }
 
+/**
+ * Deterministic recurring-scheduler inventory.
+ *
+ * This list is intentionally exhaustive for the scheduler surfaces discovered by
+ * scripts/alpha-prime/scheduler-surface-audit.mjs. The Convergence Heartbeat is the
+ * sole allowed recurring governor. Every other recurring operational authority stays
+ * FAIL evidence until it is actually consolidated/disabled under the approved release
+ * procedure with rollback receipts. Do not delete rows merely to make the gate green.
+ */
 export const SCHEDULER_INVENTORY: SchedulerEntry[] = [
   {
     id: 'alpha_prime_heartbeat',
@@ -199,13 +198,139 @@ export const SCHEDULER_INVENTORY: SchedulerEntry[] = [
     proposed_consolidation: 'This IS the governor — no action.',
   },
   {
+    id: 'base44_daily_followup',
+    authority: 'base44/workflows/Daily Follow-Up Engine.jsonc',
+    schedule: '0 8 * * *',
+    consequential: true,
+    conflicts_with_governor: true,
+    config_reference: 'Daily Follow-Up Engine trigger.config.cron_expression = 0 8 * * *',
+    proposed_consolidation: 'Route the due follow-up queue through Alpha Prime; disable the standalone production schedule only under the approved consolidation with rollback receipt.',
+  },
+  {
+    id: 'base44_daily_maintenance',
+    authority: 'base44/workflows/Daily Maintenance.jsonc',
+    schedule: '0 6 * * *',
+    consequential: true,
+    conflicts_with_governor: true,
+    config_reference: 'Daily Maintenance trigger.config.cron_expression = 0 6 * * *',
+    proposed_consolidation: 'Route maintenance through the Alpha Prime due-job scheduler; disable the standalone schedule only with rollback receipt.',
+  },
+  {
+    id: 'base44_daily_outreach',
+    authority: 'base44/workflows/Daily Outreach.jsonc',
+    schedule: '0 3 * * *',
+    consequential: true,
+    conflicts_with_governor: true,
+    config_reference: 'Daily Outreach trigger.config.cron_expression = 0 3 * * *',
+    proposed_consolidation: 'Route outreach eligibility through Alpha Prime. Customer messaging remains separately approval-gated; disable only the duplicate scheduler under approved consolidation.',
+  },
+  {
+    id: 'base44_daily_scrape_pipeline',
+    authority: 'base44/workflows/Daily Scrape Pipeline.jsonc',
+    schedule: '0 */3 * * *',
+    consequential: true,
+    conflicts_with_governor: true,
+    config_reference: 'Daily Scrape Pipeline trigger.config.cron_expression = 0 */3 * * *',
+    proposed_consolidation: 'Route scrape work through Alpha Prime due-job slots; disable the standalone production schedule only with rollback receipt.',
+  },
+  {
+    id: 'base44_draft_property_processor',
+    authority: 'base44/workflows/Draft Property Processor.jsonc',
+    schedule: '0 * * * *',
+    consequential: true,
+    conflicts_with_governor: true,
+    config_reference: 'Draft Property Processor trigger.config.cron_expression = 0 * * * *',
+    proposed_consolidation: 'Route draft processing through Alpha Prime hourly work; disable the standalone schedule only with rollback receipt.',
+  },
+  {
+    id: 'base44_probate_pipeline',
+    authority: 'base44/workflows/Probate Pipeline.jsonc',
+    schedule: '0 6 * * *',
+    consequential: true,
+    conflicts_with_governor: true,
+    config_reference: 'Probate Pipeline trigger.config.cron_expression = 0 6 * * *',
+    proposed_consolidation: 'Route probate ingestion through Alpha Prime daily work; disable the standalone schedule only with rollback receipt.',
+  },
+  {
+    id: 'base44_property_cross_reference',
+    authority: 'base44/workflows/Property Cross-Reference.jsonc',
+    schedule: '0 5 * * *',
+    consequential: true,
+    conflicts_with_governor: true,
+    config_reference: 'Property Cross-Reference trigger.config.cron_expression = 0 5 * * *',
+    proposed_consolidation: 'Route cross-reference work through Alpha Prime; disable the standalone schedule only with rollback receipt.',
+  },
+  {
+    id: 'base44_property_enrichment_engine',
+    authority: 'base44/workflows/Property Enrichment Engine.jsonc',
+    schedule: '0 */6 * * *',
+    consequential: true,
+    conflicts_with_governor: true,
+    config_reference: 'Property Enrichment Engine trigger.config.cron_expression = 0 */6 * * *',
+    proposed_consolidation: 'Route enrichment work through Alpha Prime due-job slots; disable the standalone schedule only with rollback receipt.',
+  },
+  {
+    id: 'base44_property_image_ingestion',
+    authority: 'base44/workflows/Property Image Ingestion.jsonc',
+    schedule: '*/30 * * * *',
+    consequential: true,
+    conflicts_with_governor: true,
+    config_reference: 'Property Image Ingestion trigger.config.cron_expression = */30 * * * *',
+    proposed_consolidation: 'Route image ingestion through Alpha Prime smoke/due-job cadence; disable the standalone schedule only with rollback receipt.',
+  },
+  {
+    id: 'base44_property_image_scraper',
+    authority: 'base44/workflows/Property Image Scraper.jsonc',
+    schedule: '0 */4 * * *',
+    consequential: true,
+    conflicts_with_governor: true,
+    config_reference: 'Property Image Scraper trigger.config.cron_expression = 0 */4 * * *',
+    proposed_consolidation: 'Route image scraping through Alpha Prime; disable the standalone schedule only with rollback receipt.',
+  },
+  {
+    id: 'base44_search_console_sync',
+    authority: 'base44/workflows/Search Console Sync.jsonc',
+    schedule: '0 6 * * *',
+    consequential: true,
+    conflicts_with_governor: true,
+    config_reference: 'Search Console Sync trigger.config.cron_expression = 0 6 * * *',
+    proposed_consolidation: 'Route Search Console sync through Alpha Prime daily work; disable the standalone schedule only with rollback receipt.',
+  },
+  {
+    id: 'base44_shadow_orchestrator',
+    authority: 'base44/workflows/Shadow Orchestrator.jsonc',
+    schedule: '0 */6 * * *',
+    consequential: true,
+    conflicts_with_governor: true,
+    config_reference: 'Shadow Orchestrator trigger.config.cron_expression = 0 */6 * * *',
+    proposed_consolidation: 'Retire the duplicate orchestration authority after its responsibilities are explicitly mapped into Alpha Prime and rollback is captured.',
+  },
+  {
+    id: 'base44_smart_contract_chain_sync',
+    authority: 'base44/workflows/Smart Contract Chain Sync.jsonc',
+    schedule: '0 * * * *',
+    consequential: true,
+    conflicts_with_governor: true,
+    config_reference: 'Smart Contract Chain Sync trigger.config.cron_expression = 0 * * * *',
+    proposed_consolidation: 'Route read-only chain sync through Alpha Prime; live contract execution remains separately prohibited without explicit approval.',
+  },
+  {
+    id: 'base44_system_validation',
+    authority: 'base44/workflows/System Validation.jsonc',
+    schedule: '0 4 * * *',
+    consequential: false,
+    conflicts_with_governor: true,
+    config_reference: 'System Validation trigger.config.cron_expression = 0 4 * * *',
+    proposed_consolidation: 'Route validation through Alpha Prime benchmark/validation slots; disable the redundant schedule with rollback receipt.',
+  },
+  {
     id: 'vercel_trigger_scrape',
     authority: 'vercel-orchestrator/vercel.json',
     schedule: '0 */6 * * *',
     consequential: true,
     conflicts_with_governor: true,
     config_reference: 'crons[0] = { path: /api/trigger-scrape, schedule: 0 */6 * * * }',
-    proposed_consolidation: 'Migrate scrape trigger into Alpha Prime piggyback (hourly optimize slot). Remove Vercel cron after operator approval.',
+    proposed_consolidation: 'Migrate scrape trigger into Alpha Prime piggyback. Remove Vercel cron only under the approved production consolidation with rollback receipt.',
   },
   {
     id: 'vercel_mirror_supabase',
@@ -214,7 +339,7 @@ export const SCHEDULER_INVENTORY: SchedulerEntry[] = [
     consequential: true,
     conflicts_with_governor: true,
     config_reference: 'crons[1] = { path: /api/mirror-to-supabase, schedule: */30 * * * * }',
-    proposed_consolidation: 'Migrate Supabase mirror into Alpha Prime piggyback (15-min smoke slot). Remove Vercel cron after operator approval.',
+    proposed_consolidation: 'Migrate Supabase mirror into Alpha Prime piggyback. Remove Vercel cron only under the approved production consolidation with rollback receipt.',
   },
   {
     id: 'railway_scraper_cron',
@@ -222,44 +347,8 @@ export const SCHEDULER_INVENTORY: SchedulerEntry[] = [
     schedule: '0 6 * * *',
     consequential: true,
     conflicts_with_governor: true,
-    config_reference: 'deploy.cronSchedule = 0 6 * * * (railway/scraper-cron.ts)',
-    proposed_consolidation: 'Migrate Railway scraper into Alpha Prime piggyback (daily benchmark slot). Remove Railway cron after operator approval.',
-  },
-  {
-    id: 'base44_daily_scrape_pipeline',
-    authority: 'base44/workflows/Daily Scrape Pipeline.jsonc',
-    schedule: 'scheduled',
-    consequential: true,
-    conflicts_with_governor: true,
-    config_reference: 'Base44 workflow — scheduled trigger',
-    proposed_consolidation: 'Convert to Alpha Prime piggyback dispatch or confirm it is orchestrated by the governor.',
-  },
-  {
-    id: 'base44_daily_followup',
-    authority: 'base44/workflows/Daily Follow-Up Engine.jsonc',
-    schedule: 'scheduled',
-    consequential: true,
-    conflicts_with_governor: true,
-    config_reference: 'Base44 workflow — scheduled trigger',
-    proposed_consolidation: 'Convert to Alpha Prime piggyback dispatch.',
-  },
-  {
-    id: 'base44_daily_outreach',
-    authority: 'base44/workflows/Daily Outreach.jsonc',
-    schedule: 'scheduled',
-    consequential: true,
-    conflicts_with_governor: true,
-    config_reference: 'Base44 workflow — scheduled trigger',
-    proposed_consolidation: 'Convert to Alpha Prime piggyback dispatch.',
-  },
-  {
-    id: 'base44_daily_maintenance',
-    authority: 'base44/workflows/Daily Maintenance.jsonc',
-    schedule: 'scheduled',
-    consequential: true,
-    conflicts_with_governor: true,
-    config_reference: 'Base44 workflow — scheduled trigger',
-    proposed_consolidation: 'Convert to Alpha Prime piggyback dispatch.',
+    config_reference: 'deploy.cronSchedule = 0 6 * * *',
+    proposed_consolidation: 'Migrate Railway scraper dispatch into Alpha Prime. Remove Railway cron only under the approved production consolidation with rollback receipt.',
   },
 ];
 
@@ -272,4 +361,4 @@ export const WAVE1_VALIDATORS = [
   'workflows.no_duplicate_cron',
 ];
 
-export const VALIDATOR_VERSION = '1.0.0';
+export const VALIDATOR_VERSION = '1.3.0';

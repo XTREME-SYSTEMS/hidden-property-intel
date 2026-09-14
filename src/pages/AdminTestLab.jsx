@@ -4,6 +4,7 @@ import { Play, Check, X, Loader2, AlertTriangle,
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 
+/** @type {Array<{ name: string, icon: any, color: string, tests: Array<{ name: string, desc: string, payload: Record<string, any> }> }>} */
 const TEST_GROUPS = [
   {
     name: "Scraping & Data Pipeline",

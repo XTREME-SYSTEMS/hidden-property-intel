@@ -6,10 +6,10 @@ import FairHousingAudit from "@/components/ai/FairHousingAudit";
 export default function OutreachEditor({
   targetType,
   record,
-  nextOfKin,
+  nextOfKin = [],
   initialMode = "outreach",
   initialNextOfKinIndex = 0,
-  recipientEmail: overrideEmail,
+  recipientEmail: overrideEmail = null,
   onClose,
   onSent,
 }) {

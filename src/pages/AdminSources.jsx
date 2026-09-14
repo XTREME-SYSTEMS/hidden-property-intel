@@ -182,7 +182,7 @@ export default function AdminSources() {
                 {DISTRESS.map((t) => <option key={t} value={t}>{t}</option>)}
               </select>
             </Field>
-            <Field label="Max results"><input type="number" className={inputCls} value={form.max_results} onChange={(e) => setForm({ ...form, max_results: e.target.value })} /></Field>
+            <Field label="Max results"><input type="number" className={inputCls} value={form.max_results} onChange={(e) => setForm({ ...form, max_results: Number(e.target.value) })} /></Field>
             <Field label="Frequency">
               <select className={inputCls} value={form.scrape_frequency} onChange={(e) => setForm({ ...form, scrape_frequency: e.target.value })}>
                 {FREQ.map((t) => <option key={t} value={t}>{t}</option>)}

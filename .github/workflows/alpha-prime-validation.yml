@@ -1,0 +1,324 @@
+name: Alpha Prime Validation
+
+on:
+  push:
+    branches:
+      - main
+      - 'alpha-prime/**'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alpha-prime-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+
+  repair-lint:
+    name: repair-lint
+    needs: lint
+    if: ${{ always() && needs.lint.result == 'failure' && (startsWith(github.ref, 'refs/heads/alpha-prime/') || startsWith(github.head_ref, 'alpha-prime/')) }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Apply safe ESLint autofixes
+        run: npm run lint:fix || true
+      - name: Commit only deterministic autofixes
+        run: |
+          if git diff --quiet; then
+            echo "No safe ESLint autofix changes produced."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Auto-repair lint findings"
+          target_branch="${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}"
+          git push origin "HEAD:${target_branch}"
+
+  typecheck:
+    name: typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Run typecheck and capture evidence
+        run: |
+          set +e
+          npm run typecheck 2>&1 | tee typecheck.log
+          ec=${PIPESTATUS[0]}
+          echo "$ec" > typecheck.exit
+          exit "$ec"
+      - name: Upload typecheck evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alpha-prime-typecheck-evidence
+          path: |
+            typecheck.log
+            typecheck.exit
+          if-no-files-found: error
+          retention-days: 7
+
+  repair-typecheck:
+    name: repair-typecheck
+    needs: typecheck
+    if: ${{ always() && needs.typecheck.result == 'failure' && (startsWith(github.ref, 'refs/heads/alpha-prime/') || startsWith(github.head_ref, 'alpha-prime/')) }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Apply deterministic type contract repairs
+        run: node scripts/alpha-prime/type-contract-repair.mjs
+      - name: Capture post-repair typecheck evidence
+        run: |
+          set +e
+          npm run typecheck 2>&1 | tee typecheck-post-repair.log
+          ec=${PIPESTATUS[0]}
+          echo "$ec" > typecheck-post-repair.exit
+          exit 0
+      - name: Upload post-repair typecheck evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: alpha-prime-typecheck-post-repair-evidence
+          path: |
+            typecheck-post-repair.log
+            typecheck-post-repair.exit
+          if-no-files-found: error
+          retention-days: 7
+      - name: Commit deterministic repairs only when source changed
+        run: |
+          if git diff --quiet; then
+            echo "No deterministic type contract changes produced."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src
+          git commit -m "Auto-repair deterministic type contract findings"
+          target_branch="${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}"
+          git push origin "HEAD:${target_branch}"
+
+  dependency-scan:
+    name: dependency-scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm audit --audit-level=critical
+
+  secret-scan:
+    name: secret-scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install Gitleaks CLI 8.30.1
+        run: |
+          curl -fsSLo /tmp/gitleaks.tar.gz https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz
+          curl -fsSLo /tmp/gitleaks_checksums.txt https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_checksums.txt
+          expected=$(grep 'gitleaks_8.30.1_linux_x64.tar.gz' /tmp/gitleaks_checksums.txt | awk '{print $1}')
+          actual=$(sha256sum /tmp/gitleaks.tar.gz | awk '{print $1}')
+          test -n "$expected" && test "$expected" = "$actual"
+          tar -xzf /tmp/gitleaks.tar.gz -C /tmp gitleaks
+          /tmp/gitleaks version
+      - name: Scan git history for secrets
+        run: /tmp/gitleaks git . --redact --no-banner --exit-code 1
+
+  schema-valid:
+    name: schema-valid
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/alpha-prime/static-audit.mjs schema-valid
+
+  oversized-fields:
+    name: oversized-fields
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/alpha-prime/static-audit.mjs oversized-fields
+
+  input-validation:
+    name: input-validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run input validation audit and capture evidence
+        run: |
+          set +e
+          node scripts/alpha-prime/static-audit.mjs input-validation 2>&1 | tee input-validation.log
+          ec=${PIPESTATUS[0]}
+          echo "$ec" > input-validation.exit
+          exit "$ec"
+      - name: Upload input-validation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alpha-prime-input-validation-evidence
+          path: |
+            input-validation.log
+            input-validation.exit
+          if-no-files-found: error
+          retention-days: 7
+
+  repair-input-validation:
+    name: repair-input-validation
+    needs: input-validation
+    if: ${{ always() && needs.input-validation.result == 'failure' && (startsWith(github.ref, 'refs/heads/alpha-prime/') || startsWith(github.head_ref, 'alpha-prime/')) }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Apply deterministic JSON object-body guards
+        run: node scripts/alpha-prime/input-contract-repair.mjs
+      - name: Independently rerun input-validation after repair
+        run: node scripts/alpha-prime/static-audit.mjs input-validation
+      - name: Run full safe regression on repaired tree before push
+        run: |
+          npm ci
+          npm run lint
+          npm run typecheck
+          npm run build
+          npm audit --audit-level=critical
+          node scripts/alpha-prime/static-audit.mjs schema-valid
+          node scripts/alpha-prime/static-audit.mjs oversized-fields
+          node scripts/alpha-prime/static-audit.mjs contract-safety
+      - name: Commit only fully revalidated deterministic input hardening
+        run: |
+          if git diff --quiet; then
+            echo "No deterministic input-contract changes produced."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add base44/functions
+          git commit -m "Auto-repair deterministic input contract findings"
+          target_branch="${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}"
+          git push origin "HEAD:${target_branch}"
+
+  contract-safety:
+    name: contract-safety
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run contract safety audit and capture evidence
+        run: |
+          set +e
+          node scripts/alpha-prime/static-audit.mjs contract-safety 2>&1 | tee contract-safety.log
+          ec=${PIPESTATUS[0]}
+          echo "$ec" > contract-safety.exit
+          exit "$ec"
+      - name: Upload contract-safety evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alpha-prime-contract-safety-evidence
+          path: |
+            contract-safety.log
+            contract-safety.exit
+          if-no-files-found: error
+          retention-days: 7
+
+  resilience-fallback-audit:
+    name: resilience-fallback-audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Audit core fallback chains and declared single points of failure
+        run: |
+          set +e
+          node scripts/alpha-prime/static-audit.mjs resilience-fallback 2>&1 | tee resilience-fallback.log
+          ec=${PIPESTATUS[0]}
+          echo "$ec" > resilience-fallback.exit
+          exit "$ec"
+      - name: Upload resilience evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alpha-prime-resilience-fallback-evidence
+          path: |
+            resilience-fallback.log
+            resilience-fallback.exit
+          if-no-files-found: error
+          retention-days: 7

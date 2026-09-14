@@ -66,7 +66,9 @@ async function findListingAndImages(base44, p) {
     response_json_schema: LISTING_AND_IMAGE_SCHEMA
   });
   const url = r?.listing_url || '';
-  const rawImages = Array.isArray(r?.image_urls) ? r.image_urls.filter(u => typeof u === 'string' && /^https?:\/\//.test(u)) : [];
+  const rawImages = Array.isArray(r?.image_urls)
+    ? r.image_urls.filter(u => typeof u === 'string' && /^https?:\/\//.test(u) && isPropertyImage(u))
+    : [];
   const images = rawImages.map(u => ({ url: u, caption: '' }));
   return {
     url: url && /^https?:\/\//.test(url) ? url : '',
@@ -80,7 +82,7 @@ function isPropertyImage(url) {
   if (url.startsWith('data:')) return false;
   const lower = url.toLowerCase();
   const exclude = [
-    'logo', 'icon', 'avatar', 'sprite', 'placeholder', 'blank', 'badge',
+    'logo', 'icon', 'avatar', 'sprite', 'placeholder', 'blank', 'badge', 'banner',
     'button', 'arrow', 'spinner', 'loading', 'favicon', '.svg', '.gif',
     'tracking', 'pixel', 'beacon', 'ad-', 'ads/', 'social', 'share',
     'facebook', 'twitter', 'instagram', 'linkedin', 'agent-photo',
@@ -184,6 +186,7 @@ async function validateImageUrl(url) {
 async function validateImages(images) {
   const valid = [];
   for (const img of images) {
+    if (!isPropertyImage(img?.url)) continue;
     if (await validateImageUrl(img.url)) valid.push(img);
   }
   return valid;
