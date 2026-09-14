@@ -388,7 +388,7 @@ function StatusCard({ label, value, color, bg, icon }) {
   );
 }
 
-function Panel({ title, icon, count, children }) {
+function Panel({ title, icon, count = null, children }) {
   return (
     <div className="rounded-xl border border-[#292a2d] bg-[#0f1011] p-4">
       <div className="mb-3 flex items-center justify-between">
