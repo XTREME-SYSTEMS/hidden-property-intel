@@ -255,7 +255,7 @@ export default function AdminProbateDashboard() {
   );
 }
 
-function Stat({ icon: Icon, label, value, tone }) {
+function Stat({ icon: Icon, label, value, tone = "" }) {
   const toneCls = tone === "emerald" ? "text-emerald-600" : tone === "amber" ? "text-amber-600" : "text-black";
   return (
     <div className="bg-white p-4">

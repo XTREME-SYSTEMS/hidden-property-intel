@@ -20,7 +20,7 @@ export default async function(req: Request): Promise<Response> {
     const base44 = createClientFromRequest(req);
 
     // Auth: admin OR sync token
-    const body = await req.json().catch(() => ({}));
+
     const authHeader = req.headers.get('Authorization') || '';
     const syncToken = secrets.get('BASE44_SYNC_TOKEN') || '';
     const hasToken = syncToken && authHeader === `Bearer ${syncToken}`;

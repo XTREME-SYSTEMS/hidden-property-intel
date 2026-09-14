@@ -14,6 +14,12 @@ export default async function (req: Request): Promise<Response> {
   if (user.role !== 'admin') return Response.json({ error: 'Admin only' }, { status: 403 });
 
   const body = await req.json().catch(() => ({}));
+
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+
+    return Response.json({ error: 'JSON object body required' }, { status: 400 });
+
+  }
   const db = base44.asServiceRole;
 
   const { entity_a_id, entity_b_id, auto_merge, find_duplicates } = body;

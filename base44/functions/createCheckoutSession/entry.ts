@@ -10,6 +10,9 @@ const PLAN_PRODUCTS = {
 export default async function(req) {
   try {
     const body = await req.json();
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      return Response.json({ error: 'JSON object body required' }, { status: 400 });
+    }
     const { plan, user_id, email, success_url, cancel_url } = body || {};
     if (!plan || !PLAN_PRODUCTS[plan]) {
       return Response.json({ error: 'valid plan required (starter | pro | elite)' }, { status: 400 });

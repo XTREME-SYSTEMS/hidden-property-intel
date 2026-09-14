@@ -5,6 +5,7 @@ const SITE_NAME = "Hidden Property Intel";
 const DEFAULT_IMAGE =
   "https://base44.app/api/apps/6a8ba268665196e93b7d57f7/files/mp/public/6a8ba268665196e93b7d57f7/42dfc033a_og-image.png";
 
+/** @param {string} attr @param {string} key @param {string | undefined} content */
 function upsertMeta(attr, key, content) {
   if (!content) return;
   let el = document.head.querySelector(`meta[${attr}="${key}"]`);
@@ -16,6 +17,7 @@ function upsertMeta(attr, key, content) {
   el.setAttribute("content", content);
 }
 
+/** @param {string} rel @param {string} href */
 function upsertLink(rel, href) {
   let el = document.head.querySelector(`link[rel="${rel}"]`);
   if (!el) {
@@ -26,8 +28,9 @@ function upsertLink(rel, href) {
   el.setAttribute("href", href);
 }
 
+/** @param {string} id @param {any} data */
 function setJsonLd(id, data) {
-  let el = document.getElementById(id);
+  let el = /** @type {HTMLScriptElement | null} */ (document.getElementById(id));
   if (!el) {
     el = document.createElement("script");
     el.type = "application/ld+json";
@@ -42,6 +45,15 @@ function setJsonLd(id, data) {
  * Cleans up its own JSON-LD on unmount so page-specific schemas never leak
  * across routes. Static schemas in index.html (Organization, WebSite, etc.)
  * are untouched.
+ *
+ * @param {{
+ *   title?: string,
+ *   description?: string,
+ *   keywords?: string,
+ *   path?: string,
+ *   jsonLd?: any | any[],
+ *   image?: string
+ * }} props
  */
 export default function Seo({ title, description, keywords, path = "", jsonLd = [], image }) {
   useEffect(() => {
@@ -67,11 +79,10 @@ export default function Seo({ title, description, keywords, path = "", jsonLd = 
     upsertMeta("name", "twitter:image", img);
 
     const schemas = Array.isArray(jsonLd) ? jsonLd : [jsonLd];
-    schemas.forEach((schema, i) => setJsonLd(`seo-jsonld-${i}`, schema));
+    schemas.filter(Boolean).forEach((schema, i) => setJsonLd(`seo-jsonld-${i}`, schema));
 
-    // Remove leftover JSON-LD slots from a previous render
     const existing = document.querySelectorAll('[id^="seo-jsonld-"]');
-    for (let i = schemas.length; i < existing.length; i++) {
+    for (let i = schemas.filter(Boolean).length; i < existing.length; i++) {
       existing[i].remove();
     }
 

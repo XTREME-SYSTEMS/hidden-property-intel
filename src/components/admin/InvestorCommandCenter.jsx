@@ -196,7 +196,7 @@ function InvestorDrawer({ investor, initialTab = "overview", onClose, onUpdate }
           {tab === "voice" && <VoiceTab investor={investor} />}
           {tab === "intel" && <IntelTab investor={investor} />}
           {tab === "pitch" && <PitchTab investor={investor} />}
-          {tab === "followup" && <div className="space-y-4"><FollowUpControls targetType="investor" record={investor} onUpdate={onUpdate} expanded /></div>}
+          {tab === "followup" && <div className="space-y-4"><FollowUpControls targetType="investor" record={investor} onUpdate={onUpdate} /></div>}
           {tab === "notes" && <NotesTab investor={investor} onUpdate={onUpdate} />}
         </div>
       </div>
@@ -243,7 +243,7 @@ function useGenerator() {
     setLoading(true); setOutput("");
     try {
       const res = await base44.integrations.Core.InvokeLLM({ prompt, response_json_schema: null });
-      setOutput(typeof res === "string" ? res : res.content || JSON.stringify(res));
+      setOutput(typeof res === "string" ? res : (res && typeof res === "object" && "content" in res ? String(res.content || "") : JSON.stringify(res)));
     } catch (e) { setOutput(`Error: ${e.message}`); }
     setLoading(false);
   };

@@ -1,40 +1,63 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/lib/AuthContext";
 import { Bookmark, BookmarkCheck } from "lucide-react";
 
 export default function WatchButton({ propertyId }) {
+  const { user, isAuthenticated, isLoadingAuth } = useAuth();
   const [watching, setWatching] = useState(false);
   const [record, setRecord] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let alive = true;
+
+    if (isLoadingAuth) {
+      return () => { alive = false; };
+    }
+
+    if (!isAuthenticated || !user) {
+      setWatching(false);
+      setRecord(null);
+      setLoading(false);
+      return () => { alive = false; };
+    }
+
+    setLoading(true);
     (async () => {
       try {
-        const u = await base44.auth.me();
-        if (!u) { setLoading(false); return; }
         const list = await base44.entities.Watchlist.filter({ property_id: propertyId });
         if (!alive) return;
         setWatching(list.length > 0);
         setRecord(list[0] || null);
-      } catch (e) { /* not logged in */ }
-      setLoading(false);
+      } catch (e) {
+        if (!alive) return;
+        setWatching(false);
+        setRecord(null);
+      } finally {
+        if (alive) setLoading(false);
+      }
     })();
+
     return () => { alive = false; };
-  }, [propertyId]);
+  }, [propertyId, user, isAuthenticated, isLoadingAuth]);
 
   const toggle = async () => {
+    if (!isAuthenticated || !user) return;
+
     try {
-      const u = await base44.auth.me();
-      if (!u) return;
       if (watching && record) {
         await base44.entities.Watchlist.delete(record.id);
-        setWatching(false); setRecord(null);
+        setWatching(false);
+        setRecord(null);
       } else {
-        const r = await base44.entities.Watchlist.create({ user_id: u.id, property_id: propertyId });
-        setWatching(true); setRecord(r);
+        const r = await base44.entities.Watchlist.create({ user_id: user.id, property_id: propertyId });
+        setWatching(true);
+        setRecord(r);
       }
-    } catch (e) { /* ignore */ }
+    } catch (e) {
+      // Preserve current UI state when the authenticated watch mutation fails.
+    }
   };
 
   if (loading) return null;

@@ -18,15 +18,13 @@ export default function EdenSkyeChat() {
   useEffect(() => {
     (async () => {
       try {
-        const existing = base44.agents.listConversations({ agent_name: AGENT_NAME });
-        // listConversations is synchronous in the SDK
-        const list = existing || [];
+        const list = await base44.agents.listConversations({ q: { agent_name: AGENT_NAME }, sort: "-updated_date", limit: 1 });
         if (list.length > 0) {
-          const conv = base44.agents.getConversation(list[0].id);
+          const conv = await base44.agents.getConversation(list[0].id);
           setConversation(conv);
           setMessages(conv.messages || []);
         } else {
-          const conv = base44.agents.createConversation({
+          const conv = await base44.agents.createConversation({
             agent_name: AGENT_NAME,
             metadata: { name: "Eden Skye Chat", description: "Direct conversation with Eden Skye" },
           });
@@ -58,8 +56,7 @@ export default function EdenSkyeChat() {
     setInput("");
     setSending(true);
     try {
-      const updated = base44.agents.addMessage(conversation, { role: "user", content: msg });
-      setConversation(updated);
+      await base44.agents.addMessage(conversation, { role: "user", content: msg });
     } catch (e) {
       console.error("Failed to send message:", e);
     }

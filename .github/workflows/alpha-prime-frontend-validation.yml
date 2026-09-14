@@ -1,0 +1,295 @@
+name: Alpha Prime Frontend Validation
+
+on:
+  push:
+    branches:
+      - main
+      - 'alpha-prime/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alpha-prime-frontend-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  frontend-render:
+    name: frontend-render
+    runs-on: ubuntu-latest
+    env:
+      VITE_BASE44_APP_ID: 6a8ba268665196e93b7d57f7
+      VITE_BASE44_APP_BASE_URL: https://my-property-intel.base44.app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked application dependencies
+        run: npm ci
+      - name: Install pinned validation tools without mutating lockfile
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Build exact branch frontend against real read-only Base44 backend
+        run: npm run build
+      - name: Start isolated production frontend preview
+        run: |
+          nohup npm run preview -- --host 127.0.0.1 --port 4173 > vite-preview.log 2>&1 &
+          echo $! > vite-preview.pid
+          ready=0
+          for attempt in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then
+            echo "Vite production preview did not become ready on 127.0.0.1:4173" >&2
+            cat vite-preview.log || true
+            exit 1
+          fi
+      - name: Validate mandatory render routes and capture console evidence
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import { chromium } from 'playwright';
+
+          const base = 'http://127.0.0.1:4173';
+          const staticRoutes = [
+            { id: 'home', path: '/' },
+            { id: 'listings', path: '/listings' },
+          ];
+          const results = [];
+          const browser = await chromium.launch({ headless: true });
+
+          async function validateRoute(route) {
+            const page = await browser.newPage();
+            const consoleErrors = [];
+            const pageErrors = [];
+            const failedRequests = [];
+            page.on('console', (message) => {
+              if (message.type() === 'error') consoleErrors.push(message.text());
+            });
+            page.on('pageerror', (error) => pageErrors.push(String(error?.stack || error?.message || error)));
+            page.on('requestfailed', (request) => failedRequests.push({
+              url: request.url(),
+              failure: request.failure()?.errorText || 'request failed',
+            }));
+
+            let status = null;
+            let navigationError = null;
+            let bodyLength = 0;
+            try {
+              const response = await page.goto(base + route.path, { waitUntil: 'domcontentloaded', timeout: 30000 });
+              status = response?.status() ?? null;
+              await page.waitForTimeout(3000);
+              bodyLength = (await page.locator('body').innerText()).trim().length;
+            } catch (error) {
+              navigationError = String(error?.stack || error?.message || error);
+            }
+
+            const renderPass = navigationError === null && status !== null && status < 500 && bodyLength > 0;
+            const row = {
+              route_id: route.id,
+              path: route.path,
+              http_status: status,
+              body_text_length: bodyLength,
+              render_pass: renderPass,
+              navigation_error: navigationError,
+              console_errors: consoleErrors,
+              page_errors: pageErrors,
+              failed_requests: failedRequests,
+            };
+            results.push(row);
+            return { page, row };
+          }
+
+          try {
+            await validateRoute(staticRoutes[0]).then(({ page }) => page.close());
+            const listings = await validateRoute(staticRoutes[1]);
+
+            let detailPath = null;
+            try {
+              const hrefs = await listings.page.locator('a[href*="/properties/"]').evaluateAll((anchors) =>
+                anchors.map((anchor) => anchor.getAttribute('href')).filter(Boolean)
+              );
+              detailPath = hrefs.find((href) => /^\/properties\/[^/]+$/.test(href)) || null;
+            } catch (error) {
+              results.push({
+                route_id: 'property-detail-discovery',
+                path: null,
+                http_status: null,
+                body_text_length: 0,
+                render_pass: false,
+                navigation_error: `Could not discover a real property detail route: ${String(error?.message || error)}`,
+                console_errors: [],
+                page_errors: [],
+                failed_requests: [],
+              });
+            }
+            await listings.page.close();
+
+            if (!detailPath) {
+              results.push({
+                route_id: 'property-detail',
+                path: null,
+                http_status: null,
+                body_text_length: 0,
+                render_pass: false,
+                navigation_error: 'No real property detail link was rendered by /listings; refusing a mock/fabricated property id.',
+                console_errors: [],
+                page_errors: [],
+                failed_requests: [],
+              });
+            } else {
+              await validateRoute({ id: 'property-detail', path: detailPath }).then(({ page }) => page.close());
+            }
+          } finally {
+            await browser.close();
+          }
+
+          const evidence = {
+            validator: 'alpha-prime-playwright-render-v3-live-readonly',
+            source_sha: process.env.GITHUB_SHA,
+            backend_mode: 'base44-live-readonly',
+            backend_app_id: process.env.VITE_BASE44_APP_ID,
+            backend_url: process.env.VITE_BASE44_APP_BASE_URL,
+            data_policy: 'real-live-readonly-no-mock-identities-or-fabricated-property-ids',
+            threshold: 'home, listings, and one discovered real property-detail route return <500 and render non-empty body',
+            generated_at: new Date().toISOString(),
+            routes: results,
+            render_pass: results.length === 3 && results.every((row) => row.render_pass),
+            no_console_errors_pass: results.length === 3 && results.every((row) => row.console_errors.length === 0 && row.page_errors.length === 0),
+          };
+          fs.writeFileSync('frontend-validation-evidence.json', JSON.stringify(evidence, null, 2));
+          console.log(JSON.stringify(evidence, null, 2));
+          if (!evidence.render_pass) process.exit(1);
+          NODE
+      - name: Upload exact-SHA frontend evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alpha-prime-frontend-evidence-${{ github.sha }}
+          path: |
+            frontend-validation-evidence.json
+            vite-preview.log
+          if-no-files-found: warn
+          retention-days: 7
+
+  frontend-no-console-errors:
+    name: frontend-no-console-errors
+    needs: frontend-render
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download exact-SHA frontend evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: alpha-prime-frontend-evidence-${{ github.sha }}
+      - name: Enforce zero uncaught browser errors
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const evidence = JSON.parse(fs.readFileSync('frontend-validation-evidence.json', 'utf8'));
+          if (evidence.source_sha !== process.env.GITHUB_SHA) {
+            console.error(`Stale SHA evidence rejected: evidence=${evidence.source_sha} current=${process.env.GITHUB_SHA}`);
+            process.exit(1);
+          }
+          if (evidence.backend_mode !== 'base44-live-readonly') {
+            console.error(`Invalid backend mode for console evidence: ${evidence.backend_mode}`);
+            process.exit(1);
+          }
+          if (evidence.data_policy !== 'real-live-readonly-no-mock-identities-or-fabricated-property-ids') {
+            console.error(`Invalid data policy for console evidence: ${evidence.data_policy}`);
+            process.exit(1);
+          }
+          const errors = evidence.routes.flatMap((row) => [
+            ...row.console_errors.map((message) => ({ route: row.path, type: 'console', message })),
+            ...row.page_errors.map((message) => ({ route: row.path, type: 'pageerror', message })),
+          ]);
+          console.log(JSON.stringify({ source_sha: evidence.source_sha, error_count: errors.length, errors }, null, 2));
+          if (errors.length !== 0) process.exit(1);
+          NODE
+
+  frontend-network-integrity:
+    name: frontend-network-integrity
+    needs: frontend-render
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download exact-SHA frontend evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: alpha-prime-frontend-evidence-${{ github.sha }}
+      - name: Enforce zero failed browser requests on primary routes
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const evidence = JSON.parse(fs.readFileSync('frontend-validation-evidence.json', 'utf8'));
+          if (evidence.source_sha !== process.env.GITHUB_SHA) {
+            console.error(`Stale SHA evidence rejected: evidence=${evidence.source_sha} current=${process.env.GITHUB_SHA}`);
+            process.exit(1);
+          }
+          if (evidence.backend_mode !== 'base44-live-readonly') {
+            console.error(`Invalid backend mode for network evidence: ${evidence.backend_mode}`);
+            process.exit(1);
+          }
+          if (evidence.data_policy !== 'real-live-readonly-no-mock-identities-or-fabricated-property-ids') {
+            console.error(`Invalid data policy for network evidence: ${evidence.data_policy}`);
+            process.exit(1);
+          }
+          const failures = evidence.routes.flatMap((row) =>
+            (row.failed_requests || []).map((request) => ({ route: row.path, ...request }))
+          );
+          console.log(JSON.stringify({
+            source_sha: evidence.source_sha,
+            threshold: '0 failed browser requests across home, listings, and discovered real property-detail route',
+            failed_request_count: failures.length,
+            failed_requests: failures,
+          }, null, 2));
+          if (failures.length !== 0) process.exit(1);
+          NODE
+
+  repair-public-auth-probes:
+    name: repair-public-auth-probes
+    needs: frontend-no-console-errors
+    if: ${{ always() && needs.frontend-no-console-errors.result == 'failure' && (startsWith(github.ref, 'refs/heads/alpha-prime/') || startsWith(github.head_ref, 'alpha-prime/')) }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Apply exact-pattern public auth probe repair
+        run: node scripts/alpha-prime/frontend-auth-repair.mjs
+      - name: Independently run safe regression before branch push
+        run: |
+          npm ci
+          npm run lint
+          npm run typecheck
+          npm run build
+      - name: Commit only deterministic frontend auth repair
+        run: |
+          if git diff --quiet; then
+            echo "No deterministic public auth probe repair produced."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/pages/PropertyDetail.jsx
+          git commit -m "Auto-repair anonymous auth probe on public property detail"
+          target_branch="${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}"
+          git push origin "HEAD:${target_branch}"

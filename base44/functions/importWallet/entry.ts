@@ -11,6 +11,12 @@ export default async function (req) {
     if (user && user.role !== 'admin') return Response.json({ error: 'Admin only' }, { status: 403 });
 
     const body = await req.json().catch(() => ({}));
+
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+
+      return Response.json({ error: 'JSON object body required' }, { status: 400 });
+
+    }
     const { private_key, rpc_url } = body;
     if (!private_key) return Response.json({ error: 'private_key required' }, { status: 400 });
 

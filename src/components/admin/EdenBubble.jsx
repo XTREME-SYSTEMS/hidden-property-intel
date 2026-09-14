@@ -34,7 +34,7 @@ export default function EdenBubble() {
     let cancelled = false;
     (async () => {
       try {
-        const existing = await base44.agents.listConversations({ agent_name: AGENT_NAME });
+        const existing = await base44.agents.listConversations({ q: { agent_name: AGENT_NAME }, sort: "-updated_date", limit: 1 });
         if (cancelled) return;
         if (existing.length > 0) {
           setConversation(existing[0]);

@@ -1,0 +1,42 @@
+{
+  "name": "PaymentValidationReceipt",
+  "type": "object",
+  "properties": {
+    "receipt_id": { "type": "string" },
+    "tested_at": { "type": "string", "format": "date-time" },
+    "source_sha": { "type": "string" },
+    "environment": { "type": "string", "enum": ["sandbox", "test"] },
+    "producer": { "type": "string", "enum": ["payment-sandbox-validator"] },
+    "artifact_ref": { "type": "string" },
+    "valid_signature_status": { "type": "integer", "minimum": 100, "maximum": 599 },
+    "invalid_signature_status": { "type": "integer", "minimum": 100, "maximum": 599 },
+    "checkout_session_created": { "type": "boolean" },
+    "checkout_session_id": { "type": "string" },
+    "live_charge_created": { "type": "boolean" },
+    "cleanup_ok": { "type": "boolean" },
+    "live_side_effects": { "type": "boolean" },
+    "error_count": { "type": "integer", "minimum": 0 }
+  },
+  "required": [
+    "receipt_id",
+    "tested_at",
+    "source_sha",
+    "environment",
+    "producer",
+    "artifact_ref",
+    "valid_signature_status",
+    "invalid_signature_status",
+    "checkout_session_created",
+    "checkout_session_id",
+    "live_charge_created",
+    "cleanup_ok",
+    "live_side_effects",
+    "error_count"
+  ],
+  "rls": {
+    "read": { "user_condition": { "role": "admin" } },
+    "create": { "user_condition": { "role": "admin" } },
+    "update": { "user_condition": { "role": "admin" } },
+    "delete": { "user_condition": { "role": "admin" } }
+  }
+}
