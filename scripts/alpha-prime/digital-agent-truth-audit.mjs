@@ -3,11 +3,15 @@ import fs from "node:fs";
 const files = {
   profiles: "src/lib/digitalAgentProfiles.js",
   page: "src/pages/DigitalAgentProfile.jsx",
+  edenProfile: "src/pages/EdenSkyeProfile.jsx",
+  edenChat: "src/pages/EdenSkyeChat.jsx",
 };
 
 const read = (path) => fs.readFileSync(path, "utf8");
 const profiles = read(files.profiles);
 const page = read(files.page);
+const edenProfile = read(files.edenProfile);
+const edenChat = read(files.edenChat);
 const failures = [];
 
 const forbiddenProfilePatterns = [
@@ -60,6 +64,43 @@ for (const [label, pattern] of requiredPagePatterns) {
 
 if (/AgentPicture/.test(page)) {
   failures.push(`${files.page}: human-style AgentPicture component must not be rendered by the governed capability profile`);
+}
+
+const edenForbidden = [
+  ["human impersonation claim", /indistinguishable from a human/i],
+  ["humanistic impersonation framing", /ultra-humanistic/i],
+  ["professional licensure implication", /Licensed Real Estate Support/i],
+  ["unqualified human-assistant identity", /your executive assistant at Hidden Property Intel/i],
+];
+
+for (const [label, pattern] of edenForbidden) {
+  if (pattern.test(edenProfile)) failures.push(`${files.edenProfile}: ${label}`);
+  if (pattern.test(edenChat)) failures.push(`${files.edenChat}: ${label}`);
+}
+
+const edenProfileRequired = [
+  ["AI virtual assistant label", /AI Virtual Assistant/],
+  ["AI identity notice", /AI identity notice:/],
+  ["generated-avatar disclosure", /generated avatar imagery/i],
+  ["professional-boundary disclosure", /not a human employee, licensed broker, attorney/i],
+  ["approval-bound external-action disclosure", /External actions are limited by connected tools, permissions, and approval policies/],
+  ["legal-advice boundary", /not legal advice/i],
+];
+
+for (const [label, pattern] of edenProfileRequired) {
+  if (!pattern.test(edenProfile)) failures.push(`${files.edenProfile}: missing ${label}`);
+}
+
+const edenChatRequired = [
+  ["AI executive assistant status", /Online · AI Executive Assistant/],
+  ["persistent AI disclosure", /AI-generated assistant/],
+  ["uncertainty disclosure", /Responses can be incomplete or mistaken/],
+  ["approval-bound external-action disclosure", /External actions require connected tools, permissions, and applicable approvals/],
+  ["AI introduction", /I'm Eden Skye, an AI executive assistant/],
+];
+
+for (const [label, pattern] of edenChatRequired) {
+  if (!pattern.test(edenChat)) failures.push(`${files.edenChat}: missing ${label}`);
 }
 
 const evidence = {
