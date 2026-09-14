@@ -72,24 +72,53 @@ for (const a of authorities) {
   console.log(`AUTHORITY ${a.type} ${a.authority} schedule=${a.schedule}${a.path ? ` path=${a.path}` : ''}`);
 }
 
+const governors = authorities.filter((a) => a.authority === 'base44/workflows/Convergence Heartbeat.jsonc');
+if (governors.length !== 1) {
+  failures.push(`governor cardinality drift: expected exactly 1 Convergence Heartbeat, discovered ${governors.length}`);
+}
+
 const contractPath = path.join(root, 'base44', 'shared', 'validatorContract.ts');
 if (!fs.existsSync(contractPath)) {
   failures.push('base44/shared/validatorContract.ts is missing; scheduler inventory coverage cannot be proved');
 } else {
   const contract = fs.readFileSync(contractPath, 'utf8');
-  const expectedByAuthority = new Map();
+  const discovered = new Map();
   for (const a of authorities) {
-    expectedByAuthority.set(a.authority, (expectedByAuthority.get(a.authority) || 0) + 1);
+    const key = `${a.authority}@@${a.schedule}`;
+    discovered.set(key, (discovered.get(key) || 0) + 1);
   }
-  for (const [authority, expected] of expectedByAuthority) {
-    const escaped = authority.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const actual = (contract.match(new RegExp(`authority:\\s*['\"]${escaped}['\"]`, 'g')) || []).length;
-    if (actual < expected) {
-      failures.push(`inventory drift: ${authority} discovered=${expected}, static_inventory=${actual}`);
+
+  const inventory = new Map();
+  const entryRe = /\{\s*id:\s*['"][^'"]+['"],\s*authority:\s*['"]([^'"]+)['"],\s*schedule:\s*['"]([^'"]+)['"]/gms;
+  let match;
+  while ((match = entryRe.exec(contract)) !== null) {
+    const key = `${match[1]}@@${match[2]}`;
+    inventory.set(key, (inventory.get(key) || 0) + 1);
+  }
+
+  for (const [key, expected] of discovered) {
+    const actual = inventory.get(key) || 0;
+    if (actual !== expected) {
+      const [authority, schedule] = key.split('@@');
+      failures.push(`inventory drift: ${authority} schedule=${schedule} discovered=${expected}, static_inventory=${actual}`);
     }
   }
+  for (const [key, actual] of inventory) {
+    const expected = discovered.get(key) || 0;
+    if (expected !== actual) {
+      const [authority, schedule] = key.split('@@');
+      failures.push(`stale inventory entry: ${authority} schedule=${schedule} discovered=${expected}, static_inventory=${actual}`);
+    }
+  }
+
+  const discoveredCount = [...discovered.values()].reduce((a, b) => a + b, 0);
+  const inventoryCount = [...inventory.values()].reduce((a, b) => a + b, 0);
+  if (inventoryCount !== discoveredCount) {
+    failures.push(`inventory cardinality drift: discovered=${discoveredCount}, static_inventory=${inventoryCount}`);
+  }
+
   if (failures.length === 0) {
-    console.log(`scheduler inventory coverage PASS: all ${authorities.length} discovered authority record(s) are represented in SCHEDULER_INVENTORY.`);
+    console.log(`scheduler inventory coverage PASS: all ${authorities.length} discovered authority record(s) are represented with exact schedule metadata in SCHEDULER_INVENTORY.`);
   }
 }
 
