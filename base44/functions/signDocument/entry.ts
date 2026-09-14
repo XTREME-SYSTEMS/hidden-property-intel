@@ -12,6 +12,12 @@ export default async function (req) {
     const user = await base44.auth.me().catch(() => null);
 
     const body = await req.json();
+
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+
+      return Response.json({ error: 'JSON object body required' }, { status: 400 });
+
+    }
     const {
       document_type, document_title, document_content, signer_name, signer_email,
       signer_role, signature_image, property_id, deal_id, contract_id, expires_days,

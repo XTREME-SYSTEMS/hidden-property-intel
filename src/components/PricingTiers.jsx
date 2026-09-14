@@ -1,6 +1,7 @@
 import React from "react";
 import { Check, Minus } from "lucide-react";
 
+/** @type {{name:string, price:number, tagline:string, featured?:boolean, features:[string, boolean][]}[]} */
 const PLANS = [
   {
     name: "Starter", price: 49,

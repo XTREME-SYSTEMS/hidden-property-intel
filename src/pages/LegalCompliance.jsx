@@ -483,7 +483,7 @@ function Section({ title, subtitle, icon: Icon, children }) {
   );
 }
 
-function ExpandableItem({ title, detail, citation, link, expanded, onToggle }) {
+function ExpandableItem({ id, title, detail, citation = "", link = "", expanded, onToggle }) {
   return (
     <div className="rounded-sm border border-black/10">
       <button onClick={onToggle} className="flex w-full items-center justify-between px-4 py-3 text-left">

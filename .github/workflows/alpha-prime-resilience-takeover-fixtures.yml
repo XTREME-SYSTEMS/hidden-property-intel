@@ -1,0 +1,58 @@
+name: Alpha Prime Resilience Takeover Fixtures
+
+on:
+  push:
+    branches:
+      - 'alpha-prime/**'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  workflow-runtime-takeover-fixture-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact source SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run deterministic workflow-runtime takeover fixture
+        env:
+          SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node scripts/alpha-prime/resilience-takeover-fixtures.mjs workflow-runtime
+      - name: Upload exact-SHA workflow-runtime fixture evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: workflow-runtime-takeover-fixture-${{ github.event.pull_request.head.sha || github.sha }}
+          path: artifacts/alpha-prime/workflow-runtime-takeover-fixture.json
+          if-no-files-found: error
+          retention-days: 14
+
+  entity-data-takeover-fixture-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact source SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run deterministic entity-data takeover fixture
+        env:
+          SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node scripts/alpha-prime/resilience-takeover-fixtures.mjs entity-data
+      - name: Upload exact-SHA entity-data fixture evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: entity-data-takeover-fixture-${{ github.event.pull_request.head.sha || github.sha }}
+          path: artifacts/alpha-prime/entity-data-takeover-fixture.json
+          if-no-files-found: error
+          retention-days: 14

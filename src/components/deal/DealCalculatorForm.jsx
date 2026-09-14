@@ -1,6 +1,7 @@
 import React from "react";
 import { Home, Wrench, Calendar, DollarSign, Percent, TrendingUp } from "lucide-react";
 
+/** @param {{label: React.ReactNode, value: string | number, onChange: (value: string) => void, prefix?: React.ReactNode, suffix?: React.ReactNode, type?: string, hint?: React.ReactNode}} props */
 function Field({ label, value, onChange, prefix, suffix, type = "number", hint }) {
   return (
     <div>
@@ -20,6 +21,7 @@ function Field({ label, value, onChange, prefix, suffix, type = "number", hint }
   );
 }
 
+/** @param {{title: React.ReactNode, icon: React.ComponentType<{className?: string}>, children?: React.ReactNode}} props */
 function Section({ title, icon: Icon, children }) {
   return (
     <div className="rounded-lg border border-black/10 bg-white p-4">
@@ -32,6 +34,7 @@ function Section({ title, icon: Icon, children }) {
   );
 }
 
+/** @param {{inputs: any, setInputs: Function, dealType: string}} props */
 export default function DealCalculatorForm({ inputs, setInputs, dealType }) {
   const set = (key) => (val) => setInputs((prev) => ({ ...prev, [key]: val }));
 

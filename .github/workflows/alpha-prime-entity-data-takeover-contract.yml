@@ -1,0 +1,49 @@
+name: Alpha Prime Entity Data Takeover Contract
+
+on:
+  push:
+    branches:
+      - main
+      - 'alpha-prime/**'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alpha-prime-entity-data-takeover-contract-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  entity-data-takeover-contract-audit:
+    name: entity-data-takeover-contract-audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate datastore takeover contract without claiming runtime proof
+        run: |
+          set +e
+          node scripts/alpha-prime/entity-data-takeover-contract-audit.mjs 2>&1 | tee entity-data-takeover-contract.log
+          ec=${PIPESTATUS[0]}
+          echo "$ec" > entity-data-takeover-contract.exit
+          exit "$ec"
+      - name: Upload entity takeover contract evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alpha-prime-entity-data-takeover-contract-evidence
+          path: |
+            entity-data-takeover-contract.log
+            entity-data-takeover-contract.exit
+          if-no-files-found: error
+          retention-days: 7

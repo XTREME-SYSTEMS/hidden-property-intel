@@ -365,7 +365,7 @@ export default function SmartContractSimulator() {
   );
 }
 
-function StateRow({ icon: Icon, label, done, status }) {
+function StateRow({ icon: Icon, label, done = false, status = "" }) {
   const cleared = done || status === "cleared";
   return (
     <div className="flex items-center justify-between">

@@ -1,0 +1,70 @@
+{
+  "contract_version": 1,
+  "purpose": "Validation contract for proving Base44-independent HPI entity-data takeover and deterministic failback.",
+  "scope": "branch-sandbox-validation-only",
+  "primary_store": "Base44 entity DB",
+  "takeover_store": "independent durable datastore",
+  "pass_semantics": "Contract completeness does not prove datastore takeover. The Base44 entity DB SPOF remains active until exact-SHA outage and failback evidence passes.",
+  "minimum_domain_entities": [
+    "Property",
+    "PropertyScore",
+    "Owner",
+    "InvestorLead",
+    "Deal"
+  ],
+  "minimum_governor_entities": [
+    "GateResult",
+    "HeartbeatReceipt",
+    "ValidationTask",
+    "Finding",
+    "RepairTask",
+    "ValidationReceipt",
+    "SubsystemState",
+    "GovernanceReview"
+  ],
+  "required_takeover_behaviors": [
+    "exact_source_sha_required",
+    "stable_entity_identity_required",
+    "idempotent_upsert_required",
+    "outage_writes_buffered_or_committed_to_takeover_store",
+    "tombstone_or_delete_semantics_defined_without_destructive_test",
+    "conflict_resolution_is_deterministic",
+    "ordering_or_version_rule_defined",
+    "stale_or_foreign_sha_evidence_rejected",
+    "failback_reconciliation_is_idempotent",
+    "no_duplicate_domain_or_governor_records",
+    "read_after_write_consistency_proven_for_validation_fixture",
+    "takeover_store_is_executable_without_base44_runtime"
+  ],
+  "proof_sequence": [
+    "baseline_primary_available",
+    "seed_harmless_exact_sha_fixture",
+    "simulate_base44_entity_db_unavailable",
+    "write_fixture_to_takeover_store",
+    "read_fixture_from_takeover_store",
+    "exercise_idempotent_duplicate_write",
+    "exercise_deterministic_conflict_fixture",
+    "restore_primary_store",
+    "reconcile_domain_and_governor_fixture",
+    "verify_zero_duplicate_records",
+    "emit_exact_sha_takeover_and_failback_receipts",
+    "rerun_nearby_regressions"
+  ],
+  "existing_mirror_limitations": [
+    "current_sync_to_supabase_runs_inside_base44_runtime",
+    "current_sync_from_supabase_runs_inside_base44_runtime",
+    "current_mirror_covers_only_minimum_domain_entities",
+    "current_mirror_does_not_prove_governor_state_takeover"
+  ],
+  "forbidden_shortcuts": [
+    "remove_or_weaken_critical_spof_declaration",
+    "treat_existing_mirror_as_takeover_proof",
+    "treat_contract_completeness_as_datastore_takeover_pass",
+    "use_stale_or_foreign_sha_receipts",
+    "mutate_or_delete_production_property_data_for_validation",
+    "change_production_rls_or_schema",
+    "change_secrets",
+    "incur_spend"
+  ],
+  "runtime_proof_required_before_spof_clear": true
+}

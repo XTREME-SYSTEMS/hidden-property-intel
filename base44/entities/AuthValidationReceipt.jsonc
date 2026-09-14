@@ -1,0 +1,42 @@
+{
+  "name": "AuthValidationReceipt",
+  "type": "object",
+  "properties": {
+    "receipt_id": { "type": "string" },
+    "tested_at": { "type": "string", "format": "date-time" },
+    "source_sha": { "type": "string" },
+    "environment": { "type": "string", "enum": ["sandbox", "test"] },
+    "producer": { "type": "string", "enum": ["playwright-auth-validator"] },
+    "artifact_ref": { "type": "string" },
+    "login_ok": { "type": "boolean" },
+    "register_ok": { "type": "boolean" },
+    "reset_request_ok": { "type": "boolean" },
+    "reset_complete_ok": { "type": "boolean" },
+    "session_persist_ok": { "type": "boolean" },
+    "session_restore_ok": { "type": "boolean" },
+    "live_side_effects": { "type": "boolean" },
+    "error_count": { "type": "integer", "minimum": 0 }
+  },
+  "required": [
+    "receipt_id",
+    "tested_at",
+    "source_sha",
+    "environment",
+    "producer",
+    "artifact_ref",
+    "login_ok",
+    "register_ok",
+    "reset_request_ok",
+    "reset_complete_ok",
+    "session_persist_ok",
+    "session_restore_ok",
+    "live_side_effects",
+    "error_count"
+  ],
+  "rls": {
+    "read": { "user_condition": { "role": "admin" } },
+    "create": { "user_condition": { "role": "admin" } },
+    "update": { "user_condition": { "role": "admin" } },
+    "delete": { "user_condition": { "role": "admin" } }
+  }
+}

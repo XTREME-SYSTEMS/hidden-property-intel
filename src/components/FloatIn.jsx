@@ -4,6 +4,8 @@ import React, { useEffect, useRef, useState } from "react";
  * FloatIn — wraps children and plays a subtle float-up animation
  * the first time the element scrolls into view. Pure additive effect;
  * does not alter layout or styling beyond the entrance animation.
+ *
+ * @param {{children?: React.ReactNode, className?: string, delay?: number, as?: React.ElementType}} props
  */
 export default function FloatIn({ children, className = "", delay = 0, as: Tag = "div" }) {
   const ref = useRef(null);

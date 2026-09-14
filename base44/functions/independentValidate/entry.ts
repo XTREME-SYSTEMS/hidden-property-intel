@@ -22,6 +22,12 @@ export default async function(req: Request): Promise<Response> {
     }
 
     const body = await req.json().catch(() => ({}));
+
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+
+      return Response.json({ error: 'JSON object body required' }, { status: 400 });
+
+    }
     const { repair_id, finding_id, repair_agent, test_results, source_sha } = body;
 
     if (!repair_id || !finding_id || !repair_agent) {

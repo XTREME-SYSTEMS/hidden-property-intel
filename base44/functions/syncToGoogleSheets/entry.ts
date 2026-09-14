@@ -60,6 +60,9 @@ export default async function(req) {
     // Parse optional spreadsheet_id from request body
     let body = {};
     try { body = await req.json(); } catch (e) {}
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      return Response.json({ error: 'JSON object body required' }, { status: 400 });
+    }
     const existingId = body.spreadsheet_id;
 
     let spreadsheetId = existingId;

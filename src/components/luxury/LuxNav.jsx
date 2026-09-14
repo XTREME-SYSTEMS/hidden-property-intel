@@ -1,15 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import Logo from "@/components/luxury/Logo";
 import PWAInstall from "@/components/PWAInstall";
 import AlertsBell from "@/components/AlertsBell";
 import GlobalHamburger from "@/components/GlobalHamburger";
-import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/lib/AuthContext";
 
 export default function LuxNav() {
-  const [user, setUser] = useState(null);
-
-  useEffect(() => { base44.auth.me().then(setUser).catch(() => {}); }, []);
+  const { user } = useAuth();
 
   const links = [
     { label: "For Investors", href: "/#investors" },

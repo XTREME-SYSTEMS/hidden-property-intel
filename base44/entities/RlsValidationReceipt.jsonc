@@ -1,0 +1,48 @@
+{
+  "name": "RlsValidationReceipt",
+  "type": "object",
+  "properties": {
+    "receipt_id": { "type": "string" },
+    "tested_at": { "type": "string", "format": "date-time" },
+    "source_sha": { "type": "string" },
+    "environment": { "type": "string", "enum": ["sandbox", "test"] },
+    "producer": { "type": "string", "enum": ["rls-matrix-validator"] },
+    "artifact_ref": { "type": "string" },
+    "admin_read_rejected": { "type": "boolean" },
+    "admin_create_rejected": { "type": "boolean" },
+    "admin_update_rejected": { "type": "boolean" },
+    "admin_delete_rejected": { "type": "boolean" },
+    "cross_user_read_rejected": { "type": "boolean" },
+    "cross_user_create_rejected": { "type": "boolean" },
+    "cross_user_update_rejected": { "type": "boolean" },
+    "cross_user_delete_rejected": { "type": "boolean" },
+    "cleanup_ok": { "type": "boolean" },
+    "live_side_effects": { "type": "boolean" },
+    "error_count": { "type": "integer", "minimum": 0 }
+  },
+  "required": [
+    "receipt_id",
+    "tested_at",
+    "source_sha",
+    "environment",
+    "producer",
+    "artifact_ref",
+    "admin_read_rejected",
+    "admin_create_rejected",
+    "admin_update_rejected",
+    "admin_delete_rejected",
+    "cross_user_read_rejected",
+    "cross_user_create_rejected",
+    "cross_user_update_rejected",
+    "cross_user_delete_rejected",
+    "cleanup_ok",
+    "live_side_effects",
+    "error_count"
+  ],
+  "rls": {
+    "read": { "user_condition": { "role": "admin" } },
+    "create": { "user_condition": { "role": "admin" } },
+    "update": { "user_condition": { "role": "admin" } },
+    "delete": { "user_condition": { "role": "admin" } }
+  }
+}

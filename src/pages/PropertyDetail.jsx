@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/lib/AuthContext";
 import { Image } from "@/components/ui/image";
 import DistressBadge, { labelFor } from "@/components/DistressBadge";
 import ScoreGauge from "@/components/ScoreGauge";
@@ -16,7 +17,7 @@ import { money, num, pct } from "@/lib/format";
 import Seo from "@/components/Seo";
 import { Lock, MapPin, Phone, Mail, ArrowLeft, ShieldAlert } from "lucide-react";
 
-function Card({ title, children, className = "" }) {
+function Card({ title = "", children, className = "" }) {
   return (
     <section className={`rounded-3xl bg-white p-6 ring-1 ring-[#E5EDEA] sm:p-8 ${className}`}>
       {title && <h2 className="font-display text-xl font-semibold tracking-tight">{title}</h2>}
@@ -49,19 +50,17 @@ export default function PropertyDetail() {
   const [titleRisk, setTitleRisk] = useState(null);
   const [active, setActive] = useState(0);
   const [unlocked, setUnlocked] = useState(false);
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
   const [skipTracing, setSkipTracing] = useState(null);
 
   useEffect(() => {
     let alive = true;
     setProperty(null);
     (async () => {
-      const [p, u] = await Promise.all([
-        base44.entities.Property.get(id),
-        base44.auth.me().catch(() => null)
-      ]);
+      const p = await base44.entities.Property.get(id);
+      const u = user;
       if (!alive) return;
-      setProperty(p); setUser(u);
+      setProperty(p);
       const isAdmin = u?.role === 'admin';
       let isPro = isAdmin;
       if (u && !isAdmin) {
@@ -82,7 +81,7 @@ export default function PropertyDetail() {
       setScore(sc[0] || null); setChain(ch[0] || null); setOwners(ow); setBids(bd); setTitleRisk(tr[0] || null);
     })();
     return () => { alive = false; };
-  }, [id]);
+  }, [id, user]);
 
   const handleSkipTrace = async (ownerId) => {
     setSkipTracing(ownerId);
