@@ -43,7 +43,7 @@ export default function PricingTiers() {
 
           <ul className="mt-6 space-y-3 text-sm">
             {p.features.map(([label, on]) => (
-              <li key={label} className="flex items-start gap-2.5">
+              <li key={String(label)} className="flex items-start gap-2.5">
                 {on
                   ? <Check className={`mt-0.5 h-4 w-4 shrink-0 ${p.featured ? "text-emerald-400" : "text-emerald-500"}`} />
                   : <Minus className="mt-0.5 h-4 w-4 shrink-0 text-[#6B7B72]/50" />}
