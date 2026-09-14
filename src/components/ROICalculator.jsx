@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { money, pct } from "@/lib/format";
 
-function Field({ label, value, onChange, suffix }) {
+function Field({ label, value, onChange, suffix = "" }) {
   return (
     <label className="block">
       <span className="text-xs uppercase tracking-widest text-[#6B7B72]">{label}</span>
