@@ -14,6 +14,34 @@ import {
 const FALLBACK_IMAGE_URL =
   "https://static.wixstatic.com/media/12d367_4f26ccd17f8f4e3a8958306ea08c2332~mv2.png"
 
+function shouldBypassRemoteImage(src) {
+  if (typeof src !== "string" || !src) return false
+
+  try {
+    const url = new URL(src)
+    const host = url.hostname.toLowerCase()
+    const path = url.pathname.toLowerCase()
+    const propertyOnionHost = host === "propertyonion.com" || host.endsWith(".propertyonion.com")
+
+    if (
+      propertyOnionHost &&
+      (path.startsWith("/assets/header/logo") ||
+        path.startsWith("/assets/images/icon-") ||
+        path.startsWith("/assets/academy/banner-"))
+    ) {
+      return true
+    }
+
+    if (host === "maps.googleapis.com" && path === "/maps/api/streetview") {
+      return true
+    }
+
+    return false
+  } catch {
+    return false
+  }
+}
+
 /** @typedef {React.HTMLAttributes<HTMLSpanElement> & { aspectRatio?: string | number }} ImageWrapperProps */
 /** @type {React.ForwardRefExoticComponent<ImageWrapperProps & React.RefAttributes<HTMLSpanElement>>} */
 const ImageWrapper = React.forwardRef(({ aspectRatio, className, style, children, ...props }, ref) => (
@@ -81,28 +109,40 @@ ResponsiveImage.displayName = "ResponsiveImage"
 /** @type {React.ForwardRefExoticComponent<ImageProps & React.RefAttributes<HTMLImageElement>>} */
 const Image = React.forwardRef(
   ({ src, fittingType = "fill", originWidth, originHeight, focalPointX, focalPointY, quality = 90, onError, ...props }, ref) => {
-    const parsedSource = src && src !== FALLBACK_IMAGE_URL ? parseWixMediaUrl(src) : null
+    const blockedRemoteImage = shouldBypassRemoteImage(src)
+    const effectiveSrc = blockedRemoteImage ? "" : src
+    const parsedSource = effectiveSrc && effectiveSrc !== FALLBACK_IMAGE_URL ? parseWixMediaUrl(effectiveSrc) : null
     const initialMode = parsedSource ? IMAGE_LOAD_MODE.OPTIMIZED : IMAGE_LOAD_MODE.ORIGINAL
-    const [loadState, setLoadState] = React.useState({ src, mode: initialMode })
-    const mode = loadState.src === src ? loadState.mode : initialMode
+    const [loadState, setLoadState] = React.useState({ src: effectiveSrc, mode: initialMode })
+    const mode = loadState.src === effectiveSrc ? loadState.mode : initialMode
 
-    React.useEffect(() => { setLoadState({ src, mode: initialMode }) }, [src, initialMode])
+    React.useEffect(() => { setLoadState({ src: effectiveSrc, mode: initialMode }) }, [effectiveSrc, initialMode])
 
     const handleError = (event) => {
       if (mode === IMAGE_LOAD_MODE.FALLBACK) return
       const nextMode = nextImageLoadMode(mode)
-      setLoadState({ src, mode: nextMode })
+      setLoadState({ src: effectiveSrc, mode: nextMode })
       if (nextMode === IMAGE_LOAD_MODE.FALLBACK) onError?.(event)
     }
 
     const imageProps = { ...props, onError: handleError }
 
-    if (!src) return <img ref={ref} src={FALLBACK_IMAGE_URL} {...imageProps} data-empty-image />
+    if (!effectiveSrc) {
+      return (
+        <img
+          ref={ref}
+          src={FALLBACK_IMAGE_URL}
+          {...imageProps}
+          data-empty-image
+          data-blocked-remote-image={blockedRemoteImage || undefined}
+        />
+      )
+    }
 
     const parsed = mode === IMAGE_LOAD_MODE.OPTIMIZED ? parsedSource : null
     if (!parsed) {
       const isErrorMode = mode === IMAGE_LOAD_MODE.FALLBACK
-      const imageSrc = isErrorMode ? FALLBACK_IMAGE_URL : getOriginalImageUrl(src, parsedSource)
+      const imageSrc = isErrorMode ? FALLBACK_IMAGE_URL : getOriginalImageUrl(effectiveSrc, parsedSource)
       return <img ref={ref} src={imageSrc} {...imageProps} data-error-image={isErrorMode || undefined} />
     }
 
