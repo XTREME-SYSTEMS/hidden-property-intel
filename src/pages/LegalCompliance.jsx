@@ -483,9 +483,9 @@ function Section({ title, subtitle, icon: Icon, children }) {
   );
 }
 
-function ExpandableItem({ title, detail, citation, link, expanded, onToggle }) {
+function ExpandableItem({ id = "", title, detail, citation = "", link = "", expanded = false, onToggle }) {
   return (
-    <div className="rounded-sm border border-black/10">
+    <div id={id || undefined} className="rounded-sm border border-black/10">
       <button onClick={onToggle} className="flex w-full items-center justify-between px-4 py-3 text-left">
         <span className="text-sm font-medium text-black/80">{title}</span>
         {expanded ? <ChevronUp className="h-4 w-4 text-black/40" /> : <ChevronDown className="h-4 w-4 text-black/40" />}
