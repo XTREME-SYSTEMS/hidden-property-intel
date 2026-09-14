@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.48';
 import { compileHpiGeneratorProfile } from '../../shared/universalGenerator/hpiProfile.ts';
+import { HPI_RESILIENCE_MATRIX, summarizeResilience } from '../../shared/universalGenerator/resilienceMatrix.ts';
 
 export default async function(req: Request): Promise<Response> {
   const base44 = createClientFromRequest(req);
@@ -12,5 +13,7 @@ export default async function(req: Request): Promise<Response> {
     version: 'hpi-integration-v1',
     mutationPerformed: false,
     profile: compileHpiGeneratorProfile(),
+    resilienceSummary: summarizeResilience(),
+    resilienceMatrix: HPI_RESILIENCE_MATRIX,
   });
 }
