@@ -84,7 +84,7 @@ export default async function (req: Request): Promise<Response> {
       let actual = 'allowed';
       let evidence = '';
       try {
-        await (base44.entities as any)[entity].filter({ id: '__isolation_probe__' });
+        await (base44.entities as any)[entity].list('-created_date', 1);
         evidence = `read ok as ${callerRole}`;
       } catch (e: any) {
         actual = 'denied';
