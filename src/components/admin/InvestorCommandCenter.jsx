@@ -196,7 +196,7 @@ function InvestorDrawer({ investor, initialTab = "overview", onClose, onUpdate }
           {tab === "voice" && <VoiceTab investor={investor} />}
           {tab === "intel" && <IntelTab investor={investor} />}
           {tab === "pitch" && <PitchTab investor={investor} />}
-          {tab === "followup" && <div className="space-y-4"><FollowUpControls targetType="investor" record={investor} onUpdate={onUpdate} /></div>
+          {tab === "followup" && <div className="space-y-4"><FollowUpControls targetType="investor" record={investor} onUpdate={onUpdate} /></div>}
           {tab === "notes" && <NotesTab investor={investor} onUpdate={onUpdate} />}
         </div>
       </div>
