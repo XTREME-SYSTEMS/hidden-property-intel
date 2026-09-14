@@ -1,0 +1,24 @@
+name: Alpha Prime Admin Isolation Safety Audit
+
+on:
+  push:
+    branches:
+      - 'alpha-prime/**'
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  admin-isolation-safety-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run deterministic admin isolation safety audit
+        run: node scripts/alpha-prime/admin-isolation-safety-audit.mjs
