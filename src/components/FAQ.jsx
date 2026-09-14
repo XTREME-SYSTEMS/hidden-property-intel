@@ -25,7 +25,8 @@ export default function FAQ() {
         "acceptedAnswer": { "@type": "Answer", "text": a }
       }))
     };
-    let el = document.getElementById("faq-jsonld");
+    /** @type {HTMLScriptElement | null} */
+    let el = /** @type {HTMLScriptElement | null} */ (document.getElementById("faq-jsonld"));
     if (!el) {
       el = document.createElement("script");
       el.type = "application/ld+json";
