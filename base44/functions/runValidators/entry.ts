@@ -36,9 +36,11 @@ export default async function (req: Request): Promise<Response> {
     const now = new Date().toISOString();
     const runtimeSecrets: any = (await import('base44:runtime')).secrets;
     const secrets: GithubSecrets = {
-      GITHUB_REPO: runtimeSecrets.get ? runtimeSecrets.get('GITHUB_REPO') : (runtimeSecrets.GITHUB_REPO || ''),
+      // HPI validators must resolve the canonical repository deterministically.
+      // Repository/branch identity is not allowed to drift via mutable runtime config.
+      GITHUB_REPO: 'XTREME-SYSTEMS/hidden-property-intel',
       GITHUB_TOKEN: runtimeSecrets.get ? runtimeSecrets.get('GITHUB_TOKEN') : (runtimeSecrets.GITHUB_TOKEN || ''),
-      GITHUB_BASE_BRANCH: (runtimeSecrets.get ? runtimeSecrets.get('GITHUB_BASE_BRANCH') : runtimeSecrets.GITHUB_BASE_BRANCH) || 'main',
+      GITHUB_BASE_BRANCH: 'main',
     };
 
     // ── 1. Resolve source SHA ──
