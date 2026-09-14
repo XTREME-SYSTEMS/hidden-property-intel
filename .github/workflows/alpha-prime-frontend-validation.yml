@@ -219,6 +219,45 @@ jobs:
           if (errors.length !== 0) process.exit(1);
           NODE
 
+  frontend-network-integrity:
+    name: frontend-network-integrity
+    needs: frontend-render
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download exact-SHA frontend evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: alpha-prime-frontend-evidence-${{ github.sha }}
+      - name: Enforce zero failed browser requests on primary routes
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const evidence = JSON.parse(fs.readFileSync('frontend-validation-evidence.json', 'utf8'));
+          if (evidence.source_sha !== process.env.GITHUB_SHA) {
+            console.error(`Stale SHA evidence rejected: evidence=${evidence.source_sha} current=${process.env.GITHUB_SHA}`);
+            process.exit(1);
+          }
+          if (evidence.backend_mode !== 'base44-live-readonly') {
+            console.error(`Invalid backend mode for network evidence: ${evidence.backend_mode}`);
+            process.exit(1);
+          }
+          if (evidence.data_policy !== 'real-live-readonly-no-mock-identities-or-fabricated-property-ids') {
+            console.error(`Invalid data policy for network evidence: ${evidence.data_policy}`);
+            process.exit(1);
+          }
+          const failures = evidence.routes.flatMap((row) =>
+            (row.failed_requests || []).map((request) => ({ route: row.path, ...request }))
+          );
+          console.log(JSON.stringify({
+            source_sha: evidence.source_sha,
+            threshold: '0 failed browser requests across home, listings, and discovered real property-detail route',
+            failed_request_count: failures.length,
+            failed_requests: failures,
+          }, null, 2));
+          if (failures.length !== 0) process.exit(1);
+          NODE
+
   repair-public-auth-probes:
     name: repair-public-auth-probes
     needs: frontend-no-console-errors
