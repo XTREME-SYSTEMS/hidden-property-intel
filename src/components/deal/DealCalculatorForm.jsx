@@ -1,7 +1,7 @@
 import React from "react";
 import { Home, Wrench, Calendar, DollarSign, Percent, TrendingUp } from "lucide-react";
 
-function Field({ label, value, onChange, prefix, suffix, type = "number", hint }) {
+function Field({ label, value, onChange, prefix = "", suffix = "", type = "number", hint = "" }) {
   return (
     <div>
       <label className="text-[10px] font-semibold uppercase tracking-[0.15em] text-black/50">{label}</label>
