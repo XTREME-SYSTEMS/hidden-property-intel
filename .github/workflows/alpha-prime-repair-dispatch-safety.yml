@@ -1,0 +1,49 @@
+name: Alpha Prime Repair Dispatch Safety
+
+on:
+  push:
+    branches:
+      - main
+      - 'alpha-prime/**'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alpha-prime-repair-dispatch-safety-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  repair-dispatch-safety:
+    name: repair-dispatch-safety
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Audit exact-SHA repair dispatch lineage and deduplication
+        run: |
+          set +e
+          node scripts/alpha-prime/repair-dispatch-safety.mjs 2>&1 | tee repair-dispatch-safety.log
+          ec=${PIPESTATUS[0]}
+          echo "$ec" > repair-dispatch-safety.exit
+          exit "$ec"
+      - name: Upload repair dispatch safety evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alpha-prime-repair-dispatch-safety-evidence
+          path: |
+            repair-dispatch-safety.log
+            repair-dispatch-safety.exit
+          if-no-files-found: error
+          retention-days: 7
