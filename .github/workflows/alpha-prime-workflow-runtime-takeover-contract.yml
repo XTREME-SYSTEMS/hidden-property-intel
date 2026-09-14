@@ -1,0 +1,49 @@
+name: Alpha Prime Workflow Runtime Takeover Contract
+
+on:
+  push:
+    branches:
+      - main
+      - 'alpha-prime/**'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alpha-prime-workflow-runtime-takeover-contract-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  workflow-runtime-takeover-contract-audit:
+    name: workflow-runtime-takeover-contract-audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate takeover contract without claiming runtime failover proof
+        run: |
+          set +e
+          node scripts/alpha-prime/workflow-runtime-takeover-contract-audit.mjs 2>&1 | tee workflow-runtime-takeover-contract.log
+          ec=${PIPESTATUS[0]}
+          echo "$ec" > workflow-runtime-takeover-contract.exit
+          exit "$ec"
+      - name: Upload workflow takeover contract evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alpha-prime-workflow-runtime-takeover-contract-evidence
+          path: |
+            workflow-runtime-takeover-contract.log
+            workflow-runtime-takeover-contract.exit
+          if-no-files-found: error
+          retention-days: 7
