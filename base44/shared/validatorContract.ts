@@ -178,6 +178,15 @@ export interface SchedulerEntry {
   proposed_consolidation: string;
 }
 
+/**
+ * Deterministic recurring-scheduler inventory.
+ *
+ * This list is intentionally exhaustive for the scheduler surfaces discovered by
+ * scripts/alpha-prime/scheduler-surface-audit.mjs. The Convergence Heartbeat is the
+ * sole allowed recurring governor. Every other recurring operational authority stays
+ * FAIL evidence until it is actually consolidated/disabled under the approved release
+ * procedure with rollback receipts. Do not delete rows merely to make the gate green.
+ */
 export const SCHEDULER_INVENTORY: SchedulerEntry[] = [
   {
     id: 'alpha_prime_heartbeat',
@@ -189,13 +198,139 @@ export const SCHEDULER_INVENTORY: SchedulerEntry[] = [
     proposed_consolidation: 'This IS the governor — no action.',
   },
   {
+    id: 'base44_daily_followup',
+    authority: 'base44/workflows/Daily Follow-Up Engine.jsonc',
+    schedule: '0 8 * * *',
+    consequential: true,
+    conflicts_with_governor: true,
+    config_reference: 'Daily Follow-Up Engine trigger.config.cron_expression = 0 8 * * *',
+    proposed_consolidation: 'Route the due follow-up queue through Alpha Prime; disable the standalone production schedule only under the approved consolidation with rollback receipt.',
+  },
+  {
+    id: 'base44_daily_maintenance',
+    authority: 'base44/workflows/Daily Maintenance.jsonc',
+    schedule: '0 6 * * *',
+    consequential: true,
+    conflicts_with_governor: true,
+    config_reference: 'Daily Maintenance trigger.config.cron_expression = 0 6 * * *',
+    proposed_consolidation: 'Route maintenance through the Alpha Prime due-job scheduler; disable the standalone schedule only with rollback receipt.',
+  },
+  {
+    id: 'base44_daily_outreach',
+    authority: 'base44/workflows/Daily Outreach.jsonc',
+    schedule: '0 3 * * *',
+    consequential: true,
+    conflicts_with_governor: true,
+    config_reference: 'Daily Outreach trigger.config.cron_expression = 0 3 * * *',
+    proposed_consolidation: 'Route outreach eligibility through Alpha Prime. Customer messaging remains separately approval-gated; disable only the duplicate scheduler under approved consolidation.',
+  },
+  {
+    id: 'base44_daily_scrape_pipeline',
+    authority: 'base44/workflows/Daily Scrape Pipeline.jsonc',
+    schedule: '0 */3 * * *',
+    consequential: true,
+    conflicts_with_governor: true,
+    config_reference: 'Daily Scrape Pipeline trigger.config.cron_expression = 0 */3 * * *',
+    proposed_consolidation: 'Route scrape work through Alpha Prime due-job slots; disable the standalone production schedule only with rollback receipt.',
+  },
+  {
+    id: 'base44_draft_property_processor',
+    authority: 'base44/workflows/Draft Property Processor.jsonc',
+    schedule: '0 * * * *',
+    consequential: true,
+    conflicts_with_governor: true,
+    config_reference: 'Draft Property Processor trigger.config.cron_expression = 0 * * * *',
+    proposed_consolidation: 'Route draft processing through Alpha Prime hourly work; disable the standalone schedule only with rollback receipt.',
+  },
+  {
+    id: 'base44_probate_pipeline',
+    authority: 'base44/workflows/Probate Pipeline.jsonc',
+    schedule: '0 6 * * *',
+    consequential: true,
+    conflicts_with_governor: true,
+    config_reference: 'Probate Pipeline trigger.config.cron_expression = 0 6 * * *',
+    proposed_consolidation: 'Route probate ingestion through Alpha Prime daily work; disable the standalone schedule only with rollback receipt.',
+  },
+  {
+    id: 'base44_property_cross_reference',
+    authority: 'base44/workflows/Property Cross-Reference.jsonc',
+    schedule: '0 5 * * *',
+    consequential: true,
+    conflicts_with_governor: true,
+    config_reference: 'Property Cross-Reference trigger.config.cron_expression = 0 5 * * *',
+    proposed_consolidation: 'Route cross-reference work through Alpha Prime; disable the standalone schedule only with rollback receipt.',
+  },
+  {
+    id: 'base44_property_enrichment_engine',
+    authority: 'base44/workflows/Property Enrichment Engine.jsonc',
+    schedule: '0 */6 * * *',
+    consequential: true,
+    conflicts_with_governor: true,
+    config_reference: 'Property Enrichment Engine trigger.config.cron_expression = 0 */6 * * *',
+    proposed_consolidation: 'Route enrichment work through Alpha Prime due-job slots; disable the standalone schedule only with rollback receipt.',
+  },
+  {
+    id: 'base44_property_image_ingestion',
+    authority: 'base44/workflows/Property Image Ingestion.jsonc',
+    schedule: '*/30 * * * *',
+    consequential: true,
+    conflicts_with_governor: true,
+    config_reference: 'Property Image Ingestion trigger.config.cron_expression = */30 * * * *',
+    proposed_consolidation: 'Route image ingestion through Alpha Prime smoke/due-job cadence; disable the standalone schedule only with rollback receipt.',
+  },
+  {
+    id: 'base44_property_image_scraper',
+    authority: 'base44/workflows/Property Image Scraper.jsonc',
+    schedule: '0 */4 * * *',
+    consequential: true,
+    conflicts_with_governor: true,
+    config_reference: 'Property Image Scraper trigger.config.cron_expression = 0 */4 * * *',
+    proposed_consolidation: 'Route image scraping through Alpha Prime; disable the standalone schedule only with rollback receipt.',
+  },
+  {
+    id: 'base44_search_console_sync',
+    authority: 'base44/workflows/Search Console Sync.jsonc',
+    schedule: '0 6 * * *',
+    consequential: true,
+    conflicts_with_governor: true,
+    config_reference: 'Search Console Sync trigger.config.cron_expression = 0 6 * * *',
+    proposed_consolidation: 'Route Search Console sync through Alpha Prime daily work; disable the standalone schedule only with rollback receipt.',
+  },
+  {
+    id: 'base44_shadow_orchestrator',
+    authority: 'base44/workflows/Shadow Orchestrator.jsonc',
+    schedule: '0 */6 * * *',
+    consequential: true,
+    conflicts_with_governor: true,
+    config_reference: 'Shadow Orchestrator trigger.config.cron_expression = 0 */6 * * *',
+    proposed_consolidation: 'Retire the duplicate orchestration authority after its responsibilities are explicitly mapped into Alpha Prime and rollback is captured.',
+  },
+  {
+    id: 'base44_smart_contract_chain_sync',
+    authority: 'base44/workflows/Smart Contract Chain Sync.jsonc',
+    schedule: '0 * * * *',
+    consequential: true,
+    conflicts_with_governor: true,
+    config_reference: 'Smart Contract Chain Sync trigger.config.cron_expression = 0 * * * *',
+    proposed_consolidation: 'Route read-only chain sync through Alpha Prime; live contract execution remains separately prohibited without explicit approval.',
+  },
+  {
+    id: 'base44_system_validation',
+    authority: 'base44/workflows/System Validation.jsonc',
+    schedule: '0 4 * * *',
+    consequential: false,
+    conflicts_with_governor: true,
+    config_reference: 'System Validation trigger.config.cron_expression = 0 4 * * *',
+    proposed_consolidation: 'Route validation through Alpha Prime benchmark/validation slots; disable the redundant schedule with rollback receipt.',
+  },
+  {
     id: 'vercel_trigger_scrape',
     authority: 'vercel-orchestrator/vercel.json',
     schedule: '0 */6 * * *',
     consequential: true,
     conflicts_with_governor: true,
     config_reference: 'crons[0] = { path: /api/trigger-scrape, schedule: 0 */6 * * * }',
-    proposed_consolidation: 'Migrate scrape trigger into Alpha Prime piggyback (hourly optimize slot). Remove Vercel cron after operator approval.',
+    proposed_consolidation: 'Migrate scrape trigger into Alpha Prime piggyback. Remove Vercel cron only under the approved production consolidation with rollback receipt.',
   },
   {
     id: 'vercel_mirror_supabase',
@@ -204,7 +339,7 @@ export const SCHEDULER_INVENTORY: SchedulerEntry[] = [
     consequential: true,
     conflicts_with_governor: true,
     config_reference: 'crons[1] = { path: /api/mirror-to-supabase, schedule: */30 * * * * }',
-    proposed_consolidation: 'Migrate Supabase mirror into Alpha Prime piggyback (15-min smoke slot). Remove Vercel cron after operator approval.',
+    proposed_consolidation: 'Migrate Supabase mirror into Alpha Prime piggyback. Remove Vercel cron only under the approved production consolidation with rollback receipt.',
   },
   {
     id: 'railway_scraper_cron',
@@ -212,44 +347,8 @@ export const SCHEDULER_INVENTORY: SchedulerEntry[] = [
     schedule: '0 6 * * *',
     consequential: true,
     conflicts_with_governor: true,
-    config_reference: 'deploy.cronSchedule = 0 6 * * * (railway/scraper-cron.ts)',
-    proposed_consolidation: 'Migrate Railway scraper into Alpha Prime piggyback (daily benchmark slot). Remove Railway cron after operator approval.',
-  },
-  {
-    id: 'base44_daily_scrape_pipeline',
-    authority: 'base44/workflows/Daily Scrape Pipeline.jsonc',
-    schedule: 'scheduled',
-    consequential: true,
-    conflicts_with_governor: true,
-    config_reference: 'Base44 workflow — scheduled trigger',
-    proposed_consolidation: 'Convert to Alpha Prime piggyback dispatch or confirm it is orchestrated by the governor.',
-  },
-  {
-    id: 'base44_daily_followup',
-    authority: 'base44/workflows/Daily Follow-Up Engine.jsonc',
-    schedule: 'scheduled',
-    consequential: true,
-    conflicts_with_governor: true,
-    config_reference: 'Base44 workflow — scheduled trigger',
-    proposed_consolidation: 'Convert to Alpha Prime piggyback dispatch.',
-  },
-  {
-    id: 'base44_daily_outreach',
-    authority: 'base44/workflows/Daily Outreach.jsonc',
-    schedule: 'scheduled',
-    consequential: true,
-    conflicts_with_governor: true,
-    config_reference: 'Base44 workflow — scheduled trigger',
-    proposed_consolidation: 'Convert to Alpha Prime piggyback dispatch.',
-  },
-  {
-    id: 'base44_daily_maintenance',
-    authority: 'base44/workflows/Daily Maintenance.jsonc',
-    schedule: 'scheduled',
-    consequential: true,
-    conflicts_with_governor: true,
-    config_reference: 'Base44 workflow — scheduled trigger',
-    proposed_consolidation: 'Convert to Alpha Prime piggyback dispatch.',
+    config_reference: 'deploy.cronSchedule = 0 6 * * *',
+    proposed_consolidation: 'Migrate Railway scraper dispatch into Alpha Prime. Remove Railway cron only under the approved production consolidation with rollback receipt.',
   },
 ];
 
@@ -262,4 +361,4 @@ export const WAVE1_VALIDATORS = [
   'workflows.no_duplicate_cron',
 ];
 
-export const VALIDATOR_VERSION = '1.2.0';
+export const VALIDATOR_VERSION = '1.3.0';
