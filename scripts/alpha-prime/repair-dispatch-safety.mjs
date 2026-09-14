@@ -49,10 +49,29 @@ if (createTask >= 0 && agentInvoke > createTask) {
 const createCount = (text.match(/entities\.RepairTask\.create\s*\(/g) || []).length;
 if (createCount !== 1) failures.push(`expected exactly 1 RepairTask.create path in Alpha Prime governor, found ${createCount}`);
 
+// A stale/foreign Finding with the same gate category must not suppress a new exact-SHA finding.
+const exactSourceFindingDedup = /openFindings\s*\.filter\(\(f:\s*any\)\s*=>\s*Boolean\(sourceSha\s*&&\s*f\.source_sha\s*&&\s*f\.source_sha\s*===\s*sourceSha\)\)\s*\.map\(\(f:\s*any\)\s*=>\s*f\.category\)/s;
+if (!exactSourceFindingDedup.test(text)) failures.push('mandatory-gate Finding deduplication is not restricted to the exact current source SHA');
+
+// Historical heartbeats may only contribute to the preservation clean streak when they belong to the same exact source SHA.
+const exactSourceCleanStreak = /if\s*\(sourceSha\s*&&\s*b\.source_sha\s*===\s*sourceSha\s*&&\s*b\.release_ready\s*&&\s*\(b\.gate_failures\s*\|\|\s*\[\]\)\.length\s*===\s*0\)/;
+if (!exactSourceCleanStreak.test(text)) failures.push('preservation clean-streak calculation can consume stale, foreign, or unstamped HeartbeatReceipts');
+
+// Evidence receipts emitted by the governor must preserve the same source lineage used for dispatch and validation.
+if (!/entities\.ValidationReceipt\.create\([\s\S]*?source_sha:\s*finding\.source_sha/.test(text)) {
+  failures.push('ValidationReceipt creation is not source-SHA stamped');
+}
+if (!/entities\.RepairReceipt\.create\([\s\S]*?source_sha_before:\s*finding\.source_sha[\s\S]*?source_sha_after:\s*finding\.source_sha/.test(text)) {
+  failures.push('RepairReceipt creation does not preserve before/after source SHA lineage');
+}
+if (!/entities\.HeartbeatReceipt\.create\([\s\S]*?source_sha:\s*sourceSha/.test(text)) {
+  failures.push('HeartbeatReceipt creation is not stamped with the validator source SHA');
+}
+
 if (failures.length) {
   console.error(`repair-dispatch-safety FAIL: ${failures.length} issue(s)`);
   for (const failure of failures) console.error(failure);
   process.exit(1);
 }
 
-console.log('repair-dispatch-safety PASS: exact-SHA lineage, active-task deduplication, persistence guard, and dispatch ordering are enforced.');
+console.log('repair-dispatch-safety PASS: exact-SHA finding lifecycle, repair dispatch, receipt lineage, and heartbeat preservation streak are enforced.');
