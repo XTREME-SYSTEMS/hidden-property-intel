@@ -51,9 +51,10 @@ export default async function (req: Request): Promise<Response> {
     // Source SHA lineage
     const runtimeSecrets: any = (await import('base44:runtime')).secrets;
     const secrets: GithubSecrets = {
-      GITHUB_REPO: runtimeSecrets.get ? runtimeSecrets.get('GITHUB_REPO') : runtimeSecrets.GITHUB_REPO,
+      // HPI source lineage is pinned to the canonical repository and main branch.
+      GITHUB_REPO: 'XTREME-SYSTEMS/hidden-property-intel',
       GITHUB_TOKEN: runtimeSecrets.get ? runtimeSecrets.get('GITHUB_TOKEN') : runtimeSecrets.GITHUB_TOKEN,
-      GITHUB_BASE_BRANCH: (runtimeSecrets.get ? runtimeSecrets.get('GITHUB_BASE_BRANCH') : runtimeSecrets.GITHUB_BASE_BRANCH) || 'main',
+      GITHUB_BASE_BRANCH: 'main',
     };
     const shaResult = await resolveSourceSha(secrets);
     const sourceSha = shaResult.sha;
