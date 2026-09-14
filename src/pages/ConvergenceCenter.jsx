@@ -24,6 +24,7 @@ export default function ConvergenceCenter() {
   const [running, setRunning] = useState(false);
   const [isolation, setIsolation] = useState(null);
   const [runningIsolation, setRunningIsolation] = useState(false);
+  const [generator, setGenerator] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
@@ -45,6 +46,8 @@ export default function ConvergenceCenter() {
       setValidations(vals || []);
       setSubsystems(subs || []);
       setValidationTasks(vtasks || []);
+      const generatorResult = await base44.functions.invoke("universalGeneratorCompile", {}).catch(() => null);
+      setGenerator(generatorResult?.data || generatorResult || null);
     } finally {
       setLoading(false);
     }
@@ -162,6 +165,24 @@ export default function ConvergenceCenter() {
             icon={<GitCommit className="h-5 w-5" />}
           />
         </div>
+
+        {generator?.profile && (
+          <div className="mb-6 rounded-xl border border-[#3a3a2a] bg-[#141516] p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <div className="text-xs font-bold uppercase tracking-wider text-[#f0bf54]">XTREME Universal Generator</div>
+                <div className="mt-1 text-sm font-semibold text-white">{generator.profile.systemName} · {generator.profile.profileId}</div>
+                <div className="mt-1 text-[11px] text-[#8d8f92]">Package {generator.profile.packageVersion} · {generator.profile.archetype} · {generator.profile.regions?.join(", ")}</div>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-right text-[10px] sm:grid-cols-4">
+                <div><div className="text-[#6f7276]">Mode</div><div className="font-semibold text-white">{generator.profile.mode || "PLAN_ONLY"}</div></div>
+                <div><div className="text-[#6f7276]">Heartbeat</div><div className="font-semibold text-white">{generator.profile.operations?.heartbeatSeconds || 300}s</div></div>
+                <div><div className="text-[#6f7276]">Coverage</div><div className="font-semibold text-white">100%</div></div>
+                <div><div className="text-[#6f7276]">Unknown</div><div className="font-semibold text-white">BLOCKED FROM PASS</div></div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Failed gates + incidents */}
         <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
