@@ -49,3 +49,29 @@ jobs:
             backend-functions-source.exit
           if-no-files-found: error
           retention-days: 7
+
+  mandatory-gate-coverage:
+    name: mandatory-gate-coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Prove every mandatory constitution gate has a central validator implementation reference
+        run: |
+          set +e
+          node scripts/alpha-prime/mandatory-gate-coverage.mjs 2>&1 | tee mandatory-gate-coverage.log
+          ec=${PIPESTATUS[0]}
+          echo "$ec" > mandatory-gate-coverage.exit
+          exit "$ec"
+      - name: Upload mandatory gate implementation coverage evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alpha-prime-mandatory-gate-coverage-evidence
+          path: |
+            mandatory-gate-coverage.log
+            mandatory-gate-coverage.exit
+          if-no-files-found: error
+          retention-days: 7
