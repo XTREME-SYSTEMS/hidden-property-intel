@@ -116,15 +116,17 @@ export default async function(req: Request): Promise<Response> {
     const openFindings = await base44.asServiceRole.entities.Finding.filter({
       status: { $in: ['discovered', 'diagnosed', 'repair_planned', 'failed', 'blocked'] },
     }, '-discovered_at', 50).catch(() => []);
+    // Operational state must describe only the exact source revision being governed.
+    // Historical/foreign findings stay durable for audit, but cannot poison this SHA's
+    // queue counts, health, preservation eligibility, or deduplication decisions.
+    const currentSourceOpenFindings = openFindings.filter((f: any) =>
+      Boolean(sourceSha && f.source_sha && f.source_sha === sourceSha),
+    );
 
     const failingGates = gates.filter((g) => g.mandatory && (g.current_status === 'FAIL' || g.current_status === 'BLOCKED'));
     // Auto-create findings for failing mandatory gates that have no open finding for this exact source SHA.
     // A stale/foreign finding must never suppress a current-source failure.
-    const existingCategories = new Set(
-      openFindings
-        .filter((f: any) => Boolean(sourceSha && f.source_sha && f.source_sha === sourceSha))
-        .map((f: any) => f.category),
-    );
+    const existingCategories = new Set(currentSourceOpenFindings.map((f: any) => f.category));
     for (const g of failingGates) {
       if (existingCategories.has(g.gate_id)) continue;
       await base44.asServiceRole.entities.Finding.create({
@@ -142,9 +144,12 @@ export default async function(req: Request): Promise<Response> {
     const fresh = await base44.asServiceRole.entities.Finding.filter({
       status: { $in: ['discovered', 'diagnosed', 'repair_planned', 'failed', 'blocked'] },
     }, '-discovered_at', 20).catch(() => []);
+    const currentSourceFresh = fresh.filter((f: any) =>
+      Boolean(sourceSha && f.source_sha && f.source_sha === sourceSha),
+    );
 
-    for (const finding of fresh) {
-      // Never dispatch a repair from an unstamped or stale finding. Source lineage is mandatory.
+    for (const finding of currentSourceFresh) {
+      // Defense in depth: never dispatch a repair from an unstamped or stale finding.
       if (!sourceSha || !finding.source_sha || finding.source_sha !== sourceSha) {
         continue;
       }
@@ -246,7 +251,7 @@ export default async function(req: Request): Promise<Response> {
       return n;
     })();
     const sixClean = cleanStreak >= 6;
-    const noCriticalOpen = !openFindings.some((f: any) => f.severity === 'critical' || f.severity === 'high');
+    const noCriticalOpen = !currentSourceOpenFindings.some((f: any) => f.severity === 'critical' || f.severity === 'high');
 
     let mode: 'completion' | 'preservation' | 'incident' = 'completion';
     if (readiness.release_ready && sixClean && noCriticalOpen) mode = 'preservation';
@@ -254,7 +259,7 @@ export default async function(req: Request): Promise<Response> {
 
     // ── 7. Update subsystem states ──
     for (const sub of SUBSYSTEMS) {
-      const subFindings = openFindings.filter((f: any) => f.subsystem === sub);
+      const subFindings = currentSourceOpenFindings.filter((f: any) => f.subsystem === sub);
       const subGates = gates.filter((g) => g.category.toLowerCase().includes(sub.slice(0, 4)));
       const health = subFindings.some((f: any) => f.severity === 'critical') ? 'critical'
         : subFindings.length > 0 ? 'degraded' : 'healthy';
@@ -279,8 +284,8 @@ export default async function(req: Request): Promise<Response> {
     const nextBenchmark = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
     await base44.asServiceRole.entities.HeartbeatReceipt.create({
       heartbeat_id: heartbeatId, timestamp: now, mode, lease_acquired: true, lease_owner: heartbeatId,
-      jobs_due: fresh.length, jobs_dispatched: dispatched, receipts_collected: receipts,
-      gate_failures: failingGates.map((g) => g.gate_id), open_findings: openFindings.length,
+      jobs_due: currentSourceFresh.length, jobs_dispatched: dispatched, receipts_collected: receipts,
+      gate_failures: failingGates.map((g) => g.gate_id), open_findings: currentSourceOpenFindings.length,
       release_ready: readiness.release_ready, duration_ms: Date.now() - startedAt,
       next_due_smoke: nextSmoke, next_due_optimize: nextOptimize, next_due_benchmark: nextBenchmark,
       source_sha: sourceSha,
@@ -297,7 +302,7 @@ export default async function(req: Request): Promise<Response> {
       failing_gates: readiness.failing.map((g) => g.gate_id),
       unknown_gates: readiness.unknown.map((g) => g.gate_id),
       wave1_results: Object.fromEntries(Object.entries(receiptMap).map(([k, v]: [string, any]) => [k, v.status])),
-      jobs_due: fresh.length, jobs_dispatched: dispatched, receipts_collected: receipts,
+      jobs_due: currentSourceFresh.length, jobs_dispatched: dispatched, receipts_collected: receipts,
       pending_approvals: pendingApprovals, duration_ms: Date.now() - startedAt, timestamp: now,
     });
   } catch (error) {
