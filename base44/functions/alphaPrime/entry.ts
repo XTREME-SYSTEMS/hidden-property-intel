@@ -118,8 +118,13 @@ export default async function(req: Request): Promise<Response> {
     }, '-discovered_at', 50).catch(() => []);
 
     const failingGates = gates.filter((g) => g.mandatory && (g.current_status === 'FAIL' || g.current_status === 'BLOCKED'));
-    // Auto-create findings for failing mandatory gates that have no open finding yet
-    const existingCategories = new Set(openFindings.map((f: any) => f.category));
+    // Auto-create findings for failing mandatory gates that have no open finding for this exact source SHA.
+    // A stale/foreign finding must never suppress a current-source failure.
+    const existingCategories = new Set(
+      openFindings
+        .filter((f: any) => Boolean(sourceSha && f.source_sha && f.source_sha === sourceSha))
+        .map((f: any) => f.category),
+    );
     for (const g of failingGates) {
       if (existingCategories.has(g.gate_id)) continue;
       await base44.asServiceRole.entities.Finding.create({
@@ -229,12 +234,13 @@ export default async function(req: Request): Promise<Response> {
     }
 
     // ── 6. Mode transition logic ──
-    // Count consecutive clean heartbeats from the most recent receipts
+    // Count consecutive clean heartbeats only when every receipt belongs to this exact source SHA.
+    // Foreign, stale, or unstamped receipts break the streak rather than contributing to release readiness.
     const recentBeats = await base44.asServiceRole.entities.HeartbeatReceipt.list('-timestamp', 6).catch(() => []);
     const cleanStreak = (() => {
       let n = 0;
       for (const b of recentBeats) {
-        if (b.release_ready && (b.gate_failures || []).length === 0) n++;
+        if (sourceSha && b.source_sha === sourceSha && b.release_ready && (b.gate_failures || []).length === 0) n++;
         else break;
       }
       return n;
