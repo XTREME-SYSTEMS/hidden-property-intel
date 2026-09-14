@@ -18,7 +18,7 @@ const DISTRESS_CATEGORIES = [
 export default function AdminDistressTracker() {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [busy, setBusy] = useState({});
+  const [busy, setBusy] = useState(/** @type {Record<string, boolean>} */ ({}));
   const [msg, setMsg] = useState("");
 
   const load = useCallback(async () => {
