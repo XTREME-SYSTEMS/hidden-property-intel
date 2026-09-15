@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from "react";
-import { Play, Check, X, Loader2, AlertTriangle,
-  Database, Mail, Blocks, Scale, RefreshCw as Sync, TrendingUp, Gavel, Zap
+import {
+  FlaskConical, Play, Check, X, Loader2, AlertTriangle, RefreshCw,
+  Database, Mail, Blocks, Scale, RefreshCw as Sync, TrendingUp, Gavel, FileText, Zap
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 

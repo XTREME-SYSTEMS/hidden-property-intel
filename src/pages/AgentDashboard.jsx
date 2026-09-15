@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { FileText, Users, DollarSign, PenTool, Search, Calendar, BarChart3,
-  Shield, Briefcase, Loader2, Download, Check,
+import {
+  Home, FileText, Users, DollarSign, PenTool, Search, Calendar, BarChart3,
+  Shield, Briefcase, ChevronRight, Loader2, Download, Send, Check, AlertTriangle,
   FileSignature, Building2, Scale, HelpCircle, Calculator
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";

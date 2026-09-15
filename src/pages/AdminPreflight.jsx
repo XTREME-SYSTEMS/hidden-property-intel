@@ -4,8 +4,8 @@ import PreflightGauge from "@/components/preflight/PreflightGauge";
 import PreflightDimensionCard from "@/components/preflight/PreflightDimensionCard";
 import {
   Loader2, RefreshCw, Rocket, AlertTriangle, CheckCircle2, XCircle, Activity,
-  ShieldCheck, Mail, Search, Database, Wallet, Globe, Cpu, Users,
-  FileCheck, Scale, Layout, ChevronDown,
+  ShieldCheck, Mail, Search, Zap, Database, Wallet, Globe, Cpu, Users,
+  FileCheck, Scale, Layout, Sparkles, ChevronDown,
 } from "lucide-react";
 
 const CHECKLIST_ICONS = {

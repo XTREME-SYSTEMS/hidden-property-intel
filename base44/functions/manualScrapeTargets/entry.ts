@@ -17,10 +17,8 @@ export default async function (req) {
     if (user && user.role !== 'admin') return Response.json({ error: 'Admin only' }, { status: 403 });
 
     const body = await req.json().catch(() => ({}));
-    const { target_type, city, keywords } = body;
-    // Florida-only lock: ignore requested state and always target FL
-    const state = 'FL';
-    if (!target_type) return Response.json({ error: 'target_type required' }, { status: 400 });
+    const { target_type, city, state, keywords } = body;
+    if (!target_type || !state) return Response.json({ error: 'target_type and state required' }, { status: 400 });
 
     const location = city ? `${city}, ${state}` : state;
     const kwContext = keywords ? ` Focus specifically on: ${keywords}.` : '';
@@ -113,11 +111,7 @@ export default async function (req) {
       },
     });
 
-    const owners = (r.owners || []).filter((o) => {
-      // Florida-only lock: keep only owners tied to Florida
-      const st = (o.state || state || '').trim().toUpperCase();
-      return !st || st === 'FL' || st === 'FLORIDA';
-    });
+    const owners = r.owners || [];
     let saved = 0;
     for (const o of owners) {
       if (!o.name) continue;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import {
-  Search, Loader2, Phone, Mail, MapPin, Users, History, ShieldCheck,
+  Search, Loader2, User, Phone, Mail, MapPin, Users, History, ShieldCheck,
   AlertTriangle, CheckCircle2, XCircle, FileSearch, Database, Globe,
   Building2, Skull, ListChecks, Sparkles, RefreshCw, Link2,
 } from "lucide-react";

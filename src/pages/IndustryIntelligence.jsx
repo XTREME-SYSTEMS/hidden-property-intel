@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  TrendingUp, Bitcoin, BarChart3, Building2, ExternalLink, ChevronDown, ChevronUp,
-  Calculator, Target, Zap, FileText, Cpu, Globe, Scale, HeartCrack,
+  TrendingUp, Bitcoin, BarChart3, Building2, BookOpen, ExternalLink, ChevronDown, ChevronUp,
+  Calculator, Target, Zap, DollarSign, Percent, MapPin, FileText, Cpu, Globe, Scale, HeartCrack,
 } from "lucide-react";
 
 const SECTIONS = [

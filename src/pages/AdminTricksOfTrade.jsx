@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import {
-  Lightbulb, Eye, Key, ChevronDown, ChevronUp,
-  Users, DollarSign, Target, Brain, Rocket, Loader2,
+  Lightbulb, Eye, Key, Award, ChevronDown, ChevronUp, TrendingUp,
+  Users, Home, DollarSign, AlertTriangle, Zap, Target, Brain, Rocket, Loader2,
 } from "lucide-react";
 
 const TRICKS = [

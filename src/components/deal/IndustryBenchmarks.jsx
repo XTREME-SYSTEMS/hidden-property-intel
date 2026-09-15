@@ -1,5 +1,5 @@
 import React from "react";
-import { Info, TrendingUp, Users, Briefcase } from "lucide-react";
+import { Info, TrendingUp, Users, Briefcase, Building2 } from "lucide-react";
 
 const BENCHMARKS = {
   wholesale: [

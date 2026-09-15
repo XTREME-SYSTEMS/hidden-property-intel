@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Calculator } from "lucide-react";
+import { Calculator, Users, TrendingUp, DollarSign, Scale, Info } from "lucide-react";
 import Seo from "@/components/Seo";
 import DealCalculatorForm from "@/components/deal/DealCalculatorForm";
 import DealSummary from "@/components/deal/DealSummary";

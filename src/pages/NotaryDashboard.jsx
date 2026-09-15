@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import {
   FileSignature, Brain, Loader2, ShieldCheck, Clock,
-  CheckCircle2, AlertTriangle, Stamp,
+  CheckCircle2, AlertTriangle, Stamp, UserCheck,
 } from "lucide-react";
 
 export default function NotaryDashboard() {

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { Shield, Loader2, AlertTriangle, CheckCircle2, TrendingDown } from "lucide-react";
+import { Shield, Loader2, AlertTriangle, CheckCircle2, TrendingDown, TrendingUp, X } from "lucide-react";
 
 export default function DealRiskPanel({ propertyId }) {
   const [loading, setLoading] = useState(false);

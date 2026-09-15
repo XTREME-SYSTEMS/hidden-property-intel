@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   Sparkles, Loader2, Search, Eye, Mic, Image as ImageIcon, FileAudio,
-  Database, Layers, CheckCircle2, AlertTriangle, Zap, Cpu, Volume2,
+  Database, Layers, CheckCircle2, AlertTriangle, Zap, Cpu, Globe, Volume2,
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 

@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import {
-  Cpu, Brain, Database, Mail, Scale, Search, TrendingUp,
-  FileSignature, Home, Building2,
-  CheckCircle2, AlertTriangle, XCircle, Loader2, Zap, RefreshCw, Target, Layers, Activity, Eye,
-  Bitcoin, DollarSign,
+  Cpu, Brain, Database, Mail, ShieldCheck, Scale, Search, TrendingUp,
+  FileSignature, Home, Users, Building2, Handshake, Stamp, Wrench,
+  CheckCircle2, AlertTriangle, XCircle, Loader2, Zap, RefreshCw, Target,
+  ArrowRight, FileText, Layers, Gauge, Activity, Bug, Copy, Eye, Phone,
+  Bitcoin, BarChart3, Trophy, Blocks, BookOpen, Globe, Lightbulb, DollarSign,
 } from "lucide-react";
 
 /**

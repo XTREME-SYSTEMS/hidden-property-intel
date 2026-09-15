@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Send, Sparkles, Loader2, ChevronRight } from "lucide-react";
+import { Send, Sparkles, Loader2, ChevronRight, X } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import AgentMessageBubble from "@/components/admin/AgentMessageBubble";
 

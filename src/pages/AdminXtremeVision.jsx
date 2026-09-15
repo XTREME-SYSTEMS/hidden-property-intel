@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
-import { Loader2, Zap, MessageSquare, Brain, Activity, Send, Plus, Play, RefreshCw, CheckCircle, AlertCircle, Cpu, Mail, Users, TrendingUp } from "lucide-react";
+import { Loader2, Zap, MessageSquare, Brain, Activity, Send, Plus, Play, RefreshCw, CheckCircle, AlertCircle, Cpu, Mail, Phone, Users, TrendingUp } from "lucide-react";
 
 export default function AdminXtremeVision() {
   const [tab, setTab] = useState("overview");

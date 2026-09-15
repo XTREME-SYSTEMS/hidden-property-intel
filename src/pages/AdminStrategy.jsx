@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import {
-  Target, TrendingUp, Users, DollarSign, Mail, Zap,
-  Search, Handshake, TreePine,
-  ChevronDown, ChevronUp,
+  Target, TrendingUp, Users, Home, DollarSign, Mail, Phone, MapPin, Zap,
+  Search, Brain, Handshake, Building2, Landmark, TreePine, Calculator,
+  ChevronDown, ChevronUp, Lightbulb, Award, Eye, Key,
 } from "lucide-react";
 
 const STRATEGY_CATEGORIES = [

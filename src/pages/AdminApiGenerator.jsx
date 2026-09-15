@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import {
   Key, Plus, Copy, RefreshCw, Trash2, Shield, AlertCircle, Check, Loader2, X,
-  Brain, MessageSquare, Globe, Pencil, Zap, Code2
+  Brain, MessageSquare, Globe, Pencil, Zap, ArrowRight, Code2
 } from "lucide-react";
 
 const SYSTEM_ICONS = {

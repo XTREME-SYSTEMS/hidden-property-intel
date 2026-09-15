@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import {
-  Home, Brain, Loader2, Wrench, DollarSign, CheckCircle2,
+  Home, Brain, Loader2, Wrench, DollarSign, TrendingUp,
+  AlertTriangle, CheckCircle2, Clock, Users,
 } from "lucide-react";
 
 export default function PropertyManagerDashboard() {

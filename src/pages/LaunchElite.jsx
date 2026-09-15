@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import Seo from "@/components/Seo";
 import FloatIn from "@/components/FloatIn";

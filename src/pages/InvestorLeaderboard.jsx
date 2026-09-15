@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Trophy, Award, ArrowRight } from "lucide-react";
+import { Trophy, TrendingUp, DollarSign, Target, Award, ArrowRight } from "lucide-react";
 
 export default function InvestorLeaderboard() {
   const [loading, setLoading] = useState(true);
