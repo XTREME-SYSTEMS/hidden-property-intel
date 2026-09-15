@@ -1,62 +1,75 @@
-const CACHE = 'propertyintel-v2';
-const SHELL = ['/', '/index.html', '/manifest.json'];
+// Hidden Property Intel — Service Worker v2
+// Network-first strategy: no JS chunk caching (prevents stale React copies).
+// Caches only the navigation shell for basic offline support + PWA installability.
 
-self.addEventListener('install', (e) => {
-  e.waitUntil(
-    caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting())
+const CACHE_VERSION = 'hpi-v2';
+const SHELL_CACHE = `${CACHE_VERSION}-shell`;
+
+// Only cache the root navigation request, not JS/CSS/API chunks.
+self.addEventListener('install', (event) => {
+  self.skipWaiting();
+  event.waitUntil(
+    caches.open(SHELL_CACHE).then((cache) => cache.add('/')).catch(() => {})
   );
 });
 
-self.addEventListener('activate', (e) => {
-  e.waitUntil(
-    caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
-      .then(() => self.clients.claim())
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys
+          .filter((k) => !k.startsWith(CACHE_VERSION))
+          .map((k) => caches.delete(k))
+      )
+    ).then(() => self.clients.claim())
   );
 });
 
-self.addEventListener('fetch', (e) => {
-  const req = e.request;
-  if (req.method !== 'GET') return;
-  const url = new URL(req.url);
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
 
-  // Never intercept Vite dev / build chunks — always let them go to network.
-  const isViteChunk =
-    url.pathname.startsWith('/src/') ||
-    url.pathname.startsWith('/node_modules/.vite/') ||
-    url.pathname.startsWith('/@vite/') ||
-    url.pathname.startsWith('/@react-refresh') ||
-    url.pathname.startsWith('/api/');
-  if (isViteChunk) return;
+  // Only handle GET requests.
+  if (request.method !== 'GET') return;
 
-  // Network-first for navigation, fall back to cached shell.
-  if (req.mode === 'navigate') {
-    e.respondWith(
-      fetch(req)
-        .then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(req, copy));
-          return res;
+  const url = new URL(request.url);
+
+  // Never intercept API calls, auth, or backend functions — always go to network.
+  if (
+    url.pathname.startsWith('/functions/') ||
+    url.hostname.includes('base44.app') ||
+    url.hostname.includes('supabase') ||
+    url.hostname.includes('googleapis.com')
+  ) {
+    return;
+  }
+
+  // Navigation requests (page loads): network-first, fall back to cached shell.
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(SHELL_CACHE).then((cache) => cache.put('/', copy)).catch(() => {});
+          return response;
         })
-        .catch(() => caches.match(req).then((r) => r || caches.match('/index.html')))
+        .catch(() => caches.match('/').then((r) => r || caches.match(request)))
     );
     return;
   }
 
-  // Cache-first ONLY for static assets (images, fonts, icons, manifest).
-  const isStaticAsset =
-    /\.(png|jpg|jpeg|gif|webp|svg|ico|woff|woff2|ttf|eot|otf|css|json)$/.test(url.pathname);
-  if (isStaticAsset && url.origin === self.location.origin) {
-    e.respondWith(
-      caches.match(req).then((cached) => {
-        if (cached) return cached;
-        return fetch(req).then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(req, copy));
-          return res;
-        });
+  // Static assets (images, fonts): stale-while-revalidate.
+  if (request.destination === 'image' || request.destination === 'font' || request.destination === 'style') {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        const fetchPromise = fetch(request).then((response) => {
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(SHELL_CACHE).then((cache) => cache.put(request, copy)).catch(() => {});
+          }
+          return response;
+        }).catch(() => cached);
+        return cached || fetchPromise;
       })
     );
   }
-  // Everything else (JS chunks, etc.): network-only, no caching.
 });

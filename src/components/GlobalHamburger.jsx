@@ -42,6 +42,16 @@ export default function GlobalHamburger() {
       {open && (
         <div className="absolute right-0 top-full mt-2 w-72 overflow-hidden rounded-sm border border-black/10 bg-white shadow-2xl">
           <div className="flex flex-col items-end gap-0.5 p-4">
+            <div className="mb-2 w-full border-b border-black/10 pb-3">
+              <Link
+                to="/login?returnTo=/portal"
+                onClick={close}
+                className="group flex w-full items-center justify-end gap-2 py-2.5 text-right font-brand text-sm font-bold uppercase tracking-[0.2em] text-black transition-colors hover:text-gold"
+              >
+                Portal Sign In
+                <LogIn className="h-4 w-4" />
+              </Link>
+            </div>
             {PAGES.map((p) =>
               p.to ? (
                 <Link
@@ -66,16 +76,6 @@ export default function GlobalHamburger() {
               )
             )}
 
-            <div className="mt-2 w-full border-t border-black/10 pt-3">
-              <Link
-                to="/login?returnTo=/portal"
-                onClick={close}
-                className="group flex w-full items-center justify-end gap-2 py-2.5 text-right font-brand text-sm font-bold uppercase tracking-[0.2em] text-black transition-colors hover:text-gold"
-              >
-                Portal Sign In
-                <LogIn className="h-4 w-4" />
-              </Link>
-            </div>
           </div>
         </div>
       )}
