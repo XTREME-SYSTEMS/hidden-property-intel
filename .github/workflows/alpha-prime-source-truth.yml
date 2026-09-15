@@ -12,14 +12,19 @@ on:
 permissions:
   contents: read
 
+env:
+  VALIDATION_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  VALIDATION_BRANCH: ${{ github.head_ref || github.ref_name }}
+
 jobs:
   source-truth-guard:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Checkout exact source
+      - name: Checkout exact governed source
         uses: actions/checkout@v4
         with:
+          ref: ${{ env.VALIDATION_SHA }}
           fetch-depth: 1
 
       - name: Use Node.js 20
@@ -32,17 +37,17 @@ jobs:
         shell: bash
         run: |
           set +e
-          node scripts/alpha-prime/source-truth-guard.mjs 2>&1 | tee alpha-prime-source-truth-${GITHUB_SHA}.log
+          SOURCE_SHA="${VALIDATION_SHA}" SOURCE_BRANCH="${VALIDATION_BRANCH}" node scripts/alpha-prime/source-truth-guard.mjs 2>&1 | tee alpha-prime-source-truth-${VALIDATION_SHA}.log
           code=${PIPESTATUS[0]}
           echo "exit_code=${code}" >> "$GITHUB_OUTPUT"
           exit 0
 
-      - name: Upload exact-SHA source-truth receipt
+      - name: Upload exact-head source-truth receipt
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: alpha-prime-source-truth-${{ github.sha }}
-          path: alpha-prime-source-truth-${{ github.sha }}.log
+          name: alpha-prime-source-truth-${{ env.VALIDATION_SHA }}
+          path: alpha-prime-source-truth-${{ env.VALIDATION_SHA }}.log
           if-no-files-found: error
           retention-days: 30
 
@@ -54,9 +59,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Checkout exact source
+      - name: Checkout exact governed source
         uses: actions/checkout@v4
         with:
+          ref: ${{ env.VALIDATION_SHA }}
           fetch-depth: 1
 
       - name: Use Node.js 20
@@ -69,17 +75,18 @@ jobs:
         shell: bash
         run: |
           set +e
-          node scripts/alpha-prime/scheduler-surface-audit.mjs 2>&1 | tee alpha-prime-scheduler-${GITHUB_SHA}.log
+          printf 'source_sha=%s\nbranch=%s\n' "${VALIDATION_SHA}" "${VALIDATION_BRANCH}" | tee alpha-prime-scheduler-${VALIDATION_SHA}.log
+          node scripts/alpha-prime/scheduler-surface-audit.mjs 2>&1 | tee -a alpha-prime-scheduler-${VALIDATION_SHA}.log
           code=${PIPESTATUS[0]}
           echo "exit_code=${code}" >> "$GITHUB_OUTPUT"
           exit 0
 
-      - name: Upload exact-SHA scheduler receipt
+      - name: Upload exact-head scheduler receipt
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: alpha-prime-scheduler-${{ github.sha }}
-          path: alpha-prime-scheduler-${{ github.sha }}.log
+          name: alpha-prime-scheduler-${{ env.VALIDATION_SHA }}
+          path: alpha-prime-scheduler-${{ env.VALIDATION_SHA }}.log
           if-no-files-found: error
           retention-days: 30
 
