@@ -459,7 +459,7 @@ export default function AdminArchitecture() {
   );
 }
 
-function Stat({ label, value, sub, tone = "" }) {
+function Stat({ label, value, sub, tone }) {
   const toneCls = tone === "emerald" ? "text-emerald-600" : tone === "amber" ? "text-amber-600" : tone === "red" ? "text-red-600" : "text-black";
   return (
     <div className="bg-white p-6">

@@ -50,7 +50,7 @@ export default function TheProcess() {
       (entries) => {
         entries.forEach((e) => {
           if (e.isIntersecting) {
-            const idx = Number(/** @type {HTMLElement} */ (e.target).dataset.idx);
+            const idx = Number(e.target.dataset.idx);
             if (!Number.isNaN(idx)) setActive(idx);
           }
         });

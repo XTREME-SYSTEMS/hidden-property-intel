@@ -212,7 +212,7 @@ export default function AdminOverview() {
   );
 }
 
-function MetricCard({ icon: Icon, label, value, sub = "" }) {
+function MetricCard({ icon: Icon, label, value, sub }) {
   return (
     <div className="bg-white p-5">
       <Icon className="h-5 w-5 text-black/40" />

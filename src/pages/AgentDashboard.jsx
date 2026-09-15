@@ -259,7 +259,7 @@ function StatCard({ label, value, icon: Icon }) {
   return <div className="rounded-lg border border-black/10 bg-white p-4"><div className="flex items-center gap-2"><Icon className="h-4 w-4 text-black/40" /><p className="text-[10px] uppercase tracking-[0.15em] text-black/40">{label}</p></div><p className="mt-2 font-display text-xl font-light">{value}</p></div>;
 }
 
-function ActionCard({ icon: Icon, title, desc, onClick = undefined, to = "" }) {
+function ActionCard({ icon: Icon, title, desc, onClick, to }) {
   const inner = <div className="rounded-lg border border-black/10 p-4 transition hover:border-black/30 hover:bg-gray-50"><Icon className="h-5 w-5 text-black/40" /><p className="mt-2 text-sm font-medium">{title}</p><p className="text-[10px] text-black/40">{desc}</p></div>;
   return to ? <Link to={to}>{inner}</Link> : <button onClick={onClick} className="text-left">{inner}</button>;
 }

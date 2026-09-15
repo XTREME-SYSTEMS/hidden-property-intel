@@ -26,7 +26,7 @@ function Field({ label, value, onChange, prefix = "$" }) {
   );
 }
 
-function Stat({ label, value, accent = "" }) {
+function Stat({ label, value, accent }) {
   return (
     <div className="rounded-xl bg-[#F8FAF9] p-4 ring-1 ring-[#E5EDEA]">
       <p className="text-[10px] uppercase tracking-widest text-[#6B7B72]">{label}</p>

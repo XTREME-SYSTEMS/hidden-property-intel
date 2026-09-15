@@ -4,7 +4,7 @@ import { Phone, Upload, Search, Loader2, AlertCircle, Check, Database, ArrowRigh
 
 export default function AdminNumbers() {
   const [tab, setTab] = useState("import");
-  const [numbers, setNumbers] = useState("");
+  const [numbers, setNumbers] = useState([]);
   const [staged, setStaged] = useState([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);

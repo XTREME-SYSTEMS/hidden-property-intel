@@ -22,9 +22,6 @@ export default function ConvergenceCenter() {
   const [validationTasks, setValidationTasks] = useState([]);
   const [runningValidators, setRunningValidators] = useState(false);
   const [running, setRunning] = useState(false);
-  const [isolation, setIsolation] = useState(null);
-  const [runningIsolation, setRunningIsolation] = useState(false);
-  const [generator, setGenerator] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
@@ -46,8 +43,6 @@ export default function ConvergenceCenter() {
       setValidations(vals || []);
       setSubsystems(subs || []);
       setValidationTasks(vtasks || []);
-      const generatorResult = await base44.functions.invoke("universalGeneratorCompile", {}).catch(() => null);
-      setGenerator(generatorResult?.data || generatorResult || null);
     } finally {
       setLoading(false);
     }
@@ -65,15 +60,6 @@ export default function ConvergenceCenter() {
     setRunningValidators(true);
     try { await base44.functions.invoke("runValidators", {}); await load(); }
     finally { setRunningValidators(false); }
-  };
-
-  const runIsolationRegression = async () => {
-    setRunningIsolation(true);
-    try {
-      const res = await base44.functions.invoke("adminIsolationRegression", {});
-      setIsolation(res?.data || res);
-      await load();
-    } finally { setRunningIsolation(false); }
   };
 
   const WAVE1_GATES = ["ci.sha_stamped", "code.build", "code.lint", "code.typecheck", "workflows.heartbeat_active", "workflows.no_duplicate_cron"];
@@ -107,14 +93,6 @@ export default function ConvergenceCenter() {
             <p className="mt-1 text-sm text-[#8d8f92]">Alpha Prime governor — evidence-backed autonomous convergence</p>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={runIsolationRegression}
-              disabled={runningIsolation}
-              className="inline-flex items-center gap-2 rounded-lg border border-[#3a3a2a] bg-[#1a1a14] px-4 py-2.5 text-sm font-bold text-[#c9b45a] transition hover:border-[#c9b45a] disabled:opacity-50"
-            >
-              {runningIsolation ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
-              {runningIsolation ? "Probing…" : "Isolation regression"}
-            </button>
             <button
               onClick={runValidatorsNow}
               disabled={runningValidators}
@@ -165,24 +143,6 @@ export default function ConvergenceCenter() {
             icon={<GitCommit className="h-5 w-5" />}
           />
         </div>
-
-        {generator?.profile && (
-          <div className="mb-6 rounded-xl border border-[#3a3a2a] bg-[#141516] p-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <div className="text-xs font-bold uppercase tracking-wider text-[#f0bf54]">XTREME Universal Generator</div>
-                <div className="mt-1 text-sm font-semibold text-white">{generator.profile.systemName} · {generator.profile.profileId}</div>
-                <div className="mt-1 text-[11px] text-[#8d8f92]">Package {generator.profile.packageVersion} · {generator.profile.archetype} · {generator.profile.regions?.join(", ")}</div>
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-right text-[10px] sm:grid-cols-4">
-                <div><div className="text-[#6f7276]">Mode</div><div className="font-semibold text-white">{generator.profile.mode || "PLAN_ONLY"}</div></div>
-                <div><div className="text-[#6f7276]">Heartbeat</div><div className="font-semibold text-white">{generator.profile.operations?.heartbeatSeconds || 300}s</div></div>
-                <div><div className="text-[#6f7276]">Coverage</div><div className="font-semibold text-white">100%</div></div>
-                <div><div className="text-[#6f7276]">Unknown</div><div className="font-semibold text-white">BLOCKED FROM PASS</div></div>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Failed gates + incidents */}
         <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -271,33 +231,6 @@ export default function ConvergenceCenter() {
             )}
           </Panel>
         </div>
-
-        {/* Admin isolation regression */}
-        {isolation && (
-          <div className="mb-6 rounded-xl border border-[#292a2d] bg-[#0f1011] p-4">
-            <div className="mb-3 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Lock className="h-4 w-4 text-[#f0bf54]" />
-                <h2 className="text-sm font-bold text-white">Admin Isolation Regression</h2>
-              </div>
-              <span className="rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ color: isolation.status === 'PASS' ? '#3bbd72' : isolation.status === 'FAIL' ? '#b33a31' : '#f0bf54', background: (isolation.status === 'PASS' ? '#3bbd72' : isolation.status === 'FAIL' ? '#b33a31' : '#f0bf54') + '22' }}>{isolation.status}</span>
-            </div>
-            <div className="mb-2 flex flex-wrap items-center gap-2 text-[10px] text-[#8d8f92]">
-              <span>Caller: <span className="text-white">{isolation.caller_role}</span></span>
-              <span>·</span>
-              <span>Coverage: {isolation.coverage?.join(', ') || 'none'}</span>
-              {isolation.missing_roles?.length > 0 && <><span>·</span><span className="text-[#f0bf54]">Awaiting: {isolation.missing_roles.join(', ')}</span></>}
-            </div>
-            <div className="text-[10px] text-[#8d8f92]">{isolation.reason}</div>
-            {isolation.probes?.filter((p) => p.result === 'FAIL').length > 0 && (
-              <div className="mt-2 space-y-1">
-                {isolation.probes.filter((p) => p.result === 'FAIL').map((p) => (
-                  <div key={p.name} className="text-[10px] text-[#b33a31]">{p.name}: expected {p.expected}, got {p.actual} — {p.evidence}</div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
 
         {/* Findings + repair queue */}
         <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -409,7 +342,7 @@ function StatusCard({ label, value, color, bg, icon }) {
   );
 }
 
-function Panel({ title, icon, count = undefined, children }) {
+function Panel({ title, icon, count, children }) {
   return (
     <div className="rounded-xl border border-[#292a2d] bg-[#0f1011] p-4">
       <div className="mb-3 flex items-center justify-between">

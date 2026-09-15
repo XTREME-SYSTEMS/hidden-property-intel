@@ -27,8 +27,7 @@ function upsertLink(rel, href) {
 }
 
 function setJsonLd(id, data) {
-  /** @type {HTMLScriptElement | null} */
-  let el = /** @type {HTMLScriptElement | null} */ (document.getElementById(id));
+  let el = document.getElementById(id);
   if (!el) {
     el = document.createElement("script");
     el.type = "application/ld+json";
@@ -44,17 +43,7 @@ function setJsonLd(id, data) {
  * across routes. Static schemas in index.html (Organization, WebSite, etc.)
  * are untouched.
  */
-/**
- * @param {{
- *   title?: string,
- *   description?: string,
- *   keywords?: string,
- *   path?: string,
- *   jsonLd?: any | any[],
- *   image?: string
- * }} props
- */
-export default function Seo({ title = "", description = "", keywords = "", path = "", jsonLd = [], image = DEFAULT_IMAGE }) {
+export default function Seo({ title, description, keywords, path = "", jsonLd = [], image }) {
   useEffect(() => {
     const fullUrl = `${SITE_URL}${path}`;
     const fullTitle = title

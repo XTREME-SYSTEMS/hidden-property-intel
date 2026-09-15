@@ -187,6 +187,6 @@ export default function AdminSmartContracts() {
   );
 }
 
-function StatCard({ label, value, color = "" }) {
+function StatCard({ label, value, color }) {
   return <div className="rounded-lg border border-black/10 bg-white p-3"><p className="text-[10px] uppercase tracking-[0.2em] text-black/40">{label}</p><p className={`mt-1 text-xl font-medium ${color || ""}`}>{value}</p></div>;
 }

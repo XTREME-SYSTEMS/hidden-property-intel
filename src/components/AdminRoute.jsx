@@ -1,6 +1,5 @@
 import { Outlet, Navigate } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
-import { adminRouteDecision } from '@/lib/adminGuard';
 
 /**
  * Guards admin-only routes. Must be nested inside <ProtectedRoute> so the
@@ -19,8 +18,13 @@ export default function AdminRoute() {
     );
   }
 
-  const decision = adminRouteDecision({ isAuthenticated, user });
-  if (decision === 'login') return <Navigate to="/login" replace />;
-  if (decision === 'portal') return <Navigate to="/portal" replace />;
+  if (!isAuthenticated || !user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (user.role !== 'admin') {
+    return <Navigate to="/portal" replace />;
+  }
+
   return <Outlet />;
 }

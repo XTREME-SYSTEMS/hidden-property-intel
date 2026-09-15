@@ -134,16 +134,8 @@ export default async function(req: Request): Promise<Response> {
     const fresh = await base44.asServiceRole.entities.Finding.filter({
       status: { $in: ['discovered', 'diagnosed', 'repair_planned', 'failed', 'blocked'] },
     }, '-discovered_at', 20).catch(() => []);
-    const activeRepairTasks = await base44.asServiceRole.entities.RepairTask.filter({
-      status: { $in: ['queued', 'in_progress'] },
-    }, '-created_at', 100).catch(() => []);
-    const activeRepairFindingIds = new Set(activeRepairTasks.map((t: any) => t.finding_id));
 
     for (const finding of fresh) {
-      const gateForFinding = gates.find((g) => g.gate_id === finding.category);
-      if (gateForFinding && !['FAIL', 'BLOCKED'].includes(gateForFinding.current_status)) continue;
-      if (activeRepairFindingIds.has(finding.finding_id)) continue;
-
       const specialist = specialistFor(finding.subsystem);
       const action = `diagnose_and_repair:${finding.category}`;
       const classification = classifyAction(action);
@@ -154,16 +146,13 @@ export default async function(req: Request): Promise<Response> {
       }
       // Safe lane — dispatch via agentThink
       const taskId = uid('rt');
-      const repairTaskRecord = await base44.asServiceRole.entities.RepairTask.create({
+      await base44.asServiceRole.entities.RepairTask.create({
         task_id: taskId, finding_id: finding.finding_id, subsystem: finding.subsystem,
         specialist: specialist.id, action, reason: finding.description,
         status: 'in_progress', approval_required: false, approval_state: 'auto_approved',
         risk_class: specialist.risk_class, source_sha_before: finding.source_sha || null,
         created_at: now, started_at: now,
-      }).catch(() => null);
-      const repairTaskEntityId = repairTaskRecord?.id;
-      if (!repairTaskEntityId) continue;
-      activeRepairFindingIds.add(finding.finding_id);
+      }).catch(() => {});
 
       try {
         const think = await base44.asServiceRole.functions.invoke('agentThink', {
@@ -171,7 +160,7 @@ export default async function(req: Request): Promise<Response> {
           finding_id: finding.finding_id, context: { title: finding.title, description: finding.description, subsystem: finding.subsystem },
         }).catch(() => ({ status: 'error', message: 'agentThink unavailable' }));
 
-        await base44.asServiceRole.entities.RepairTask.update(repairTaskEntityId, {
+        await base44.asServiceRole.entities.RepairTask.update(taskId, {
           status: think?.status === 'error' ? 'failed' : 'completed',
           completed_at: nowIso(), test_results: think || null,
         }).catch(() => {});
@@ -217,7 +206,7 @@ export default async function(req: Request): Promise<Response> {
         }
         dispatched++;
       } catch (e) {
-        await base44.asServiceRole.entities.RepairTask.update(repairTaskEntityId, { status: 'failed', completed_at: nowIso() }).catch(() => {});
+        await base44.asServiceRole.entities.RepairTask.update(taskId, { status: 'failed', completed_at: nowIso() }).catch(() => {});
       }
     }
 

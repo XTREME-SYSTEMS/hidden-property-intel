@@ -277,8 +277,8 @@ function AgentCard({ agent, selected, onSelect }) {
       {/* Emotional + accountability bars */}
       <div className="mt-3 space-y-1.5">
         <Meter label="Mood" value={confidence} color="#375a7f" suffix={mood} />
-        <Meter label="Stress" value={stress} color={stress > 60 ? "#b33a31" : "#a6640b"} suffix="" />
-        <Meter label="Trust" value={accountability} color="#247a45" suffix="" />
+        <Meter label="Stress" value={stress} color={stress > 60 ? "#b33a31" : "#a6640b"} />
+        <Meter label="Trust" value={accountability} color="#247a45" />
       </div>
       {/* Stats */}
       <div className="mt-3 flex items-center gap-3 text-[10px] text-[#6f6a60]">

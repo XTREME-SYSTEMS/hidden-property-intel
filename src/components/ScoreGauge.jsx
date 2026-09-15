@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function ScoreGauge({ score = 0, size = 56, label = "" }) {
+export default function ScoreGauge({ score = 0, size = 56, label }) {
   const r = (size - 8) / 2;
   const c = 2 * Math.PI * r;
   const pct = Math.max(0, Math.min(100, score)) / 100;

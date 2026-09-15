@@ -21,7 +21,7 @@ export default function PWAInstall({ variant = "nav", active = false }) {
 
     const ios = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
     setIsIos(ios);
-    const standalone = window.matchMedia('(display-mode: standalone)').matches || (ios && /** @type {any} */ (window.navigator).standalone === true);
+    const standalone = window.matchMedia('(display-mode: standalone)').matches || (ios && window.navigator.standalone === true);
     if (standalone) setInstalled(true);
 
     return () => {
