@@ -45,11 +45,11 @@ export default function LuxNav() {
           <AlertsBell user={user} />
           <PWAInstall variant="nav" />
           {user ? (
-            <Link to="/portal" className="hidden rounded-sm border border-black/15 px-5 py-2.5 font-brand text-[11px] font-medium uppercase tracking-[0.3em] text-black transition-colors hover:bg-black hover:text-white sm:inline-block">
-              My Portal
+            <Link to="/portal" className="inline-block rounded-sm border border-black/15 px-3 py-2 font-brand text-[10px] font-medium uppercase tracking-[0.2em] text-black transition-colors hover:bg-black hover:text-white sm:px-5 sm:py-2.5 sm:text-[11px] sm:tracking-[0.3em]">
+              Portal
             </Link>
           ) : (
-            <Link to="/login?returnTo=/portal" className="hidden rounded-sm border border-black/15 px-5 py-2.5 font-brand text-[11px] font-medium uppercase tracking-[0.3em] text-black transition-colors hover:bg-black hover:text-white sm:inline-block">
+            <Link to="/login?returnTo=/portal" className="inline-block rounded-sm border border-black/15 px-3 py-2 font-brand text-[10px] font-medium uppercase tracking-[0.2em] text-black transition-colors hover:bg-black hover:text-white sm:px-5 sm:py-2.5 sm:text-[11px] sm:tracking-[0.3em]">
               Sign In
             </Link>
           )}
