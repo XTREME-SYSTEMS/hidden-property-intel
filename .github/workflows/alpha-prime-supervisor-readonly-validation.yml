@@ -1,0 +1,118 @@
+name: Alpha Prime Supervisor Readonly Validation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  source-lineage:
+    name: source-lineage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Require current main to be an ancestor of validated HEAD
+        run: |
+          git fetch origin main --no-tags
+          echo "VALIDATED_SHA=$(git rev-parse HEAD)"
+          echo "CANONICAL_MAIN_SHA=$(git rev-parse origin/main)"
+          git merge-base --is-ancestor origin/main HEAD
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+
+  typecheck:
+    name: typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+
+  dependency-scan:
+    name: dependency-scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm audit --audit-level=critical
+
+  static-audits:
+    name: static-audits
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/alpha-prime/static-audit.mjs schema-valid
+      - run: node scripts/alpha-prime/static-audit.mjs oversized-fields
+      - run: node scripts/alpha-prime/static-audit.mjs input-validation
+      - run: node scripts/alpha-prime/static-audit.mjs contract-safety
+      - run: node scripts/alpha-prime/static-audit.mjs backend-functions-source
+
+  scheduler-surface:
+    name: scheduler-surface
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/alpha-prime/scheduler-surface-audit.mjs
+
+  resilience-fallback:
+    name: resilience-fallback
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/alpha-prime/static-audit.mjs resilience-fallback
+
+  vercel-spa-routing:
+    name: vercel-spa-routing
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/alpha-prime/vercel-spa-routing-audit.mjs
