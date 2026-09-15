@@ -1,0 +1,31 @@
+name: Alpha Prime Source Truth Guard
+
+on:
+  push:
+    branches:
+      - alpha-prime/autonomous-completion-v6
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-truth-guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run deterministic Alpha Prime source-truth guard
+        run: node scripts/alpha-prime/source-truth-guard.mjs
