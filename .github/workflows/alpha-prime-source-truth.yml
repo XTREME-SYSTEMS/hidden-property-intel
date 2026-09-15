@@ -1,4 +1,4 @@
-name: Alpha Prime Source Truth Guard
+name: Alpha Prime Supervisor Validation
 
 on:
   push:
@@ -29,3 +29,20 @@ jobs:
 
       - name: Run deterministic Alpha Prime source-truth guard
         run: node scripts/alpha-prime/source-truth-guard.mjs
+
+  scheduler-surface-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run deterministic scheduler surface audit
+        run: node scripts/alpha-prime/scheduler-surface-audit.mjs
