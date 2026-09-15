@@ -18,9 +18,9 @@ import { Lock, MapPin, Phone, Mail, ArrowLeft, ShieldAlert } from "lucide-react"
 
 function Card({ title, children, className = "" }) {
   return (
-    <section className={`rounded-3xl bg-white p-6 ring-1 ring-[#E5EDEA] sm:p-8 ${className}`}>
-      {title && <h2 className="font-display text-xl font-semibold tracking-tight">{title}</h2>}
-      <div className={title ? "mt-6" : ""}>{children}</div>
+    <section className={`rounded-3xl bg-white p-5 ring-1 ring-[#E5EDEA] sm:p-8 ${className}`}>
+      {title && <h2 className="font-display text-lg font-semibold tracking-tight sm:text-xl">{title}</h2>}
+      <div className={title ? "mt-5 sm:mt-6" : ""}>{children}</div>
     </section>
   );
 }
@@ -117,7 +117,7 @@ export default function PropertyDetail() {
   ];
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-10">
+    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
       <Seo
         title={`${property.city}, ${property.state} — ${labelFor(property.distress_type)} Property`}
         description={`${labelFor(property.distress_type)} property in ${property.city}, ${property.state} ${property.zip_code}. ${property.bedrooms || 0} bed, ${property.bathrooms || 0} bath, ${num(property.square_footage)} sqft. AI investment score ${Math.round(property.property_score || 0)}/100. Estimated value ${money(property.estimated_value)}.`}
@@ -183,35 +183,35 @@ export default function PropertyDetail() {
         </div>
       </div>
 
-      <div className="mt-8 flex flex-wrap items-start justify-between gap-6">
+      <div className="mt-6 flex flex-col gap-4 sm:mt-8 sm:flex-wrap sm:items-start sm:justify-between sm:gap-6">
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <DistressBadge type={property.distress_type} />
             <span className="rounded-full bg-[#E5EDEA] px-2.5 py-1 text-[11px]">{labelFor(property.property_type)}</span>
           </div>
-          <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">{unlocked ? property.address : `${property.city}, ${property.state} ${property.zip_code}`}</h1>
+          <h1 className="mt-3 font-display text-2xl font-semibold tracking-tight sm:text-3xl">{unlocked ? property.address : `${property.city}, ${property.state} ${property.zip_code}`}</h1>
           <p className="mt-1 inline-flex items-center gap-1.5 text-sm text-[#6B7B72]">
-            <MapPin className="h-4 w-4" />{unlocked ? `${property.city}, ${property.state} ${property.zip_code}` : "Full address revealed with a Pro subscription"}
+            <MapPin className="h-4 w-4 shrink-0" />{unlocked ? `${property.city}, ${property.state} ${property.zip_code}` : "Full address revealed with a Pro subscription"}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <ScoreGauge score={property.property_score || 0} size={72} label="AI score" />
-          <Link to={`/properties/${id}/bid`} className="rounded-full bg-emerald-500 px-6 py-3.5 text-sm font-medium text-white hover:bg-emerald-600">
+        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+          <ScoreGauge score={property.property_score || 0} size={64} label="AI score" />
+          <Link to={`/properties/${id}/bid`} className="rounded-full bg-emerald-500 px-5 py-3 text-sm font-medium text-white hover:bg-emerald-600 sm:px-6 sm:py-3.5">
             Place a bid
           </Link>
           <WatchButton propertyId={property.id} />
           <PropertyBrief property={property} score={score} owners={owners} chain={chain} bids={bids} titleRisk={titleRisk} />
-          <Link to={`/investor/pipeline?propertyId=${property.id}`} className="rounded-full bg-[#0F2A1D] px-5 py-2.5 text-sm text-white hover:bg-[#1A2B22]">
+          <Link to={`/investor/pipeline?propertyId=${property.id}`} className="rounded-full bg-[#0F2A1D] px-4 py-2.5 text-sm text-white hover:bg-[#1A2B22] sm:px-5">
             Add to pipeline
           </Link>
         </div>
       </div>
 
-      <div className="mt-8 grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="mt-6 grid grid-cols-2 gap-2.5 sm:mt-8 sm:grid-cols-3 sm:gap-3 lg:grid-cols-6">
         {stats.map(([l, v]) => (
-          <div key={l} className="rounded-2xl bg-white p-4 ring-1 ring-[#E5EDEA]">
+          <div key={l} className="rounded-2xl bg-white p-3.5 ring-1 ring-[#E5EDEA] sm:p-4">
             <p className="text-[10px] uppercase tracking-widest text-[#6B7B72]">{l}</p>
-            <p className="mt-1.5 text-lg font-semibold tabular-nums">{v}</p>
+            <p className="mt-1.5 text-base font-semibold tabular-nums sm:text-lg">{v}</p>
           </div>
         ))}
       </div>
@@ -231,13 +231,13 @@ export default function PropertyDetail() {
           </Card>
 
           <Card title="AI score breakdown">
-            <div className="flex flex-wrap items-center gap-8">
-              <ScoreGauge score={score?.overall_score || property.property_score || 0} size={96} label="Overall" />
+            <div className="flex flex-col gap-6 sm:flex-wrap sm:items-center sm:gap-8">
+              <ScoreGauge score={score?.overall_score || property.property_score || 0} size={88} label="Overall" />
               <div>
                 <p className="text-[10px] uppercase tracking-widest text-[#6B7B72]">Distress severity</p>
                 <p className="mt-1 text-lg font-semibold capitalize">{score?.distress_severity || "—"}</p>
               </div>
-              <div className="min-w-[220px] flex-1 space-y-3">
+              <div className="w-full min-w-0 flex-1 space-y-3 sm:min-w-[220px]">
                 {Object.entries(score?.score_factors || {}).map(([k, v]) => <Factor key={k} label={k} value={v} />)}
               </div>
             </div>
