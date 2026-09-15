@@ -95,15 +95,15 @@ if (vercel) {
 }
 add('routing:dynamic_sitemap_before_spa_catchall', routingOk, routingEvidence);
 
-const sha = process.env.GITHUB_SHA || process.env.SOURCE_SHA || null;
-const branch = process.env.GITHUB_REF_NAME || null;
+const sha = process.env.SOURCE_SHA || process.env.GITHUB_SHA || null;
+const branch = process.env.SOURCE_BRANCH || process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME || null;
 const counts = results.reduce((acc, r) => {
   acc[r.status] = (acc[r.status] || 0) + 1;
   return acc;
 }, {});
 const receipt = {
   validator: 'alpha-prime/source-truth-guard',
-  version: 1,
+  version: 2,
   source_sha: sha,
   branch,
   generated_at: new Date().toISOString(),
