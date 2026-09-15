@@ -29,9 +29,9 @@ export default function AdminCommandBar({ categories, items, onNavigate, onJumpC
   };
 
   return (
-    <div className="flex items-center gap-3 border-b border-black/10 bg-white px-4 py-2.5">
-      {/* Table of Contents */}
-      <div className="relative shrink-0">
+    <div className="flex items-center gap-2 border-b border-black/10 bg-white px-3 py-2.5 sm:gap-3 sm:px-4">
+      {/* Table of Contents — hidden on mobile (use the Menu button instead) */}
+      <div className="relative hidden shrink-0 sm:block">
         <select
           onChange={(e) => { if (e.target.value) onJumpCategory(e.target.value); e.target.value = ""; }}
           className="appearance-none rounded-md border border-black/15 bg-[#f7f5f0] py-1.5 pl-8 pr-8 text-[11px] font-medium uppercase tracking-[0.15em] text-black/70 outline-none hover:bg-black/5"
@@ -45,16 +45,16 @@ export default function AdminCommandBar({ categories, items, onNavigate, onJumpC
       </div>
 
       {/* Intelligence search */}
-      <div className="relative flex-1 max-w-md">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-black/30" />
+      <div className="relative min-w-0 flex-1 sm:max-w-md">
+        <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-black/30 sm:left-3" />
         <input
           value={query}
           onChange={e => { setQuery(e.target.value); setShowResults(true); }}
           onFocus={() => setShowResults(true)}
           onBlur={() => setTimeout(() => setShowResults(false), 150)}
           onKeyDown={e => { if (e.key === "Enter" && results[0]) pick(results[0].id); }}
-          placeholder="Intelligence search — tools, investors, properties…"
-          className="w-full rounded-md border border-black/15 bg-[#f7f5f0] py-2 pl-10 pr-3 text-sm outline-none placeholder:text-black/30 focus:border-[#c38a1b]"
+          placeholder="Search tools…"
+          className="w-full rounded-md border border-black/15 bg-[#f7f5f0] py-2 pl-9 pr-3 text-sm outline-none placeholder:text-black/30 focus:border-[#c38a1b] sm:pl-10"
         />
         {showResults && results.length > 0 && (
           <div className="absolute left-0 right-0 top-full z-30 mt-1 overflow-hidden rounded-md border border-black/10 bg-white shadow-lg">
@@ -76,8 +76,8 @@ export default function AdminCommandBar({ categories, items, onNavigate, onJumpC
         )}
       </div>
 
-      {/* Mini calendar */}
-      <div className="ml-auto flex items-center gap-2.5 rounded-md border border-black/10 bg-[#f7f5f0] px-3 py-1.5">
+      {/* Mini calendar — hidden on mobile */}
+      <div className="ml-auto hidden items-center gap-2.5 rounded-md border border-black/10 bg-[#f7f5f0] px-3 py-1.5 sm:flex">
         <Calendar className="h-4 w-4 text-[#c38a1b]" />
         <div className="leading-tight">
           <p className="text-[10px] uppercase tracking-[0.15em] text-black/40">
