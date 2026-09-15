@@ -48,10 +48,10 @@ const block = (start, end) => {
 };
 const generateBlock = block("if (action === 'generate')", "if (action === 'update')");
 const updateBlock = block("if (action === 'update')", "if (action === 'presets')");
-const adminGuard = (text) => /user\.role\s*!==\s*['\"]admin['\"]/.test(text) || /user\.role\s*===\s*['\"]admin['\"]/.test(text);
-add('security:api_key_generate_privilege_guard', Boolean(generateBlock) && adminGuard(generateBlock), 'Generate must reject or constrain non-admin privilege-bearing scope/system_type requests.');
-const updateTouchesScopes = /scopes/.test(updateBlock);
-add('security:api_key_scope_update_guard', Boolean(updateBlock) && (!updateTouchesScopes || adminGuard(updateBlock)), 'Scope mutation must not permit authenticated non-admin privilege escalation.');
+const directAdminDeny = (text) => /if\s*\(\s*user\.role\s*!==\s*['\"]admin['\"]\s*\)\s*\{?[\s\S]{0,180}(?:403|Forbidden|return\s+Response)/.test(text);
+add('security:api_key_generate_privilege_guard', Boolean(generateBlock) && directAdminDeny(generateBlock), 'Generate must reject non-admin requests before caller-controlled scopes/system_type are persisted.');
+const updateTouchesScopes = /updates\.scopes\s*=|scopes\s*!==\s*undefined/.test(updateBlock);
+add('security:api_key_scope_update_guard', Boolean(updateBlock) && (!updateTouchesScopes || directAdminDeny(updateBlock)), 'If scopes can be changed, non-admin scope mutation must be rejected regardless of key ownership.');
 
 function walk(dir) {
   const abs = path.join(root, dir);
@@ -103,7 +103,7 @@ const counts = results.reduce((acc, r) => {
 }, {});
 const receipt = {
   validator: 'alpha-prime/source-truth-guard',
-  version: 2,
+  version: 3,
   source_sha: sha,
   branch,
   generated_at: new Date().toISOString(),
