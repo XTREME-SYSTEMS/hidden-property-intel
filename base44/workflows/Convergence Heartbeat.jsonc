@@ -1,0 +1,45 @@
+{
+  "description": "Single five-minute control plane. Alpha Prime governor evaluates due jobs, recomputes release gates, dispatches safe-lane repairs, collects receipts, and evaluates mode transitions. All other cadences (15-min smoke, hourly optimize, daily benchmark) piggyback via last-run timestamps inside the governor.",
+  "name": "Convergence Heartbeat",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "convergence_heartbeat",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "govern": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "alphaPrime",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Alpha Prime heartbeat",
+            "description": "Govern, dispatch, validate, emit receipt"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "*/5 * * * *",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  }
+}

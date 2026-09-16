@@ -20,6 +20,10 @@ function unauthorized() {
   return Response.json({ error: 'Unauthorized' }, { status: 401 });
 }
 
+function isFloridaProperty(property: any): boolean {
+  return String(property?.state || '').trim().toUpperCase() === 'FL';
+}
+
 export default async function(req: Request): Promise<Response> {
   const token = process.env.RAILWAY_SYNC_TOKEN;
   const auth = req.headers.get('authorization') || req.headers.get('Authorization') || '';
@@ -47,6 +51,8 @@ export default async function(req: Request): Promise<Response> {
       for (const p of items) {
         try {
           if (!p.address || !p.city || !p.state || !p.zip_code) { skipped++; continue; }
+          // Florida-only ingress boundary. Non-FL records are never written or updated.
+          if (!isFloridaProperty(p)) { skipped++; continue; }
           const norm = normalizeAddress(p.address);
           const key = dedupeKey(p.address, p.zip_code);
 
@@ -122,6 +128,8 @@ export default async function(req: Request): Promise<Response> {
             prop = found && found[0];
           }
           if (!prop) { skipped++; continue; }
+          // Do not enrich a non-Florida property even if it predates the ingress guard.
+          if (!isFloridaProperty(prop)) { skipped++; continue; }
 
           await base44.asServiceRole.entities.Property.update(prop.id, {
             property_score: s.overall_score ?? s.score ?? null,
