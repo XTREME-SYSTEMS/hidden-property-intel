@@ -43,8 +43,11 @@ export default async function(req: Request): Promise<Response> {
       return Response.json({ keys: safe });
     }
 
-    // GENERATE — create a new API key, return the raw key ONCE
+    // GENERATE — privileged because caller-controlled scopes/system_type are persisted.
     if (action === 'generate') {
+      if (user.role !== 'admin') {
+        return Response.json({ error: 'Forbidden' }, { status: 403 });
+      }
       const { name, scopes, description, system_type } = body;
       if (!name) return Response.json({ error: 'Name is required' }, { status: 400 });
       const { rawKey, keyHash, keyPrefix } = await generateKey();
@@ -70,7 +73,7 @@ export default async function(req: Request): Promise<Response> {
       });
     }
 
-    // UPDATE — edit name, description, or scopes on an existing key
+    // UPDATE — owners may edit metadata, but only admins may mutate scopes.
     if (action === 'update') {
       const { key_id, name, description, scopes } = body;
       if (!key_id) return Response.json({ error: 'key_id is required' }, { status: 400 });
@@ -78,6 +81,11 @@ export default async function(req: Request): Promise<Response> {
       if (!existing) return Response.json({ error: 'Key not found' }, { status: 404 });
       if (user.role !== 'admin' && existing.tenant_id !== user.id) {
         return Response.json({ error: 'Forbidden' }, { status: 403 });
+      }
+      if (scopes !== undefined) {
+        if (user.role !== 'admin') {
+          return Response.json({ error: 'Forbidden: scope changes require admin' }, { status: 403 });
+        }
       }
       const updates = {};
       if (name !== undefined) updates.name = name;
