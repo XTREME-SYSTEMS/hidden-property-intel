@@ -84,8 +84,10 @@ export default async function(req: Request): Promise<Response> {
       if (user.role !== 'admin' && existing.tenant_id !== user.id) {
         return Response.json({ error: 'Forbidden' }, { status: 403 });
       }
-      if (scopes !== undefined && user.role !== 'admin') {
-        return Response.json({ error: 'Forbidden: scope changes require admin' }, { status: 403 });
+      if (scopes !== undefined) {
+        if (user.role !== 'admin') {
+          return Response.json({ error: 'Forbidden: scope changes require admin' }, { status: 403 });
+        }
       }
       const updates: Record<string, unknown> = {};
       if (name !== undefined) updates.name = name;
