@@ -53,6 +53,27 @@ add('security:api_key_generate_privilege_guard', Boolean(generateBlock) && direc
 const updateTouchesScopes = /updates\.scopes\s*=|scopes\s*!==\s*undefined/.test(updateBlock);
 add('security:api_key_scope_update_guard', Boolean(updateBlock) && (!updateTouchesScopes || directAdminDeny(updateBlock)), 'If scopes can be changed, non-admin scope mutation must be rejected regardless of key ownership.');
 
+const apiKeyEntityText = read('base44/entities/ApiKey.jsonc');
+let apiKeyWriteRlsOk = false;
+let apiKeyWriteRlsEvidence = 'base44/entities/ApiKey.jsonc missing';
+if (apiKeyEntityText) {
+  try {
+    const schema = JSON.parse(apiKeyEntityText);
+    const writeOps = ['create', 'update', 'delete'];
+    const operationResults = Object.fromEntries(writeOps.map((op) => {
+      const rule = schema?.rls?.[op];
+      const text = JSON.stringify(rule || {});
+      const adminOnly = rule?.user_condition?.role === 'admin' && !text.includes('{{user.id}}') && !text.includes('tenant_id');
+      return [op, adminOnly];
+    }));
+    apiKeyWriteRlsOk = Object.values(operationResults).every(Boolean);
+    apiKeyWriteRlsEvidence = operationResults;
+  } catch (error) {
+    apiKeyWriteRlsEvidence = `invalid ApiKey schema: ${error.message}`;
+  }
+}
+add('security:api_key_entity_write_rls_guard', apiKeyWriteRlsOk, apiKeyWriteRlsEvidence);
+
 function walk(dir) {
   const abs = path.join(root, dir);
   if (!fs.existsSync(abs)) return [];
@@ -103,7 +124,7 @@ const counts = results.reduce((acc, r) => {
 }, {});
 const receipt = {
   validator: 'alpha-prime/source-truth-guard',
-  version: 3,
+  version: 4,
   source_sha: sha,
   branch,
   generated_at: new Date().toISOString(),
