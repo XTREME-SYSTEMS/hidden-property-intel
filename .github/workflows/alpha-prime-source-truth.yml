@@ -3,7 +3,7 @@ name: Alpha Prime Supervisor Validation
 on:
   push:
     branches:
-      - alpha-prime/autonomous-completion-v6
+      - alpha-prime/autonomous-completion-v7
   pull_request:
     branches:
       - main
