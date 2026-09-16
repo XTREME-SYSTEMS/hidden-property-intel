@@ -1,0 +1,96 @@
+{
+  "contract_version": 2,
+  "purpose": "Validation contract for proving Base44-independent HPI entity-data takeover and deterministic failback without accepting lossy mirror behavior.",
+  "scope": "branch-sandbox-validation-only",
+  "primary_store": "Base44 entity DB",
+  "takeover_store": "independent durable datastore",
+  "pass_semantics": "Contract or fixture PASS does not prove datastore takeover. The Base44 entity DB SPOF remains active until exact-SHA independent-store outage and failback evidence passes.",
+  "minimum_domain_entities": [
+    "Property",
+    "PropertyScore",
+    "Owner",
+    "InvestorLead",
+    "Deal"
+  ],
+  "minimum_governor_entities": [
+    "GateResult",
+    "HeartbeatReceipt",
+    "ValidationTask",
+    "Finding",
+    "RepairTask",
+    "ValidationReceipt",
+    "SubsystemState",
+    "GovernanceReview"
+  ],
+  "required_checkpoint_semantics": [
+    "separate_directional_checkpoints",
+    "separate_entity_family_checkpoints",
+    "checkpoint_advances_only_after_commit_safe_success_or_durable_retry_capture",
+    "stable_keyset_cursor_uses_timestamp_and_stable_id",
+    "bootstrap_state_is_deterministically_created",
+    "retry_restart_preserves_uncommitted_work",
+    "bidirectional_interleaving_cannot_advance_opposite_direction_cursor"
+  ],
+  "required_failure_scenarios": [
+    "partial_record_failure_before_batch_end",
+    "more_than_500_records_with_identical_timestamp",
+    "process_restart_after_partial_commit",
+    "duplicate_delivery_after_retry",
+    "outbound_entity_family_failure_after_property_success",
+    "interleaved_base44_to_takeover_and_takeover_to_base44_sync"
+  ],
+  "required_takeover_behaviors": [
+    "exact_source_sha_required",
+    "stable_entity_identity_required",
+    "idempotent_upsert_required",
+    "outage_writes_buffered_or_committed_to_takeover_store",
+    "tombstone_or_delete_semantics_defined_without_destructive_test",
+    "conflict_resolution_is_deterministic",
+    "ordering_or_version_rule_defined",
+    "stale_or_foreign_sha_evidence_rejected",
+    "failback_reconciliation_is_idempotent",
+    "no_duplicate_domain_or_governor_records",
+    "read_after_write_consistency_proven_for_validation_fixture",
+    "takeover_store_is_executable_without_base44_runtime",
+    "zero_skipped_logical_records_under_required_failure_scenarios"
+  ],
+  "proof_sequence": [
+    "baseline_primary_available",
+    "seed_harmless_exact_sha_fixture",
+    "simulate_base44_entity_db_unavailable",
+    "write_fixture_to_takeover_store",
+    "read_fixture_from_takeover_store",
+    "exercise_idempotent_duplicate_write",
+    "exercise_deterministic_conflict_fixture",
+    "exercise_directional_and_entity_checkpoint_isolation",
+    "exercise_partial_failure_without_cursor_skip",
+    "exercise_tied_timestamp_keyset_pagination",
+    "exercise_restart_retry_and_bidirectional_interleaving",
+    "restore_primary_store",
+    "reconcile_domain_and_governor_fixture",
+    "verify_zero_skipped_and_zero_duplicate_records",
+    "emit_exact_sha_takeover_and_failback_receipts",
+    "rerun_nearby_regressions"
+  ],
+  "known_current_mirror_risks": [
+    "shared_sync_state_default_cursor_used_by_both_directions",
+    "sync_from_supabase_orders_only_by_updated_at_and_limits_500",
+    "sync_from_supabase_advances_cursor_even_when_record_errors_exist",
+    "sync_from_supabase_bootstrap_comment_does_not_insert_state",
+    "sync_to_supabase_advances_global_cursor_from_property_stream_only",
+    "current_sync_to_supabase_runs_inside_base44_runtime",
+    "current_sync_from_supabase_runs_inside_base44_runtime",
+    "current_mirror_does_not_prove_governor_state_takeover"
+  ],
+  "forbidden_shortcuts": [
+    "remove_or_weaken_critical_spof_declaration",
+    "treat_existing_mirror_as_takeover_proof",
+    "treat_contract_or_fixture_completeness_as_datastore_takeover_pass",
+    "use_stale_or_foreign_sha_receipts",
+    "mutate_or_delete_production_property_data_for_validation",
+    "change_production_rls_or_schema",
+    "change_secrets",
+    "incur_spend"
+  ],
+  "runtime_proof_required_before_spof_clear": true
+}
