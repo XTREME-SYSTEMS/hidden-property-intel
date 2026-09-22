@@ -75,6 +75,7 @@ import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 import OAuthConsent from '@/pages/OAuthConsent';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import AdminRoute from '@/components/AdminRoute';
 import { Navigate } from 'react-router-dom';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
@@ -133,43 +134,45 @@ const AuthenticatedApp = () => {
           <Route path="/contracts/:id" element={<SmartContractDetail />} />
           <Route path="/portal" element={<PortalRouter />} />
           <Route path="/mobile" element={<PwaMobile />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/sources" element={<AdminSources />} />
-          <Route path="/admin/outreach" element={<AdminOutreach />} />
-          <Route path="/admin/test-lab" element={<AdminTestLab />} />
-          <Route path="/admin/architecture" element={<AdminArchitecture />} />
-          <Route path="/admin/search-console" element={<AdminSearchConsole />} />
-          <Route path="/system-dna" element={<SystemDNA />} />
           <Route path="/smart-contracts" element={<SmartContractMarketing />} />
-        <Route path="/deal-calculator" element={<DealCalculator />} />
-        <Route path="/agent/dashboard" element={<AgentDashboard />} />
-        <Route path="/legal-compliance" element={<LegalCompliance />} />
-        <Route path="/industry-intelligence" element={<IndustryIntelligence />} />
-        <Route path="/admin/analytics" element={<AdminAnalytics />} />
-        <Route path="/investor/leaderboard" element={<InvestorLeaderboard />} />
-        <Route path="/admin/probate" element={<AdminProbateDashboard />} />
-        <Route path="/admin/strategy" element={<AdminStrategy />} />
-        <Route path="/admin/tricks" element={<AdminTricksOfTrade />} />
-        <Route path="/admin/sources-directory" element={<AdminSourcesDirectory />} />
-        <Route path="/admin/distress-education" element={<AdminDistressEducation />} />
-        <Route path="/admin/distress-tracker" element={<AdminDistressTracker />} />
-        <Route path="/admin/shadow" element={<ShadowCommandCenter />} />
-        <Route path="/admin/email-gallery" element={<EmailTemplateGallery />} />
-        <Route path="/admin/api-keys" element={<AdminApiKeys />} />
-        <Route path="/admin/api-generator" element={<AdminApiGenerator />} />
-        <Route path="/admin/numbers" element={<AdminNumbers />} />
-        <Route path="/admin/eden-voice" element={<AdminEdenVoice />} />
-        <Route path="/admin/calendar" element={<AdminCalendar />} />
-        <Route path="/admin/preflight" element={<AdminPreflight />} />
-        <Route path="/admin/florida-sources" element={<FloridaSourceDirectory />} />
-        <Route path="/admin/enrichment-upgrades" element={<AdminEnrichmentUpgrades />} />
-        <Route path="/admin/xtreme-vision" element={<AdminXtremeVision />} />
-        <Route path="/admin/owner-identify" element={<AdminOwnerIdentification />} />
-        <Route path="/admin/ai-gateway" element={<AdminAiGateway />} />
-        <Route path="/admin/intelligence" element={<IntelligenceConsole />} />
-        <Route path="/admin/digital-workforce" element={<DigitalWorkforce />} />
-        <Route path="/admin/digital-workforce/:agentId" element={<DigitalAgentProfile />} />
-        <Route path="/admin/tool-generator" element={<AgentToolGenerator />} />
+          <Route path="/deal-calculator" element={<DealCalculator />} />
+          <Route path="/agent/dashboard" element={<AgentDashboard />} />
+          <Route path="/investor/leaderboard" element={<InvestorLeaderboard />} />
+          <Route element={<AdminRoute />}>
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/sources" element={<AdminSources />} />
+            <Route path="/admin/outreach" element={<AdminOutreach />} />
+            <Route path="/admin/test-lab" element={<AdminTestLab />} />
+            <Route path="/admin/architecture" element={<AdminArchitecture />} />
+            <Route path="/admin/search-console" element={<AdminSearchConsole />} />
+            <Route path="/system-dna" element={<SystemDNA />} />
+            <Route path="/legal-compliance" element={<LegalCompliance />} />
+            <Route path="/industry-intelligence" element={<IndustryIntelligence />} />
+            <Route path="/admin/analytics" element={<AdminAnalytics />} />
+            <Route path="/admin/probate" element={<AdminProbateDashboard />} />
+            <Route path="/admin/strategy" element={<AdminStrategy />} />
+            <Route path="/admin/tricks" element={<AdminTricksOfTrade />} />
+            <Route path="/admin/sources-directory" element={<AdminSourcesDirectory />} />
+            <Route path="/admin/distress-education" element={<AdminDistressEducation />} />
+            <Route path="/admin/distress-tracker" element={<AdminDistressTracker />} />
+            <Route path="/admin/shadow" element={<ShadowCommandCenter />} />
+            <Route path="/admin/email-gallery" element={<EmailTemplateGallery />} />
+            <Route path="/admin/api-keys" element={<AdminApiKeys />} />
+            <Route path="/admin/api-generator" element={<AdminApiGenerator />} />
+            <Route path="/admin/numbers" element={<AdminNumbers />} />
+            <Route path="/admin/eden-voice" element={<AdminEdenVoice />} />
+            <Route path="/admin/calendar" element={<AdminCalendar />} />
+            <Route path="/admin/preflight" element={<AdminPreflight />} />
+            <Route path="/admin/florida-sources" element={<FloridaSourceDirectory />} />
+            <Route path="/admin/enrichment-upgrades" element={<AdminEnrichmentUpgrades />} />
+            <Route path="/admin/xtreme-vision" element={<AdminXtremeVision />} />
+            <Route path="/admin/owner-identify" element={<AdminOwnerIdentification />} />
+            <Route path="/admin/ai-gateway" element={<AdminAiGateway />} />
+            <Route path="/admin/intelligence" element={<IntelligenceConsole />} />
+            <Route path="/admin/digital-workforce" element={<DigitalWorkforce />} />
+            <Route path="/admin/digital-workforce/:agentId" element={<DigitalAgentProfile />} />
+            <Route path="/admin/tool-generator" element={<AgentToolGenerator />} />
+          </Route>
         </Route>
         <Route path="/eden-skye" element={<EdenSkyeProfile />} />
         <Route path="/eden-skye/chat" element={<EdenSkyeChat />} />

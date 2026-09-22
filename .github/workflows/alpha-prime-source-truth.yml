@@ -1,0 +1,342 @@
+name: Alpha Prime Supervisor Validation
+
+on:
+  push:
+    branches:
+      - alpha-prime/autonomous-completion-v7
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  VALIDATION_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  VALIDATION_BRANCH: ${{ github.head_ref || github.ref_name }}
+
+jobs:
+  source-lineage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact governed source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.VALIDATION_SHA }}
+          fetch-depth: 0
+
+      - name: Prove canonical main is an ancestor of governed head
+        shell: bash
+        run: |
+          git fetch origin main --no-tags
+          printf 'validation_sha=%s\ncanonical_main_sha=%s\n' "$(git rev-parse HEAD)" "$(git rev-parse origin/main)"
+          git merge-base --is-ancestor origin/main HEAD
+
+  source-truth-guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact governed source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.VALIDATION_SHA }}
+          fetch-depth: 1
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run deterministic Alpha Prime source-truth guard
+        id: validate
+        shell: bash
+        run: |
+          set +e
+          SOURCE_SHA="${VALIDATION_SHA}" SOURCE_BRANCH="${VALIDATION_BRANCH}" node scripts/alpha-prime/source-truth-guard.mjs 2>&1 | tee alpha-prime-source-truth-${VALIDATION_SHA}.log
+          code=${PIPESTATUS[0]}
+          echo "exit_code=${code}" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Upload exact-head source-truth receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alpha-prime-source-truth-${{ env.VALIDATION_SHA }}
+          path: alpha-prime-source-truth-${{ env.VALIDATION_SHA }}.log
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Enforce source-truth result
+        if: steps.validate.outputs.exit_code != '0'
+        run: exit 1
+
+  scheduler-surface-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact governed source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.VALIDATION_SHA }}
+          fetch-depth: 1
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run deterministic scheduler surface audit
+        id: validate
+        shell: bash
+        run: |
+          set +e
+          printf 'source_sha=%s\nbranch=%s\n' "${VALIDATION_SHA}" "${VALIDATION_BRANCH}" | tee alpha-prime-scheduler-${VALIDATION_SHA}.log
+          node scripts/alpha-prime/scheduler-surface-audit.mjs 2>&1 | tee -a alpha-prime-scheduler-${VALIDATION_SHA}.log
+          code=${PIPESTATUS[0]}
+          echo "exit_code=${code}" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Upload exact-head scheduler receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alpha-prime-scheduler-${{ env.VALIDATION_SHA }}
+          path: alpha-prime-scheduler-${{ env.VALIDATION_SHA }}.log
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Enforce scheduler result
+        if: steps.validate.outputs.exit_code != '0'
+        run: exit 1
+
+  content-integrity-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact governed source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.VALIDATION_SHA }}
+          fetch-depth: 1
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run deterministic content integrity audit
+        id: validate
+        shell: bash
+        run: |
+          set +e
+          SOURCE_SHA="${VALIDATION_SHA}" SOURCE_BRANCH="${VALIDATION_BRANCH}" node scripts/alpha-prime/content-integrity-audit.mjs 2>&1 | tee alpha-prime-content-integrity-${VALIDATION_SHA}.log
+          code=${PIPESTATUS[0]}
+          echo "exit_code=${code}" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Upload exact-head content-integrity receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alpha-prime-content-integrity-${{ env.VALIDATION_SHA }}
+          path: alpha-prime-content-integrity-${{ env.VALIDATION_SHA }}.log
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Enforce content-integrity result
+        if: steps.validate.outputs.exit_code != '0'
+        run: exit 1
+
+  static-audits:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact governed source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.VALIDATION_SHA }}
+          fetch-depth: 1
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Validate entity schemas
+        run: node scripts/alpha-prime/static-audit.mjs schema-valid
+
+      - name: Reject oversized entity payload fields
+        run: node scripts/alpha-prime/static-audit.mjs oversized-fields
+
+      - name: Validate backend input-validation signals
+        run: node scripts/alpha-prime/static-audit.mjs input-validation
+
+      - name: Validate protected contract execution paths
+        run: node scripts/alpha-prime/static-audit.mjs contract-safety
+
+      - name: Parse all backend function entrypoints
+        run: node scripts/alpha-prime/static-audit.mjs backend-functions-source
+
+  resilience-fallback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact governed source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.VALIDATION_SHA }}
+          fetch-depth: 1
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate zero-core-SPOF requirement
+        run: node scripts/alpha-prime/static-audit.mjs resilience-fallback
+
+  vercel-spa-routing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact governed source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.VALIDATION_SHA }}
+          fetch-depth: 1
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate SPA and dynamic sitemap routing contract
+        run: node scripts/alpha-prime/vercel-spa-routing-audit.mjs
+
+  workflow-takeover-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact governed source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.VALIDATION_SHA }}
+          fetch-depth: 1
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate independent workflow-runtime takeover contract
+        run: node scripts/alpha-prime/workflow-runtime-takeover-contract-audit.mjs
+
+  entity-takeover-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact governed source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.VALIDATION_SHA }}
+          fetch-depth: 1
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate Base44-independent entity-data takeover contract
+        run: node scripts/alpha-prime/entity-data-takeover-contract-audit.mjs
+
+  dependency-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact governed source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.VALIDATION_SHA }}
+          fetch-depth: 1
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install locked dependencies without lifecycle scripts
+        run: npm ci --ignore-scripts
+
+      - name: Reject critical dependency vulnerabilities
+        run: npm audit --audit-level=critical
+
+  branch-regressions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact governed source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.VALIDATION_SHA }}
+          fetch-depth: 1
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Typecheck
+        id: typecheck
+        continue-on-error: true
+        run: npm run typecheck
+
+      - name: Lint
+        id: lint
+        continue-on-error: true
+        run: npm run lint
+
+      - name: Build
+        id: build
+        continue-on-error: true
+        run: npm run build
+
+      - name: Write exact-head branch regression receipt
+        if: always()
+        shell: bash
+        run: |
+          cat > "alpha-prime-branch-regressions-${VALIDATION_SHA}.log" <<EOF
+          source_sha=${VALIDATION_SHA}
+          branch=${VALIDATION_BRANCH}
+          typecheck=${{ steps.typecheck.outcome }}
+          lint=${{ steps.lint.outcome }}
+          build=${{ steps.build.outcome }}
+          EOF
+          cat "alpha-prime-branch-regressions-${VALIDATION_SHA}.log"
+
+      - name: Upload exact-head branch regression receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: alpha-prime-branch-regressions-${{ env.VALIDATION_SHA }}
+          path: alpha-prime-branch-regressions-${{ env.VALIDATION_SHA }}.log
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Enforce branch regression results
+        if: always()
+        shell: bash
+        run: |
+          test '${{ steps.typecheck.outcome }}' = 'success'
+          test '${{ steps.lint.outcome }}' = 'success'
+          test '${{ steps.build.outcome }}' = 'success'
