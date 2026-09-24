@@ -1,12 +1,8 @@
 {
   "crons": [
     {
-      "path": "/api/trigger-scrape",
-      "schedule": "0 */6 * * *"
-    },
-    {
-      "path": "/api/mirror-to-supabase",
-      "schedule": "*/30 * * * *"
+      "path": "/api/reconcile",
+      "schedule": "*/5 * * * *"
     }
   ]
 }
