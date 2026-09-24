@@ -1,0 +1,2 @@
+import { json, requireUser, rpc } from "../_lib/supabaseServer.js";
+export default async function handler(req,res){try{if(req.method!=="POST")return json(res,405,{error:"method_not_allowed"});const user=await requireUser(req);const b=req.body||{};const result=await rpc("hpi_accept_bid",{p_user_id:user.id,p_property_id:String(b.property_id||""),p_bid_id:String(b.bid_id||"")});return json(res,200,{data:result});}catch(e){return json(res,e.status||400,{error:e.message||"accept_bid_failed"});}}
