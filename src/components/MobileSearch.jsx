@@ -2,6 +2,7 @@ import React, { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, X, Sparkles, MapPin, DollarSign, TrendingDown, Loader2, Building2 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { publicProperties } from "@/api/publicProperties";
 
 const DISTRESS_TYPES = [
   "pre-foreclosure", "foreclosure", "probate_inherited", "tax_delinquent",
@@ -33,7 +34,7 @@ export default function MobileSearch({ open, onClose }) {
       if (filters.min_price != null) query.estimated_value = { ...query.estimated_value, $gte: filters.min_price };
       if (filters.max_price != null) query.estimated_value = { ...query.estimated_value, $lte: filters.max_price };
       query.status = "active";
-      const props = await base44.entities.Property.filter(query, "-property_score", 10);
+      const props = await publicProperties.filter(query, "-property_score", 10);
       setResults(props);
     } catch {
       setResults([]);

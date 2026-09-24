@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { userDomain } from "@/api/userDomain";
 import { Bookmark, BookmarkCheck } from "lucide-react";
 
 export default function WatchButton({ propertyId }) {
@@ -13,10 +14,10 @@ export default function WatchButton({ propertyId }) {
       try {
         const u = await base44.auth.me();
         if (!u) { setLoading(false); return; }
-        const list = await base44.entities.Watchlist.filter({ property_id: propertyId });
+        const item = await userDomain.watchlist.get(u.id, propertyId);
         if (!alive) return;
-        setWatching(list.length > 0);
-        setRecord(list[0] || null);
+        setWatching(Boolean(item));
+        setRecord(item);
       } catch (e) { /* not logged in */ }
       setLoading(false);
     })();
@@ -28,10 +29,10 @@ export default function WatchButton({ propertyId }) {
       const u = await base44.auth.me();
       if (!u) return;
       if (watching && record) {
-        await base44.entities.Watchlist.delete(record.id);
+        await userDomain.watchlist.remove(record.id);
         setWatching(false); setRecord(null);
       } else {
-        const r = await base44.entities.Watchlist.create({ user_id: u.id, property_id: propertyId });
+        const r = await userDomain.watchlist.create({ user_id: u.id, property_id: propertyId });
         setWatching(true); setRecord(r);
       }
     } catch (e) { /* ignore */ }

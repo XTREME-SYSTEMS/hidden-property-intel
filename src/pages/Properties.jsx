@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { publicProperties } from "@/api/publicProperties";
 import PropertyCard from "@/components/PropertyCard";
 import FilterSidebar from "@/components/FilterSidebar";
 import { Search, SlidersHorizontal } from "lucide-react";
@@ -18,7 +19,7 @@ export default function Properties() {
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
-    base44.entities.Property.filter({ status: "active" }, "-property_score", 300).then(setAll);
+    publicProperties.filter({ status: "active" }, "-property_score", 300).then(setAll);
   }, []);
 
   useEffect(() => setPage(1), [filters]);

@@ -1,0 +1,2 @@
+create index if not exists idx_negotiation_threads_seller on public.negotiation_threads(seller_id,updated_date desc);
+create index if not exists idx_negotiation_threads_investor on public.negotiation_threads(investor_id,updated_date desc);

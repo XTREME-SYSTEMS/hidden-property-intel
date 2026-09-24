@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
+import { userDomain } from "@/api/userDomain";
 import { money } from "@/lib/format";
 import { Plus, FileText, PenTool, Scale, Mail, Calculator, Shield } from "lucide-react";
 import DashboardFAQ from "@/components/DashboardFAQ";
@@ -13,8 +13,7 @@ export default function SellerDashboard() {
   useEffect(() => {
     (async () => {
       try {
-        const u = await base44.auth.me();
-        const props = await base44.entities.Property.filter({ seller_id: u.id });
+        const props = await userDomain.sellerProperties.list();
         setProperties(props);
       } catch (e) { /* not logged in */ }
       setLoading(false);

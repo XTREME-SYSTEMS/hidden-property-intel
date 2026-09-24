@@ -5,6 +5,8 @@ import {
   TrendingUp, MapPin, Shield, ChevronRight, Mic, Eye, Database,
 } from "lucide-react";
 import { base44 } from "@/api/base44Client";
+import { publicProperties } from "@/api/publicProperties";
+import { userDomain } from "@/api/userDomain";
 import Seo from "@/components/Seo";
 
 const NAV = [
@@ -22,11 +24,19 @@ export default function PwaMobile() {
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
-    Promise.all([
-      base44.entities.Property.list("-created_date", 1).catch(() => []),
-      base44.entities.Deal.list("-created_date", 1).catch(() => []),
-      base44.entities.DealAlert.filter({ read: false }).catch(() => []),
-    ]).then(([p, d, a]) => setStats({ properties: p.length, deals: d.length, alerts: a.length }));
+    (async () => {
+      const u = await base44.auth.me().catch(() => null);
+      const [p, d, a] = await Promise.all([
+        publicProperties.list("-created_date", 1).catch(() => []),
+        u ? userDomain.deals.list("-created_date", 200).catch(() => []) : Promise.resolve([]),
+        u ? userDomain.alerts.list(100).catch(() => []) : Promise.resolve([]),
+      ]);
+      setStats({
+        properties: p.length,
+        deals: d.filter((x) => x.status === "active").length,
+        alerts: a.filter((x) => !x.read).length
+      });
+    })();
   }, []);
 
   const tools = [
