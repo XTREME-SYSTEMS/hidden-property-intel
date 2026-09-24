@@ -68,6 +68,13 @@ export const userDomain = {
       await request("saved_searches",{method:"DELETE",query:`id=eq.${encodeURIComponent(id)}`,prefer:"return=minimal"});
     },
   },
+  sellerProperties: {
+    async list() {
+      const data = await apiCall("/api/properties/mine");
+      return data?.properties || [];
+    },
+  },
+
   properties: {
     async create(payload) {
       const rows = await request("properties", { method:"POST", body: payload, prefer:"return=representation" });
