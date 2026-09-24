@@ -49,6 +49,19 @@ async function apiCall(path, body) {
 }
 
 export const userDomain = {
+  watchlist: {
+    async get(userId, propertyId) {
+      const rows = await request("watchlist",{query:`user_id=eq.${encodeURIComponent(userId)}&property_id=eq.${encodeURIComponent(propertyId)}&limit=1`});
+      return rows?.[0] || null;
+    },
+    async create(payload) {
+      const rows = await request("watchlist",{method:"POST",body:payload,prefer:"return=representation"});
+      return rows?.[0] || null;
+    },
+    async remove(id) {
+      await request("watchlist",{method:"DELETE",query:`id=eq.${encodeURIComponent(id)}`,prefer:"return=minimal"});
+    },
+  },
   investor: {
     async get(userId) {
       const rows = await request("investor_profiles",{query:`user_id=eq.${encodeURIComponent(userId)}&limit=1`});
