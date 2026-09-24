@@ -15,10 +15,14 @@ export default async function(req) {
     const base44 = createClientFromRequest(req);
 
     // Fetch all active properties, filter for those without scores
-    const all = await base44.asServiceRole.entities.Property.filter({ status: 'active' }, '-created_date', 500);
-    const needingScore = all.filter(p => p.property_score == null);
-
-    const toProcess = needingScore.slice(0, BATCH_SIZE);
+    const [all, existingScores] = await Promise.all([
+      base44.asServiceRole.entities.Property.filter({ status: 'active' }, '-created_date', 500),
+      base44.asServiceRole.entities.PropertyScore.list('-created_date', 500),
+    ]);
+    const scoredIds = new Set(existingScores.map(s => s.property_id));
+    const needingScore = all.filter(p => p.property_score == null && !scoredIds.has(p.id));
+    const eligible = needingScore.filter(p => Number(p.estimated_value) > 0 && Number(p.proposed_asking_price) > 0);
+    const toProcess = [...eligible, ...needingScore.filter(p => !eligible.includes(p))].slice(0, BATCH_SIZE);
     const results = [];
     let scored = 0;
     const startedAt = Date.now();

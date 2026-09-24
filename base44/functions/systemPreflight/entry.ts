@@ -561,27 +561,27 @@ export default async function (req: Request): Promise<Response> {
     productionChecklist.push({
       id: 'security_audit',
       label: 'Security Audit Complete',
-      status: 'pass',
-      detail: 'RLS configured on all entities, admin-only access enforced',
-      action: null,
+      status: 'warning',
+      detail: 'Independent security and access-control verification not recorded here',
+      action: 'Run an independent security review before release',
     });
 
     // 10. Legal compliance
     productionChecklist.push({
       id: 'legal_compliance',
       label: 'Legal & Fair Housing Compliance',
-      status: 'pass',
-      detail: 'Fair Housing audit, RESPA awareness, FL Chapter 475 compliance built in',
-      action: null,
+      status: 'warning',
+      detail: 'No independent legal compliance evidence in this audit',
+      action: 'Obtain qualified legal review before release',
     });
 
     // 11. Frontend
     productionChecklist.push({
       id: 'frontend_polish',
       label: 'Frontend Production-Ready',
-      status: 'pass',
-      detail: 'Light luxury theme, responsive, PWA-enabled',
-      action: null,
+      status: 'warning',
+      detail: 'Desktop, mobile, PWA and user journeys require independent testing',
+      action: 'Run independent user-journey and mobile tests',
     });
 
     // 12. Digital workforce
