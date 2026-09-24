@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { hasRealImages } from '../../shared/propertyImages.ts';
 
 // Shadow Orchestrator — the autonomous intelligence layer for PropertyIntel.
 // Audits 8 dimensions, auto-heals issues, computes a 0-100 system score,
@@ -70,7 +71,8 @@ export default async function (req: any) {
     metrics.properties_with_scores = scores.length;
     metrics.properties_with_title = titleRisks.length;
     metrics.properties_with_ownership = ownershipChains.length;
-    metrics.properties_with_images = images.length;
+    metrics.property_image_records = images.length;
+    metrics.properties_with_images = properties.filter((p: any) => hasRealImages(p)).length;
     metrics.total_investors = investors.length;
     metrics.active_investors = investors.filter((i: any) => i.subscription_status === 'active').length;
     metrics.total_bids = bids.length;
@@ -190,7 +192,7 @@ export default async function (req: any) {
     }
 
     // ── DIMENSION 4: Outreach Engine ──
-    const leadResponseRate = metrics.investor_leads > 0 ? metrics.investor_leads - metrics.new_leads / Math.max(metrics.investor_leads, 1) : 0;
+    const leadResponseRate = metrics.investor_leads > 0 ? (metrics.investor_leads - metrics.new_leads) / Math.max(metrics.investor_leads, 1) : 0;
     const ownerResponseRate = metrics.owners > 0 ? metrics.owners_contacted / metrics.owners : 0;
     dimensionScores.outreach_engine = score([
       { threshold: 0.5, value: ownerResponseRate, weight: 3 },
