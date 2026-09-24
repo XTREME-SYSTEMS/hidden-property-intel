@@ -49,6 +49,25 @@ async function apiCall(path, body) {
 }
 
 export const userDomain = {
+  investor: {
+    async get(userId) {
+      const rows = await request("investor_profiles",{query:`user_id=eq.${encodeURIComponent(userId)}&limit=1`});
+      return rows?.[0] || null;
+    },
+  },
+
+  savedSearches: {
+    async list(userId) {
+      return (await request("saved_searches",{query:`user_id=eq.${encodeURIComponent(userId)}&order=created_date.desc`})) || [];
+    },
+    async create(payload) {
+      const rows=await request("saved_searches",{method:"POST",body:payload,prefer:"return=representation"});
+      return rows?.[0] || null;
+    },
+    async remove(id) {
+      await request("saved_searches",{method:"DELETE",query:`id=eq.${encodeURIComponent(id)}`,prefer:"return=minimal"});
+    },
+  },
   properties: {
     async create(payload) {
       const rows = await request("properties", { method:"POST", body: payload, prefer:"return=representation" });
@@ -75,6 +94,9 @@ export const userDomain = {
   },
 
   bids: {
+    async mine(userId) {
+      return (await request("bids",{query:`investor_id=eq.${encodeURIComponent(userId)}&order=created_date.desc`})) || [];
+    },
     async list(propertyId) {
       return (await request("bids",{query:`property_id=eq.${encodeURIComponent(propertyId)}&order=bid_amount.desc`})) || [];
     },
