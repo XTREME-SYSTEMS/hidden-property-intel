@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import { publicProperties } from "@/api/publicProperties";
+import { userDomain } from "@/api/userDomain";
 import { money } from "@/lib/format";
 import { FileSignature, Check } from "lucide-react";
 
@@ -18,22 +20,26 @@ export default function Bidding() {
   const [genBusy, setGenBusy] = useState(false);
   const [genMsg, setGenMsg] = useState("");
   const [acceptBusy, setAcceptBusy] = useState(false);
+  const [isSellerOrAdmin, setIsSellerOrAdmin] = useState(false);
 
   const load = async () => {
     try {
       const [p, u] = await Promise.all([
-        base44.entities.Property.get(id),
+        publicProperties.get(id),
         base44.auth.me().catch(() => null)
       ]);
       setProperty(p); setUser(u);
-      const b = await base44.entities.Bid.filter({ property_id: id });
+      const [b, party] = await Promise.all([
+        u ? userDomain.bids.list(id) : Promise.resolve([]),
+        u ? userDomain.propertyParty.get(id).catch(() => ({ isSellerOrAdmin:false })) : Promise.resolve({ isSellerOrAdmin:false })
+      ]);
       setBids(b.sort((a, b) => b.bid_amount - a.bid_amount));
+      setIsSellerOrAdmin(Boolean(party?.isSellerOrAdmin));
     } catch (e) { /* ignore */ }
   };
 
   useEffect(() => { load(); }, [id]);
 
-  const isSellerOrAdmin = user && (user.role === "admin" || (property?.seller_id && property.seller_id === user.id));
   const activeBids = bids.filter((b) => b.status === "active");
   const acceptedBid = bids.find((b) => b.status === "accepted");
   const topBid = acceptedBid || activeBids.sort((a, b) => b.bid_amount - a.bid_amount)[0];
@@ -42,11 +48,11 @@ export default function Bidding() {
   const place = async () => {
     setMsg(""); setBusy(true);
     try {
-      const res = await base44.functions.invoke("placeBid", {
+      const res = await userDomain.bids.place({
         property_id: id, bid_amount: Number(amount),
         is_proxy_bid: proxy, max_proxy_amount: proxy ? Number(maxProxy) : undefined
       });
-      if (res.data?.error) setMsg(res.data.error);
+      if (res?.error) setMsg(res.error);
       else { setAmount(""); setMaxProxy(""); setProxy(false); load(); }
     } catch (e) { setMsg(e.response?.data?.error || e.message); }
     setBusy(false);
@@ -55,8 +61,8 @@ export default function Bidding() {
   const accept = async (bidId) => {
     setMsg(""); setAcceptBusy(true);
     try {
-      const res = await base44.functions.invoke("acceptBid", { property_id: id, bid_id: bidId });
-      if (res.data?.error) setMsg(res.data.error);
+      const res = await userDomain.bids.accept({ property_id: id, bid_id: bidId });
+      if (res?.error) setMsg(res.error);
       else { setMsg("Bid accepted — property is now under contract."); load(); }
     } catch (e) { setMsg(e.response?.data?.error || e.message); }
     setAcceptBusy(false);

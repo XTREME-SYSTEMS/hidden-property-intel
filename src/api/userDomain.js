@@ -29,6 +29,25 @@ function orderParam(sort) {
   return `order=${encodeURIComponent(field)}.${desc ? "desc" : "asc"}.nullslast`;
 }
 
+async function apiCall(path, body) {
+  const token = await supabaseAuth.getAccessToken();
+  const response = await fetch(path, {
+    method: body === undefined ? "GET" : "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      ...(body === undefined ? {} : { "Content-Type": "application/json" }),
+    },
+    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    const error = new Error(data?.error || `API request failed (${response.status})`);
+    error.status = response.status;
+    throw error;
+  }
+  return data;
+}
+
 export const userDomain = {
   properties: {
     async create(payload) {
@@ -52,6 +71,24 @@ export const userDomain = {
     },
     async remove(id) {
       await request("deals",{method:"DELETE",query:`id=eq.${encodeURIComponent(id)}`,prefer:"return=minimal"});
+    },
+  },
+
+  bids: {
+    async list(propertyId) {
+      return (await request("bids",{query:`property_id=eq.${encodeURIComponent(propertyId)}&order=bid_amount.desc`})) || [];
+    },
+    async place(payload) {
+      return apiCall("/api/bids/place", payload);
+    },
+    async accept(payload) {
+      return apiCall("/api/bids/accept", payload);
+    },
+  },
+
+  propertyParty: {
+    async get(propertyId) {
+      return apiCall(`/api/properties/party-context?property_id=${encodeURIComponent(propertyId)}`);
     },
   },
 
