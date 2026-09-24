@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { base44 } from "@/api/base44Client";
 import PreflightGauge from "@/components/preflight/PreflightGauge";
 import PreflightDimensionCard from "@/components/preflight/PreflightDimensionCard";
+import ConvergenceBaseline from "@/components/preflight/ConvergenceBaseline";
 import {
   Loader2, RefreshCw, Rocket, AlertTriangle, CheckCircle2, XCircle, Activity,
   ShieldCheck, Mail, Search, Zap, Database, Wallet, Globe, Cpu, Users,
@@ -90,11 +91,13 @@ export default function AdminPreflight() {
               <div className="flex-1">
                 <p className={`text-2xl font-light ${go ? "text-emerald-700" : "text-red-700"}`}>{report.go_no_go}</p>
                 <p className="text-xs text-[#6f6a60]">
-                  {go ? "All systems pass pre-flight — autonomous operations cleared." : `${criticalDims.length} critical dimension(s) blocking autonomous operations.`}
+                  {go ? "Evidence gates pass." : "Production is not independently verified; review the evidence gates below."}
                 </p>
               </div>
               <PreflightGauge score={report.overall_score} size={120} />
             </div>
+
+            <ConvergenceBaseline baseline={report.convergence_baseline} />
 
             {/* Production Launch Checklist */}
             {checklist && (

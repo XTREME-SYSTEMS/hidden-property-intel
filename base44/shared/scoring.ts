@@ -35,6 +35,7 @@ const SCHEMA = {
 };
 
 import { hasRealImages, fetchPropertyImages } from './propertyImages.ts';
+import { rulesOnlyScore } from './rulesOnlyScore.ts';
 
 const TITLE_SCHEMA = {
   type: 'object',
@@ -107,12 +108,20 @@ Estimated value: ${property.estimated_value ?? 'n/a'}, Proposed asking: ${proper
 
 Find comparable sales within 1 mile in the last 12 months, estimate current market value, repair costs for the distress type, after-repair value (ARV), distress severity, estimated ROI %, and score factors (0-100 each). Write a 2-3 paragraph ai_analysis explaining the score.`;
 
-  const r = await base44.asServiceRole.integrations.Core.InvokeLLM({
-    prompt,
-    add_context_from_internet: true,
-    model: 'gemini_3_flash',
-    response_json_schema: SCHEMA
-  });
+  let r: any;
+  let rulesOnly = false;
+  try {
+    r = await base44.asServiceRole.integrations.Core.InvokeLLM({
+      prompt,
+      add_context_from_internet: true,
+      model: 'gemini_3_flash',
+      response_json_schema: SCHEMA
+    });
+  } catch (error) {
+    console.warn('AI scoring unavailable; using disclosed rules-only indicator', error?.message);
+    r = rulesOnlyScore(property);
+    rulesOnly = true;
+  }
 
   const existingScores = await base44.asServiceRole.entities.PropertyScore.filter({ property_id });
   const scoreData = {
@@ -125,7 +134,7 @@ Find comparable sales within 1 mile in the last 12 months, estimate current mark
     score_factors: r.score_factors,
     ai_analysis: r.ai_analysis,
     scored_at: new Date().toISOString(),
-    model_version: 'gemini_3_flash-v1'
+    model_version: rulesOnly ? r.model_version : 'gemini_3_flash-v1'
   };
   if (existingScores[0]) {
     await base44.asServiceRole.entities.PropertyScore.update(existingScores[0].id, scoreData);
@@ -133,11 +142,13 @@ Find comparable sales within 1 mile in the last 12 months, estimate current mark
     await base44.asServiceRole.entities.PropertyScore.create({ property_id, ...scoreData });
   }
 
-  await base44.asServiceRole.entities.Property.update(property_id, {
+  if (!rulesOnly) await base44.asServiceRole.entities.Property.update(property_id, {
     estimated_value: r.estimated_value,
     proposed_asking_price: r.proposed_asking_price,
     property_score: r.overall_score
   });
+
+  if (rulesOnly) return r; // No speculative valuation, image scraping or paid title lookup.
 
   // fetch REAL listing photos via the self-hosted cloudbrowser engine (no AI-generated images)
   if (!hasRealImages(property)) {

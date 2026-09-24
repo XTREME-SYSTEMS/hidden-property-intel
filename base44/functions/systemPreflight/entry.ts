@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.46';
+import { convergenceBaseline } from '../../shared/convergenceBaseline.ts';
 
 /**
  * SYSTEM PREFLIGHT — End-to-end forensic audit & scoring engine.
@@ -86,6 +87,9 @@ export default async function (req: Request): Promise<Response> {
       base44.asServiceRole.entities.DealAlert.list('-created_date', 100),
       base44.asServiceRole.entities.NegotiationThread.list('-created_date', 100),
     ]);
+
+    const jobs = await base44.asServiceRole.entities.Job.list('-created_date', 100);
+    const convergence = convergenceBaseline({ properties, dataSources, scrapeJobs, jobs, systemHealth });
 
     // ═══════════════════════════════════════════════════════════════════════════
     // 1. VISION & STRATEGY
@@ -619,7 +623,8 @@ export default async function (req: Request): Promise<Response> {
       run_at: new Date().toISOString(),
       elapsed_ms: elapsed,
       overall_score: overall,
-      go_no_go: go ? 'GO' : 'NO-GO',
+      go_no_go: go && convergence.verified_100 ? 'GO' : 'NO-GO',
+      convergence_baseline: convergence,
       summary: {
         total_dimensions: dims.length,
         healthy, warning: warnings, critical,
@@ -647,8 +652,8 @@ export default async function (req: Request): Promise<Response> {
         fail: checklistFail,
         warning: checklistWarn,
         total: productionChecklist.length,
-        production_ready: productionReady,
-        launch_status: productionReady ? 'READY TO LAUNCH' : checklistFail > 0 ? 'BLOCKED' : 'NEARLY READY',
+        production_ready: productionReady && convergence.verified_100,
+        launch_status: productionReady && convergence.verified_100 ? 'READY TO LAUNCH' : 'NOT VERIFIED',
       },
     });
   } catch (error) {
