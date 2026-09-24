@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Image } from "@/components/ui/image";
-import { base44 } from "@/api/base44Client";\nimport { publicProperties } from "@/api/publicProperties";
+import { base44 } from "@/api/base44Client";
+import { publicProperties } from "@/api/publicProperties";
 import { IMAGES } from "@/lib/luxury";
 import LuxuryListingCard from "@/components/luxury/LuxuryListingCard";
 import FAQ from "@/components/FAQ";

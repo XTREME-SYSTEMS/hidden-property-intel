@@ -1,7 +1,8 @@
 import React, { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, X, Sparkles, MapPin, DollarSign, TrendingDown, Loader2, Building2 } from "lucide-react";
-import { base44 } from "@/api/base44Client";\nimport { publicProperties } from "@/api/publicProperties";
+import { base44 } from "@/api/base44Client";
+import { publicProperties } from "@/api/publicProperties";
 
 const DISTRESS_TYPES = [
   "pre-foreclosure", "foreclosure", "probate_inherited", "tax_delinquent",

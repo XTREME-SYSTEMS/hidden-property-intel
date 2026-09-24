@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { base44 } from "@/api/base44Client";\nimport { publicProperties } from "@/api/publicProperties";
+import { base44 } from "@/api/base44Client";
+import { publicProperties } from "@/api/publicProperties";
 import PropertyCard from "@/components/PropertyCard";
 import PricingTiers from "@/components/PricingTiers";
 import FAQ from "@/components/FAQ";

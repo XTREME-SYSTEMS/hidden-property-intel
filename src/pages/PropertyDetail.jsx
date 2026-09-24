@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { base44 } from "@/api/base44Client";\nimport { publicProperties } from "@/api/publicProperties";
+import { base44 } from "@/api/base44Client";
+import { publicProperties } from "@/api/publicProperties";
 import { Image } from "@/components/ui/image";
 import DistressBadge, { labelFor } from "@/components/DistressBadge";
 import ScoreGauge from "@/components/ScoreGauge";

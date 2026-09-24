@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { base44 } from "@/api/base44Client";\nimport { publicProperties } from "@/api/publicProperties";
+import { base44 } from "@/api/base44Client";
+import { publicProperties } from "@/api/publicProperties";
 import PropertyCard from "@/components/PropertyCard";
 import FilterSidebar from "@/components/FilterSidebar";
 import { Search, SlidersHorizontal } from "lucide-react";

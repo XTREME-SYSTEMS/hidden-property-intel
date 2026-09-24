@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { base44 } from "@/api/base44Client";\nimport { publicProperties } from "@/api/publicProperties";
+import { base44 } from "@/api/base44Client";
+import { publicProperties } from "@/api/publicProperties";
 import { IMAGES } from "@/lib/luxury";
 import { Image } from "@/components/ui/image";
 import LuxuryListingCard from "@/components/luxury/LuxuryListingCard";
