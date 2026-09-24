@@ -124,6 +124,10 @@ Find comparable sales within 1 mile in the last 12 months, estimate current mark
   }
 
   const existingScores = await base44.asServiceRole.entities.PropertyScore.filter({ property_id });
+  if (rulesOnly && existingScores[0] && existingScores[0].model_version !== 'rules-only-unverified-v1') {
+    return existingScores[0]; // Preserve previously generated analysis when the AI provider is unavailable.
+  }
+  if (rulesOnly && r.overall_score == null) return r; // Missing price inputs: do not persist a fabricated score.
   const scoreData = {
     overall_score: r.overall_score,
     distress_severity: r.distress_severity,

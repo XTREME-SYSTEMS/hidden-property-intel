@@ -29,9 +29,13 @@ export default async function(req) {
         continue;
       }
       try {
-        await scorePropertyRecord(base44, p);
-        scored++;
-        results.push({ id: p.id, address: p.address, action: 'scored' });
+        const result = await scorePropertyRecord(base44, p);
+        if (result.overall_score == null) {
+          results.push({ id: p.id, address: p.address, action: 'unscorable', note: 'Missing verified pricing inputs; no score saved' });
+        } else {
+          scored++;
+          results.push({ id: p.id, address: p.address, action: result.model_version === 'rules-only-unverified-v1' ? 'rules_only_indicator' : 'scored' });
+        }
       } catch (e) {
         console.error('score failed for', p.id, e?.message);
         results.push({ id: p.id, address: p.address, action: 'error', error: e.message });
