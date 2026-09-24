@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
+import { base44 } from "@/api/base44Client";\nimport { publicProperties } from "@/api/publicProperties";
 import PropertyCard from "@/components/PropertyCard";
 import PricingTiers from "@/components/PricingTiers";
 import FAQ from "@/components/FAQ";
@@ -16,7 +16,7 @@ export default function Home() {
   const [featured, setFeatured] = useState([]);
 
   useEffect(() => {
-    base44.entities.Property.filter({ status: "active" }, "-property_score", 6).then(setFeatured);
+    publicProperties.filter({ status: "active" }, "-property_score", 6).then(setFeatured);
   }, []);
 
   return (

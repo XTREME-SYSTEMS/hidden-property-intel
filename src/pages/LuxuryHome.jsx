@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Image } from "@/components/ui/image";
-import { base44 } from "@/api/base44Client";
+import { base44 } from "@/api/base44Client";\nimport { publicProperties } from "@/api/publicProperties";
 import { IMAGES } from "@/lib/luxury";
 import LuxuryListingCard from "@/components/luxury/LuxuryListingCard";
 import FAQ from "@/components/FAQ";
@@ -62,7 +62,7 @@ function QuickAction({ icon: Icon, label, to }) {
 export default function LuxuryHome() {
   const [featured, setFeatured] = useState([]);
   useEffect(() => {
-    base44.entities.Property.filter({ status: "active", is_featured: true }, "-property_score", 6).then(setFeatured).catch(() => {});
+    publicProperties.filter({ status: "active", is_featured: true }, "-property_score", 6).then(setFeatured).catch(() => {});
   }, []);
 
   return (

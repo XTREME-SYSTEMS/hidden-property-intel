@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { base44 } from "@/api/base44Client";\nimport { publicProperties } from "@/api/publicProperties";
 import { IMAGES } from "@/lib/luxury";
 import { Image } from "@/components/ui/image";
 import LuxuryListingCard from "@/components/luxury/LuxuryListingCard";
@@ -20,7 +20,7 @@ export default function Listings() {
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
-    base44.entities.Property.filter({ status: "active" }, "-property_score", 300).then(setAll).catch(() => setAll([]));
+    publicProperties.filter({ status: "active" }, "-property_score", 300).then(setAll).catch(() => setAll([]));
   }, []);
   useEffect(() => setPage(1), [q, distress, maxPrice, minScore, sort]);
 
