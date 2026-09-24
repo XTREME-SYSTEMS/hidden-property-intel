@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import { publicProperties } from "@/api/publicProperties";
+import { userDomain } from "@/api/userDomain";
 import { money } from "@/lib/format";
 import { Plus, ChevronLeft, ChevronRight, Trash2, TrendingUp } from "lucide-react";
 
@@ -26,12 +28,12 @@ export default function InvestorPipeline() {
 
   const load = useCallback(async () => {
     try {
-      const d = await base44.entities.Deal.list("-created_date", 200);
+      const d = await userDomain.deals.list("-created_date", 200);
       setDeals(d);
       const ids = [...new Set(d.map((x) => x.property_id).filter(Boolean))];
       const map = {};
       if (ids.length) {
-        const allProps = await base44.entities.Property.list('-created_date', 500);
+        const allProps = await publicProperties.list('-created_date', 500);
         const idSet = new Set(ids);
         allProps.forEach(p => { if (idSet.has(p.id)) map[p.id] = p; });
       }
@@ -48,7 +50,7 @@ export default function InvestorPipeline() {
   const create = async () => {
     const u = await base44.auth.me();
     if (!u || !form.property_id) return;
-    await base44.entities.Deal.create({
+    await userDomain.deals.create({
       user_id: u.id,
       property_id: form.property_id,
       stage: "lead",
@@ -62,12 +64,12 @@ export default function InvestorPipeline() {
   const move = async (deal, dir) => {
     const i = ORDER.indexOf(deal.stage);
     const next = ORDER[Math.max(0, Math.min(ORDER.length - 1, i + dir))];
-    await base44.entities.Deal.update(deal.id, { stage: next });
+    await userDomain.deals.update(deal.id, { stage: next });
     load();
   };
 
   const remove = async (id) => {
-    await base44.entities.Deal.delete(id);
+    await userDomain.deals.remove(id);
     load();
   };
 

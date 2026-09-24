@@ -80,12 +80,19 @@ export const publicProperties = {
     return this.filter({ status: "active" }, sort, limit);
   },
 
-  async get(base44Id) {
-    const params = new URLSearchParams();
-    params.set("status", "eq.active");
-    params.set("base44_id", `eq.${base44Id}`);
-    params.set("limit", "1");
-    const rows = await queryRows(params);
+  async get(id) {
+    const byLegacy = new URLSearchParams();
+    byLegacy.set("status", "eq.active");
+    byLegacy.set("base44_id", `eq.${id}`);
+    byLegacy.set("limit", "1");
+    let rows = await queryRows(byLegacy);
+    if (!rows[0] && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(id))) {
+      const byUuid = new URLSearchParams();
+      byUuid.set("status", "eq.active");
+      byUuid.set("id", `eq.${id}`);
+      byUuid.set("limit", "1");
+      rows = await queryRows(byUuid);
+    }
     if (!rows[0]) {
       const error = new Error("Property not found");
       error.status = 404;

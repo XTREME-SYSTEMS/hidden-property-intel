@@ -246,6 +246,12 @@ export const supabaseAuth = {
     return Boolean(loadSession()?.access_token);
   },
 
+  async getAccessToken() {
+    const session = await getValidSession();
+    if (!session?.access_token) throw authError("Authentication required", 401);
+    return session.access_token;
+  },
+
   async logout(redirectUrl) {
     const session = loadSession();
     try {
