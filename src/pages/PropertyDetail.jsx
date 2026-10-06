@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import { publicProperties } from "@/api/publicProperties";
 import { Image } from "@/components/ui/image";
 import DistressBadge, { labelFor } from "@/components/DistressBadge";
 import ScoreGauge from "@/components/ScoreGauge";
@@ -57,7 +58,7 @@ export default function PropertyDetail() {
     setProperty(null);
     (async () => {
       const [p, u] = await Promise.all([
-        base44.entities.Property.get(id),
+        publicProperties.get(id),
         base44.auth.me().catch(() => null)
       ]);
       if (!alive) return;

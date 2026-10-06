@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import { publicProperties } from "@/api/publicProperties";
+import { userDomain } from "@/api/userDomain";
 import { ArrowRight, ArrowLeft, Sparkles } from "lucide-react";
 import { DISTRESS_TYPES as DISTRESS, PROPERTY_TYPES as TYPES } from "@/lib/constants";
 const inputCls = "w-full rounded-sm border border-black/15 bg-white px-4 py-3 text-sm outline-none focus:border-black";
@@ -39,7 +41,7 @@ export default function SellerPostProperty() {
       const u = await base44.auth.me();
       // Deduplication: check for existing property with same address + zip
       if (f.address && f.zip_code) {
-        const existing = await base44.entities.Property.filter({ address: f.address, zip_code: f.zip_code });
+        const existing = await publicProperties.filter({ address: f.address, zip_code: f.zip_code }, "-updated_date", 5);
         if (existing.length > 0) {
           alert("A property with this address and ZIP code already exists. Redirecting you to it.");
           nav(`/properties/${existing[0].id}`);
@@ -56,22 +58,7 @@ export default function SellerPostProperty() {
         proposed_asking_price: f.proposed_asking_price ? Number(f.proposed_asking_price) : undefined,
         seller_id: u.id, source: "user_submitted", status: "active"
       };
-      const res = await base44.entities.Property.create(payload);
-      // Create or update Seller profile
-      const existingSeller = await base44.entities.Seller.filter({ user_id: u.id });
-      if (!existingSeller[0]) {
-        await base44.entities.Seller.create({
-          user_id: u.id,
-          name: u.full_name || u.email,
-          email: u.email,
-          property_count: 1,
-          joined_at: new Date().toISOString()
-        });
-      } else {
-        await base44.entities.Seller.update(existingSeller[0].id, {
-          property_count: (existingSeller[0].property_count || 0) + 1
-        });
-      }
+      const res = await userDomain.properties.create(payload);
       nav(`/properties/${res.id}`);
     } catch (e) { alert(e.message); }
     setBusy(false);

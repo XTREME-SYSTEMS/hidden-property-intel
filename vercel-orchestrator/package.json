@@ -1,8 +1,11 @@
 {
   "name": "property-intel-orchestrator",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
-  "description": "Vercel cron orchestrator — triggers Railway scrapers and mirrors Base44 data into Supabase",
+  "description": "Fail-closed Hidden Property Intel convergence orchestrator with one five-minute heartbeat",
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  },
   "dependencies": {}
 }

@@ -1,67 +1,64 @@
-# Property Intel Orchestrator (Vercel Cron)
+# Hidden Property Intel Convergence Orchestrator
 
-Standalone Vercel project that owns the scheduling layer for Hidden Property Intel.
-Moves all cron orchestration off Base44 onto your own Vercel infrastructure.
+This Vercel project is the governed scheduling/control plane for Hidden Property Intel.
 
-## What it does
+## Canonical heartbeat
 
-| Endpoint | Schedule | Purpose |
-|---|---|---|
-| `/api/trigger-scrape` | Every 6 hours | Triggers the Railway-hosted scraper to harvest distressed properties |
-| `/api/mirror-to-supabase` | Every 30 min | Mirrors Base44 data (properties, scores, owners, leads, deals) into your Supabase |
-| `/api/health` | On demand | Health check |
+Exactly one cron is declared:
 
-## Architecture
+`Vercel Cron every 5 minutes -> /api/reconcile`
 
-```
-Vercel Cron ──> Railway Scraper ──> Base44 (syncFromRailway)
-                                         │
-Vercel Cron ──> Base44 (syncToSupabase) ──> Supabase (your data warehouse)
-```
+The reconcile route is fail-closed. It acquires a global Supabase lease, refetches the canonical GitHub SHA, compares deployment parity, reads an aggregate Base44 convergence snapshot, evaluates mandatory evidence, deduplicates due recurring work, records immutable receipts, and refuses `VERIFIED_100` whenever mandatory evidence is FAIL, UNKNOWN, BLOCKED, SKIPPED, or STALE.
 
-- **Scraping + AI scoring** runs on Railway (heavy compute, Groq LLM)
-- **Scheduling** runs on Vercel (cron jobs)
-- **Data storage** lives in Base44 (app database) + Supabase (your owned mirror)
-- **Frontend** stays on Base44 (the published app)
+The previous 6-hour scrape and 30-minute mirror schedules are preserved as task cadences inside the reconcile loop. Their direct endpoints remain available for diagnostics, but they are no longer declared as Vercel crons in this branch.
 
-## Deploy
+## Protected repair lanes
 
-1. Create a new Vercel project from this directory:
-   ```bash
-   npm i -g vercel
-   vercel
-   ```
+The controller can detect low title-risk, real-image, owner-enrichment, and investor-outreach coverage. Those lanes are deliberately marked operator-gated. Detection creates blocker/work evidence only. It does not silently launch costly enrichment, customer outreach, contract actions, or destructive work.
 
-2. Set these environment variables in Vercel (Project Settings → Environment Variables):
-   ```
-   RAILWAY_SCRAPER_URL  =  https://your-railway-app.up.railway.app/trigger
-   RAILWAY_TOKEN        =  <your Railway token>
-   BASE44_SYNC_TOKEN    =  <the BASE44_SYNC_TOKEN from Base44 Secrets>
-   ```
+## Required migration
 
-3. Deploy:
-   ```bash
-   vercel --prod
-   ```
+Review `migrations/001_convergence_control_plane.sql` before applying it to Supabase. It creates:
 
-4. Vercel automatically creates the cron jobs from `vercel.json`.
+- atomic global reconcile lease
+- durable idempotent jobs
+- state registry
+- immutable reconciliation receipts
+- RLS with no anon/authenticated access
 
-## Run the Supabase migration first
+The application never auto-applies this migration.
 
-Before the mirror works, run this SQL in your Supabase SQL Editor:
-```
-base44/shared/supabaseDDL_migration_2.sql
-```
-This adds the `base44_id` columns, `property_scores` table, and `sync_state` table
-needed for the incremental mirror.
+## Environment contract
 
-## Verify
+Required for the control plane:
 
-After deploy, test each endpoint:
-```
-curl https://your-project.vercel.app/api/health
-curl -X POST https://your-project.vercel.app/api/mirror-to-supabase
-curl -X POST https://your-project.vercel.app/api/trigger-scrape
+- `CRON_SECRET` or `VERCEL_CRON_SECRET`
+- `HPI_SUPABASE_URL` or `SUPABASE_URL`
+- `HPI_SUPABASE_SERVICE_ROLE_KEY` or `SUPABASE_SERVICE_ROLE_KEY`
+- `BASE44_SYNC_TOKEN`
+
+Required for safe recurring dispatch:
+
+- `RAILWAY_SCRAPER_URL`
+- `RAILWAY_TOKEN` when the scraper requires it
+- `ALLOW_RECONCILE_DISPATCH=true`
+
+Release evidence flags:
+
+- `CONVERGENCE_HEARTBEAT_ACTIVE=true` only after the deployed cron is verified
+- `LEGACY_SCHEDULERS_DISABLED=true` only after legacy Base44/Vercel schedulers are actually disabled and independently verified
+- `REQUIRED_CLEAN_CYCLES=3` by default
+
+Do not set release-evidence flags merely to make validation pass.
+
+## Tests
+
+```bash
+npm test
 ```
 
-Then check Supabase → Table Editor → `properties` to see mirrored data.
+Tests prove fail-closed certification, deterministic idempotency, persistence gating, and the single Vercel heartbeat declaration. They do not certify the external production system.
+
+## Release rule
+
+Branch/preview work is safe to validate automatically. Production scheduler changes, Supabase migration application, secret changes, deployment, customer messaging, and protected repair dispatch remain explicit operator approvals.
