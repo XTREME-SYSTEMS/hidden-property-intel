@@ -1,0 +1,81 @@
+{
+  "contract_version": 1,
+  "purpose": "Validation contract for proving Alpha Prime workflow-runtime takeover without weakening the resilience gate.",
+  "scope": "branch-sandbox-validation-only",
+  "primary_runtime": "Base44 scheduled workflow runtime",
+  "takeover_runtime": "independent Xtreme OS / PGMQ worker plane",
+  "pass_semantics": "This contract may pass as complete while resilience-fallback remains FAIL. It does not prove live takeover.",
+  "base44_job_interface": [
+    "createJob",
+    "claimNextJob",
+    "completeJob",
+    "failJob"
+  ],
+  "required_job_fields": [
+    "job_id",
+    "job_type",
+    "payload",
+    "correlation_id",
+    "attempt",
+    "max_attempts",
+    "timeout_seconds",
+    "idempotency_key",
+    "status",
+    "lease_expires_at",
+    "environment",
+    "source_version"
+  ],
+  "required_attempt_fields": [
+    "job_id",
+    "worker_id",
+    "pgmq_message_id",
+    "attempt",
+    "status",
+    "error",
+    "started_at",
+    "completed_at"
+  ],
+  "required_worker_fields": [
+    "worker_id",
+    "worker_type",
+    "capabilities",
+    "environment",
+    "status",
+    "current_job",
+    "last_heartbeat"
+  ],
+  "required_takeover_behaviors": [
+    "exact_source_version_required",
+    "deterministic_idempotency_key_required",
+    "single_claim_or_lease_owner",
+    "retry_with_bounded_attempts",
+    "dead_letter_after_retry_exhaustion",
+    "independent_heartbeat_or_lease_continuity",
+    "evidence_receipt_source_stamped",
+    "stale_or_foreign_source_evidence_rejected",
+    "failback_reconciliation_is_idempotent",
+    "no_duplicate_jobs_findings_repairs_or_receipts"
+  ],
+  "proof_sequence": [
+    "baseline_primary_available",
+    "simulate_base44_workflow_runtime_unavailable",
+    "enqueue_harmless_exact_sha_validation_job",
+    "claim_once_on_independent_worker",
+    "exercise_retry_and_dead_letter_fixture",
+    "verify_external_heartbeat_or_lease_continuity",
+    "restore_primary_runtime",
+    "reconcile_without_duplicate_dispatch",
+    "emit_exact_sha_takeover_and_failback_receipts",
+    "rerun_nearby_regressions"
+  ],
+  "forbidden_shortcuts": [
+    "remove_or_weaken_critical_spof_declaration",
+    "treat_control_plane_health_as_takeover_proof",
+    "treat_contract_completeness_as_runtime_takeover_pass",
+    "use_stale_or_foreign_sha_receipts",
+    "write_to_production_xtreme_os_for_validation",
+    "change_secrets_or_production_schema",
+    "incur_spend"
+  ],
+  "runtime_proof_required_before_spof_clear": true
+}

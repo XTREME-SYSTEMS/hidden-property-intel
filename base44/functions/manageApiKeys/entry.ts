@@ -43,12 +43,16 @@ export default async function(req: Request): Promise<Response> {
       return Response.json({ keys: safe });
     }
 
-    // GENERATE — create a new API key, return the raw key ONCE
+    // GENERATE — privileged because caller-controlled scopes/system_type are persisted.
+    // Entity writes are admin-only at the schema layer; this function mediates every mutation.
     if (action === 'generate') {
+      if (user.role !== 'admin') {
+        return Response.json({ error: 'Forbidden' }, { status: 403 });
+      }
       const { name, scopes, description, system_type } = body;
       if (!name) return Response.json({ error: 'Name is required' }, { status: 400 });
       const { rawKey, keyHash, keyPrefix } = await generateKey();
-      const key = await base44.entities.ApiKey.create({
+      const key = await base44.asServiceRole.entities.ApiKey.create({
         name,
         description: description || '',
         key_prefix: keyPrefix,
@@ -70,7 +74,8 @@ export default async function(req: Request): Promise<Response> {
       });
     }
 
-    // UPDATE — edit name, description, or scopes on an existing key
+    // UPDATE — owners may edit metadata, but only admins may mutate scopes.
+    // The service-role write occurs only after ownership/admin authorization and a field allowlist.
     if (action === 'update') {
       const { key_id, name, description, scopes } = body;
       if (!key_id) return Response.json({ error: 'key_id is required' }, { status: 400 });
@@ -79,11 +84,16 @@ export default async function(req: Request): Promise<Response> {
       if (user.role !== 'admin' && existing.tenant_id !== user.id) {
         return Response.json({ error: 'Forbidden' }, { status: 403 });
       }
-      const updates = {};
+      if (scopes !== undefined) {
+        if (user.role !== 'admin') {
+          return Response.json({ error: 'Forbidden: scope changes require admin' }, { status: 403 });
+        }
+      }
+      const updates: Record<string, unknown> = {};
       if (name !== undefined) updates.name = name;
       if (description !== undefined) updates.description = description;
       if (scopes !== undefined) updates.scopes = scopes;
-      await base44.entities.ApiKey.update(key_id, updates);
+      await base44.asServiceRole.entities.ApiKey.update(key_id, updates);
       return Response.json({ success: true, message: 'Key updated' });
     }
 
@@ -194,7 +204,8 @@ export default async function(req: Request): Promise<Response> {
       });
     }
 
-    // ROLL — create a replacement key, mark old as rolled
+    // ROLL — create a replacement key, mark old as rolled.
+    // Ownership is checked before the privileged write path is used.
     if (action === 'roll') {
       const { key_id } = body;
       if (!key_id) return Response.json({ error: 'key_id is required' }, { status: 400 });
@@ -204,7 +215,7 @@ export default async function(req: Request): Promise<Response> {
         return Response.json({ error: 'Forbidden' }, { status: 403 });
       }
       const { rawKey, keyHash, keyPrefix } = await generateKey();
-      const newKey = await base44.entities.ApiKey.create({
+      const newKey = await base44.asServiceRole.entities.ApiKey.create({
         name: existing.name,
         description: existing.description,
         key_prefix: keyPrefix,
@@ -215,7 +226,7 @@ export default async function(req: Request): Promise<Response> {
         status: 'active',
         request_count: 0
       });
-      await base44.entities.ApiKey.update(key_id, { status: 'rolled' });
+      await base44.asServiceRole.entities.ApiKey.update(key_id, { status: 'rolled' });
       return Response.json({
         key: rawKey,
         key_id: newKey.id,
@@ -224,7 +235,7 @@ export default async function(req: Request): Promise<Response> {
       });
     }
 
-    // REVOKE — mark key as revoked (soft delete)
+    // REVOKE — mark key as revoked (soft delete) after ownership/admin authorization.
     if (action === 'revoke') {
       const { key_id } = body;
       if (!key_id) return Response.json({ error: 'key_id is required' }, { status: 400 });
@@ -233,11 +244,11 @@ export default async function(req: Request): Promise<Response> {
       if (user.role !== 'admin' && existing.tenant_id !== user.id) {
         return Response.json({ error: 'Forbidden' }, { status: 403 });
       }
-      await base44.entities.ApiKey.update(key_id, { status: 'revoked' });
+      await base44.asServiceRole.entities.ApiKey.update(key_id, { status: 'revoked' });
       return Response.json({ success: true, message: 'Key revoked' });
     }
 
-    // DELETE — hard delete
+    // DELETE — hard delete after ownership/admin authorization.
     if (action === 'delete') {
       const { key_id } = body;
       if (!key_id) return Response.json({ error: 'key_id is required' }, { status: 400 });
@@ -246,7 +257,7 @@ export default async function(req: Request): Promise<Response> {
       if (user.role !== 'admin' && existing.tenant_id !== user.id) {
         return Response.json({ error: 'Forbidden' }, { status: 403 });
       }
-      await base44.entities.ApiKey.delete(key_id);
+      await base44.asServiceRole.entities.ApiKey.delete(key_id);
       return Response.json({ success: true, message: 'Key deleted' });
     }
 
