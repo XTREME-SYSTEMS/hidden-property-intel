@@ -87,3 +87,20 @@ test('never-run and stale counts capture the observed 480-source failure profile
   assert.equal(result.metrics.sources_stale_7d, 177);
   assert.equal(result.checks.find((c) => c.name === 'data_sources').status, 'critical');
 });
+
+test('raw found count is not proof of persisted records', () => {
+  const records = snapshots();
+  records.jobs = [{ status: 'complete', completed_at: NOW, properties_found: 15, properties_new: 0, properties_updated: 0 }];
+  const result = evaluateHealth(records, NOW);
+  assert.equal(result.metrics.jobs_positive_yield_72h, 0);
+  assert.equal(result.checks.find((c) => c.name === 'scrape_pipeline').status, 'critical');
+});
+
+test('older productive acquisition cannot mask an entire missing day', () => {
+  const records = snapshots();
+  records.jobs = [{ status: 'complete', completed_at: '2026-10-14T00:00:00Z', properties_new: 12 }];
+  const result = evaluateHealth(records, NOW);
+  assert.equal(result.metrics.jobs_positive_yield_72h, 1);
+  assert.equal(result.metrics.jobs_last_24h, 0);
+  assert.equal(result.checks.find((c) => c.name === 'scrape_pipeline').status, 'critical');
+});
