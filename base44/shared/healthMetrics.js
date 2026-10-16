@@ -57,7 +57,7 @@ export function evaluateHealth(input = {}, nowInput = new Date().toISOString()) 
   const recentFailed = recentJobs.filter((j) => j.status === 'failed').length;
   const recentCompleted = recentJobs.filter((j) => j.status === 'complete');
   const positiveYieldJobs = recentCompleted.filter((j) =>
-    Number(j.properties_found) > 0 || Number(j.properties_new) > 0 || Number(j.properties_updated) > 0
+    Number(j.properties_new) > 0 || Number(j.properties_updated) > 0
   ).length;
   const zeroYieldJobs = recentCompleted.length - positiveYieldJobs;
   const stuckJobs = jobs.filter((j) =>
@@ -82,7 +82,7 @@ export function evaluateHealth(input = {}, nowInput = new Date().toISOString()) 
   checks.push(check('data_sources', sourceStatus,
     `${sources.length} sampled; ${activeSources.length} labeled active, ${freshSources} run in 7 days, ${neverRunSources} never run, ${staleSources} stale`));
 
-  const scrapeStatus = stuckJobs > 0 || recentCompleted.length === 0 || positiveYieldJobs === 0 ? 'critical'
+  const scrapeStatus = stuckJobs > 0 || recent24Jobs.length === 0 || recentCompleted.length === 0 || positiveYieldJobs === 0 ? 'critical'
     : recentFailed > 0 || zeroYieldJobs > positiveYieldJobs ? 'degraded' : 'healthy';
   checks.push(check('scrape_pipeline', scrapeStatus,
     `${recent24Jobs.length} jobs in 24h; ${recentCompleted.length} completed in 72h, ${positiveYieldJobs} with positive yield, ${zeroYieldJobs} zero-yield, ${recentFailed} failed, ${stuckJobs} stuck`));
