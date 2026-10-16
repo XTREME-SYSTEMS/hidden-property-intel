@@ -49,18 +49,19 @@ export default function AdminSources() {
   const save = async () => {
     setMsg(""); setBusy("save");
     try {
+      const sourceUrl = form.url.trim();
+      try { const parsed = new URL(sourceUrl); if (parsed.protocol !== 'https:' || !parsed.hostname.includes('.')) throw new Error(); }
+      catch { throw new Error('A real HTTPS source URL is required. Placeholder government URLs are prohibited.'); }
       const cfg = { method: form.method, state: form.state, county: form.county, distress_type: form.distress_type, max_results: Number(form.max_results) };
       const payload = {
         name: form.name,
         type: form.type,
-        url: form.url || `https://${form.state.toLowerCase()}-${(form.county || "region").toLowerCase()}.gov`,
+        url: sourceUrl,
         scrape_frequency: form.scrape_frequency,
         scrape_config: cfg,
-        status: "active",
-        health_score: 80
       };
       if (editingId) await base44.entities.DataSource.update(editingId, payload);
-      else await base44.entities.DataSource.create(payload);
+      else await base44.entities.DataSource.create({ ...payload, status: 'inactive', health_score: 0 });
       setForm(empty); setEditingId(null); setShowForm(false);
       await load();
     } catch (e) { setMsg(e.message); }
