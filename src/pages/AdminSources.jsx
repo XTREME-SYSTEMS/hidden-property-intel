@@ -100,7 +100,7 @@ export default function AdminSources() {
   };
 
   const runAll = async () => {
-    const activeSources = sources.filter((s) => s.status === "active");
+    const activeSources = sources.filter((s) => s.status === "active").slice(0, 10);
     if (activeSources.length === 0) { setMsg("No active sources to run."); return; }
     setMsg(""); setBusy("runAll");
     let totalFound = 0, totalNew = 0, errors = 0;
@@ -111,7 +111,7 @@ export default function AdminSources() {
         else { totalFound += res.data.found || 0; totalNew += res.data.new || 0; }
       } catch (e) { errors++; }
     }
-    setMsg(`Run All complete: ${activeSources.length} sources scraped · ${totalFound} found · ${totalNew} new · ${errors} errors.`);
+    setMsg(`Batch finished: ${activeSources.length} sources attempted · ${totalFound} found · ${totalNew} new · ${errors} errors. Review logs before the next run.`);
     await load();
     setBusy("");
   };
@@ -143,7 +143,7 @@ export default function AdminSources() {
             className="inline-flex items-center gap-2 rounded-sm bg-amber-600 px-5 py-3 text-[11px] uppercase tracking-[0.3em] text-white transition hover:bg-amber-700 disabled:opacity-50"
           >
             {busy === "runAll" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
-            {busy === "runAll" ? "Running all…" : `Run All (${active})`}
+            {busy === "runAll" ? "Running batch…" : `Run batch (up to 10 of ${active})`}
           </button>
           <button
             onClick={() => { setForm(empty); setEditingId(null); setShowForm(!showForm); }}
