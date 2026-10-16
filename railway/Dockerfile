@@ -1,14 +1,11 @@
-FROM node:20-alpine
+FROM node:22-alpine
 
 WORKDIR /app
 
 COPY package*.json ./
-
-RUN npm ci --only=production && npm install -D typescript ts-node @types/node
+RUN npm ci
 
 COPY scraper-cron.ts ./
-
 RUN npm run build
 
 CMD ["npm", "start"]
-

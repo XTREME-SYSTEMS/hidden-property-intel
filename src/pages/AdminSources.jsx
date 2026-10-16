@@ -49,18 +49,19 @@ export default function AdminSources() {
   const save = async () => {
     setMsg(""); setBusy("save");
     try {
+      const sourceUrl = form.url.trim();
+      try { const parsed = new URL(sourceUrl); if (parsed.protocol !== 'https:' || !parsed.hostname.includes('.')) throw new Error(); }
+      catch { throw new Error('A real HTTPS source URL is required. Placeholder government URLs are prohibited.'); }
       const cfg = { method: form.method, state: form.state, county: form.county, distress_type: form.distress_type, max_results: Number(form.max_results) };
       const payload = {
         name: form.name,
         type: form.type,
-        url: form.url || `https://${form.state.toLowerCase()}-${(form.county || "region").toLowerCase()}.gov`,
+        url: sourceUrl,
         scrape_frequency: form.scrape_frequency,
         scrape_config: cfg,
-        status: "active",
-        health_score: 80
       };
       if (editingId) await base44.entities.DataSource.update(editingId, payload);
-      else await base44.entities.DataSource.create(payload);
+      else await base44.entities.DataSource.create({ ...payload, status: 'inactive', health_score: 0 });
       setForm(empty); setEditingId(null); setShowForm(false);
       await load();
     } catch (e) { setMsg(e.message); }
@@ -100,7 +101,7 @@ export default function AdminSources() {
   };
 
   const runAll = async () => {
-    const activeSources = sources.filter((s) => s.status === "active");
+    const activeSources = sources.filter((s) => s.status === "active").slice(0, 10);
     if (activeSources.length === 0) { setMsg("No active sources to run."); return; }
     setMsg(""); setBusy("runAll");
     let totalFound = 0, totalNew = 0, errors = 0;
@@ -111,7 +112,7 @@ export default function AdminSources() {
         else { totalFound += res.data.found || 0; totalNew += res.data.new || 0; }
       } catch (e) { errors++; }
     }
-    setMsg(`Run All complete: ${activeSources.length} sources scraped · ${totalFound} found · ${totalNew} new · ${errors} errors.`);
+    setMsg(`Batch finished: ${activeSources.length} sources attempted · ${totalFound} found · ${totalNew} new · ${errors} errors. Review logs before the next run.`);
     await load();
     setBusy("");
   };
@@ -143,7 +144,7 @@ export default function AdminSources() {
             className="inline-flex items-center gap-2 rounded-sm bg-amber-600 px-5 py-3 text-[11px] uppercase tracking-[0.3em] text-white transition hover:bg-amber-700 disabled:opacity-50"
           >
             {busy === "runAll" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
-            {busy === "runAll" ? "Running all…" : `Run All (${active})`}
+            {busy === "runAll" ? "Running batch…" : `Run batch (up to 10 of ${active})`}
           </button>
           <button
             onClick={() => { setForm(empty); setEditingId(null); setShowForm(!showForm); }}
