@@ -30,6 +30,9 @@ test('property observations are mirrored into the existing UPI source and proper
   assert.ok(source.includes("from('universal_property_source_links')"));
   assert.ok(source.includes("from('universal_site_properties')"));
   assert.ok(source.includes("from('universal_entity_catalog')"));
+  assert.ok(source.includes('UPI_SUPABASE_URL'));
+  assert.ok(source.includes('CANONICAL_UPI_PROJECT_REF'));
+  assert.ok(source.includes('Never overwrite an existing canonical property'));
 });
 
 test('off-domain extracted URLs cannot be attributed to the visited source page', () => {
