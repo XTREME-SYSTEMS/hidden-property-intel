@@ -310,28 +310,26 @@ export default function AdminSystemTest() {
   const runTest = async (test) => {
     try {
       if (test.type === "function") {
-        await base44.functions.invoke(test.fn, test.payload);
-        return { status: "pass", detail: "Function executed successfully" };
+        // Never invoke these against live data. Several functions send outreach,
+        // create records, call paid providers, or deploy contracts.
+        return { status: "warn", detail: "NOT EXECUTED: needs an isolated, explicitly authorized integration test" };
       } else if (test.type === "entity") {
         const records = await base44.entities[test.entity].list("-created_date", 1);
-        return { status: "pass", detail: `${records.length > 0 ? "Has records" : "Entity accessible (empty)"}` };
+        return records.length > 0
+          ? { status: "pass", detail: "Entity read succeeded; records present" }
+          : { status: "warn", detail: "Entity accessible but empty; functionality unproven" };
       } else if (test.type === "page") {
         const response = await fetch(test.path, { method: "HEAD" }).catch(() => null);
-        return { status: "pass", detail: "Page route registered" };
+        return response?.ok
+          ? { status: "warn", detail: "HTTP path responds; route and UI behavior not yet verified" }
+          : { status: "fail", detail: "HTTP HEAD did not succeed" };
       } else if (test.type === "file") {
-        return { status: "pass", detail: "File created" };
+        return { status: "warn", detail: "File existence not verified by this browser test" };
       }
-      return { status: "pass", detail: "OK" };
+      return { status: "warn", detail: "No safe test method available" };
     } catch (e) {
       const msg = e?.message || String(e);
-      if (msg.includes("not found") || msg.includes("404")) {
-        return { status: "fail", detail: msg };
-      }
-      // If it's a validation error (e.g., test payload), that means the function exists and ran
-      if (msg.includes("validation") || msg.includes("required") || msg.includes("invalid")) {
-        return { status: "warn", detail: "Function exists but test payload rejected (expected)" };
-      }
-      return { status: "warn", detail: msg.slice(0, 120) };
+      return { status: "fail", detail: msg.slice(0, 120) };
     }
   };
 

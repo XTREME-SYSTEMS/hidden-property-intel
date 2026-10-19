@@ -1,5 +1,5 @@
 {
-  "description": "Daily autonomous system validation, health logging, and auto-heal (re-run failed sources, reset error sources)",
+  "description": "Evidence-only system health validation and logging; never reclassifies failed jobs or restarts scrapers",
   "definition": {
     "document": {
       "dsl": "1.0.0",
@@ -16,8 +16,8 @@
           },
           "then": "end",
           "x-base44": {
-            "title": "Validate & auto-heal system",
-            "description": "Inspect all subsystems, log health, re-run failed sources"
+            "title": "Evaluate system health without auto-heal",
+            "description": "Inspect subsystems, report stale acquisition, and log health only"
           }
         }
       }

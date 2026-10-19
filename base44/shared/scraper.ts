@@ -212,7 +212,12 @@ export async function scrapeSource(base44, { source, url, distress_type, state }
   let updated = 0;
   const newRecords = [];
   for (const p of props) {
-    if (!p.address) continue;
+    // Only persist candidates with an address, ZIP and a candidate-specific
+    // HTTP(S) evidence URL. A source category page is not property evidence.
+    if (!p?.address || !p?.city || !p?.state || !p?.zip_code || !p?.source_url) continue;
+    let evidenceUrl;
+    try { evidenceUrl = new URL(p.source_url); } catch { continue; }
+    if (!['http:', 'https:'].includes(evidenceUrl.protocol) || evidenceUrl.username || evidenceUrl.password) continue;
     const norm = normalizeAddress(p.address);
     // Dedupe by normalized address + zip (falls back to exact match for legacy records)
     let existing = await base44.asServiceRole.entities.Property.filter({
@@ -238,9 +243,8 @@ export async function scrapeSource(base44, { source, url, distress_type, state }
       square_footage: p.square_footage || null,
       description: p.listing_notes || null,
       source: 'scraped',
-      source_url: p.source_url || url || source?.url,
-      scraped_at: new Date().toISOString(),
-      status: 'active'
+      source_url: p.source_url,
+      scraped_at: new Date().toISOString()
     };
     if (existing[0]) {
       await base44.asServiceRole.entities.Property.update(existing[0].id, payload);
