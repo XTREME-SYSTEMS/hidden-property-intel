@@ -44,6 +44,22 @@ if (!supabaseUrl || !supabaseServiceKey || !browserEngineUrl || !browserEngineAp
 }
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
+const CANONICAL_UPI_PROJECT_REF = process.env.UPI_SUPABASE_PROJECT_REF || 'fwtchbsebygwifmmqhur';
+const currentProjectRef = getSupabaseProjectRef(supabaseUrl);
+const upiUrl = process.env.UPI_SUPABASE_URL || (currentProjectRef === CANONICAL_UPI_PROJECT_REF ? supabaseUrl : '');
+const upiKey = process.env.UPI_SUPABASE_SERVICE_KEY || (currentProjectRef === CANONICAL_UPI_PROJECT_REF ? supabaseServiceKey : '');
+const upiSupabase = upiUrl && upiKey && getSupabaseProjectRef(upiUrl) === CANONICAL_UPI_PROJECT_REF
+  ? createClient(upiUrl, upiKey)
+  : null;
+let upiMirrorWarningLogged = false;
+
+function getSupabaseProjectRef(value: string): string {
+  try {
+    return new URL(value).hostname.split('.')[0].toLowerCase();
+  } catch {
+    return '';
+  }
+}
 
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
@@ -457,11 +473,86 @@ async function storeProperties(props: RawProperty[], sourceName: string): Promis
 
 async function mirrorUniversalProperties(rows: any[]): Promise<void> {
   if (!rows.length) return;
+  if (!upiSupabase) {
+    if (!upiMirrorWarningLogged) {
+      log('warn', 'UPI mirror disabled: configure UPI_SUPABASE_URL and UPI_SUPABASE_SERVICE_KEY, or point SUPABASE_URL at the canonical UPI project. No cross-project writes were attempted.');
+      upiMirrorWarningLogged = true;
+    }
+    return;
+  }
+
   const capturedAt = new Date().toISOString();
-  const observations = rows.map(row => {
+  const candidates = rows.map(row => ({
+    id: row.id,
+    dedup_key: row.dedup_key,
+    address: row.address,
+    normalized_address: row.normalized_address,
+    city: row.city,
+    state: row.state,
+    zip_code: row.zip_code,
+    distress_type: row.distress_type,
+    estimated_value: row.estimated_value,
+    source_name: row.source_name,
+    source_url: row.source_url,
+    scraped_at: row.scraped_at,
+    last_verified_at: row.last_verified_at,
+    raw_data: row.raw_data,
+  }));
+  const dedupKeys = [...new Set(candidates.map(row => row.dedup_key).filter(Boolean))];
+  if (!dedupKeys.length) return;
+
+  // Never overwrite an existing canonical property's user edits or Base44 IDs.
+  const { data: existingCanonical, error: existingError } = await upiSupabase
+    .from('properties')
+    .select('id,dedup_key')
+    .in('dedup_key', dedupKeys);
+  if (existingError) throw new Error(`canonical property lookup failed: ${existingError.message}`);
+
+  const existingKeys = new Set((existingCanonical || []).map((row: any) => String(row.dedup_key)));
+  const missingCanonical = candidates
+    .filter(row => !existingKeys.has(String(row.dedup_key)))
+    .map(row => ({
+      address: row.address,
+      normalized_address: row.normalized_address,
+      dedup_key: row.dedup_key,
+      city: row.city,
+      state: row.state,
+      zip_code: row.zip_code,
+      property_type: 'residential',
+      distress_type: row.distress_type,
+      estimated_value: row.estimated_value,
+      status: 'active',
+      source: SOURCE_SYSTEM,
+      source_name: row.source_name,
+      source_url: row.source_url,
+      scraped_at: row.scraped_at,
+      last_verified_at: row.last_verified_at,
+      raw_data: row.raw_data,
+      images: [],
+    }));
+
+  if (missingCanonical.length) {
+    const { error: insertError } = await upiSupabase
+      .from('properties')
+      .upsert(missingCanonical, { onConflict: 'dedup_key', ignoreDuplicates: true });
+    if (insertError) throw new Error(`canonical property insert failed: ${insertError.message}`);
+  }
+
+  const { data: canonicalRows, error: canonicalError } = await upiSupabase
+    .from('properties')
+    .select('id,dedup_key')
+    .in('dedup_key', dedupKeys);
+  if (canonicalError) throw new Error(`canonical property resolution failed: ${canonicalError.message}`);
+  const canonicalByKey = new Map((canonicalRows || []).map((row: any) => [String(row.dedup_key), String(row.id)]));
+  if (dedupKeys.some(key => !canonicalByKey.has(String(key)))) {
+    throw new Error('One or more property observations could not be mapped to a canonical UPI property ID.');
+  }
+
+  const observations = candidates.map(row => {
+    const canonicalPropertyId = canonicalByKey.get(String(row.dedup_key))!;
     const sourceId = sha256(`${SOURCE_SYSTEM}|${row.source_url || ''}|${row.dedup_key || ''}`);
     const record = {
-      property_id: row.id,
+      property_id: canonicalPropertyId,
       address: row.address,
       normalized_address: row.normalized_address,
       city: row.city,
@@ -471,9 +562,10 @@ async function mirrorUniversalProperties(rows: any[]): Promise<void> {
       estimated_value: row.estimated_value,
       source_url: row.source_url,
       source_name: row.source_name,
-      scraped_at: row.scraped_at,
-      last_verified_at: row.last_verified_at,
+      observed_at: row.scraped_at,
+      source_capture: row.raw_data?._source_capture || null,
       raw_data: row.raw_data,
+      verification_level: 'source_observed_not_legal_ownership',
     };
     return {
       source_system: SOURCE_SYSTEM,
@@ -482,16 +574,16 @@ async function mirrorUniversalProperties(rows: any[]): Promise<void> {
       site_key: SITE_KEY,
       record,
       record_hash: sha256(JSON.stringify(record)),
-      source_created_at: row.created_date || row.scraped_at || capturedAt,
-      source_updated_at: row.updated_at || row.updated_date || row.scraped_at || capturedAt,
+      source_created_at: row.scraped_at || capturedAt,
+      source_updated_at: capturedAt,
       migrated_at: capturedAt,
-      property_id: row.id,
+      property_id: canonicalPropertyId,
       dedup_key: row.dedup_key || '',
     };
   });
 
   const sourceRecords = observations.map(({ property_id, dedup_key, ...record }) => record);
-  const { error: sourceError } = await supabase
+  const { error: sourceError } = await upiSupabase
     .from('universal_source_records')
     .upsert(sourceRecords, { onConflict: 'source_system,entity_type,source_id' });
   if (sourceError) throw new Error(`source-record upsert failed: ${sourceError.message}`);
@@ -505,36 +597,45 @@ async function mirrorUniversalProperties(rows: any[]): Promise<void> {
     is_canonical: false,
     linked_at: capturedAt,
   }));
-  const { error: linkError } = await supabase
+  const { error: linkError } = await upiSupabase
     .from('universal_property_source_links')
     .upsert(sourceLinks, { onConflict: 'source_system,entity_type,source_id' });
   if (linkError) throw new Error(`source-link upsert failed: ${linkError.message}`);
 
-  const ids = rows.map(row => row.id);
-  const { data: existingSiteLinks, error: siteReadError } = await supabase
+  const canonicalIds = [...new Set(observations.map(row => row.property_id))];
+  const { data: existingSiteLinks, error: siteReadError } = await upiSupabase
     .from('universal_site_properties')
     .select('property_id')
     .eq('site_key', SITE_KEY)
-    .in('property_id', ids);
+    .in('property_id', canonicalIds);
   if (siteReadError) throw new Error(`site-link lookup failed: ${siteReadError.message}`);
 
   const existingIds = new Set((existingSiteLinks || []).map((row: any) => String(row.property_id)));
-  const missingSiteLinks = rows
-    .filter(row => !existingIds.has(String(row.id)))
-    .map(row => ({
+  const missingSiteLinks = canonicalIds
+    .filter(id => !existingIds.has(String(id)))
+    .map(id => ({
       site_key: SITE_KEY,
-      property_id: row.id,
+      property_id: id,
       listing_status: 'visible',
       display_overrides: {},
     }));
   if (missingSiteLinks.length) {
-    const { error: siteWriteError } = await supabase
+    const { error: siteWriteError } = await upiSupabase
       .from('universal_site_properties')
       .upsert(missingSiteLinks, { onConflict: 'site_key,property_id', ignoreDuplicates: true });
     if (siteWriteError) throw new Error(`site-link upsert failed: ${siteWriteError.message}`);
   }
 
-  const { count, error: countError } = await supabase
+  const { data: existingCatalog, error: catalogReadError } = await upiSupabase
+    .from('universal_entity_catalog')
+    .select('first_source_created_at')
+    .eq('source_system', SOURCE_SYSTEM)
+    .eq('entity_type', 'PropertyObservation')
+    .eq('site_key', SITE_KEY)
+    .maybeSingle();
+  if (catalogReadError) throw new Error(`entity-catalog lookup failed: ${catalogReadError.message}`);
+
+  const { count, error: countError } = await upiSupabase
     .from('universal_source_records')
     .select('source_id', { count: 'exact', head: true })
     .eq('source_system', SOURCE_SYSTEM)
@@ -542,14 +643,14 @@ async function mirrorUniversalProperties(rows: any[]): Promise<void> {
     .eq('site_key', SITE_KEY);
   if (countError) throw new Error(`source-record count failed: ${countError.message}`);
 
-  const { error: catalogError } = await supabase
+  const { error: catalogError } = await upiSupabase
     .from('universal_entity_catalog')
     .upsert({
       source_system: SOURCE_SYSTEM,
       entity_type: 'PropertyObservation',
       site_key: SITE_KEY,
       record_count: count || 0,
-      first_source_created_at: null,
+      first_source_created_at: existingCatalog?.first_source_created_at || capturedAt,
       latest_source_updated_at: capturedAt,
       last_migrated_at: capturedAt,
     }, { onConflict: 'source_system,entity_type,site_key' });
