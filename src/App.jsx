@@ -74,6 +74,7 @@ import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 import OAuthConsent from '@/pages/OAuthConsent';
+import AuthCallback from '@/pages/AuthCallback';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Navigate } from 'react-router-dom';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -108,6 +109,7 @@ const AuthenticatedApp = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="/oauth/consent" element={<OAuthConsent />} />
       <Route element={<LuxLayout />}>
         <Route path="/" element={<LuxuryHome />} />

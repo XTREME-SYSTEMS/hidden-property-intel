@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import { publicProperties } from "@/api/publicProperties";
+import { userDomain } from "@/api/userDomain";
 import LuxuryListingCard from "@/components/luxury/LuxuryListingCard";
 import { Trash2, Plus, Search, Calculator, Blocks, FileText, SkipForward, Mail, TrendingUp, Trophy } from "lucide-react";
 import { DISTRESS_TYPES as DISTRESS } from "@/lib/constants";
@@ -20,13 +22,12 @@ export default function InvestorDashboard() {
   const load = async () => {
     try {
       const u = await base44.auth.me();
-      const inv = await base44.entities.Investor.filter({ user_id: u.id });
-      const investor = inv[0] || null;
+      const investor = await userDomain.investor.get(u.id);
       setInvestor(investor);
       const [b, ss, props] = await Promise.all([
-        base44.entities.Bid.filter({ investor_id: u.id }),
-        base44.entities.SavedSearch.filter({ user_id: u.id }),
-        base44.entities.Property.filter({ status: "active" }, "-property_score", 60)
+        userDomain.bids.mine(u.id),
+        userDomain.savedSearches.list(u.id),
+        publicProperties.filter({ status: "active" }, "-property_score", 60)
       ]);
       setBids(b);
       setSavedSearches(ss);
@@ -34,7 +35,7 @@ export default function InvestorDashboard() {
       const propIds = [...new Set(b.map(bid => bid.property_id).filter(Boolean))];
       const propMap = {};
       if (propIds.length) {
-        const allProps = await base44.entities.Property.list('-created_date', 500);
+        const allProps = await publicProperties.list('-created_date', 500);
         const idSet = new Set(propIds);
         allProps.forEach(p => { if (idSet.has(p.id)) propMap[p.id] = p; });
       }
@@ -57,12 +58,12 @@ export default function InvestorDashboard() {
     try {
       const u = await base44.auth.me();
       if (!u) return;
-      await base44.entities.SavedSearch.create({ user_id: u.id, name: newSearch.name, filters: { state: newSearch.state, distress_type: newSearch.distress_type } });
+      await userDomain.savedSearches.create({ user_id: u.id, name: newSearch.name, filters: { state: newSearch.state, distress_type: newSearch.distress_type } });
       setNewSearch({ name: "", state: "", distress_type: "" });
       load();
     } catch (e) { /* ignore */ }
   };
-  const deleteSearch = async (id) => { await base44.entities.SavedSearch.delete(id); load(); };
+  const deleteSearch = async (id) => { await userDomain.savedSearches.remove(id); load(); };
 
   if (loading) return <div className="px-6 py-32 text-center text-sm text-black/50">Loading…</div>;
 

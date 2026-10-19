@@ -1,22 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
+import { userDomain } from "@/api/userDomain";
 import { Bell } from "lucide-react";
 
 export default function AlertsBell({ user }) {
   const [count, setCount] = useState(0);
 
   const refresh = () => {
-    base44.entities.DealAlert.filter({ read: false })
-      .then((a) => setCount(a.length))
+    userDomain.alerts.list(100)
+      .then((a) => setCount(a.filter((x) => !x.read).length))
       .catch(() => {});
   };
 
   useEffect(() => {
     if (!user) return;
     refresh();
-    const unsub = base44.entities.DealAlert.subscribe(() => refresh());
-    return unsub;
+    const timer = window.setInterval(refresh, 30000);
+    return () => window.clearInterval(timer);
   }, [user]);
 
   if (!user) return null;

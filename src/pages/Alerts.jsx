@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
+import { userDomain } from "@/api/userDomain";
 import { Bell, CheckCheck, Mail, Smartphone, MessageSquare } from "lucide-react";
 import { money } from "@/lib/format";
 
@@ -12,8 +13,8 @@ export default function Alerts() {
   const load = useCallback(async () => {
     try {
       const [a, p] = await Promise.all([
-        base44.entities.DealAlert.list("-created_date", 100),
-        base44.entities.AlertPreference.filter({}).then((r) => r[0] || null),
+        userDomain.alerts.list(100),
+        userDomain.alerts.getPreferences(),
       ]);
       setAlerts(a);
       setPref(p);
@@ -24,19 +25,14 @@ export default function Alerts() {
   useEffect(() => { load(); }, [load]);
 
   const markAllRead = async () => {
-    const unread = alerts.filter((a) => !a.read);
-    await base44.entities.DealAlert.bulkUpdate(unread.map((a) => ({ id: a.id, read: true })));
+    await userDomain.alerts.markAllRead();
     load();
   };
 
   const savePref = async (next) => {
     const u = await base44.auth.me();
     if (!u) return;
-    if (pref?.id) {
-      await base44.entities.AlertPreference.update(pref.id, next);
-    } else {
-      await base44.entities.AlertPreference.create({ user_id: u.id, ...next });
-    }
+    await userDomain.alerts.savePreferences(u.id, next);
     load();
   };
 
