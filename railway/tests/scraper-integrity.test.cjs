@@ -9,6 +9,8 @@ test('scraper requires approved hosts and checks robots policy', () => {
   assert.ok(source.includes('APPROVED_SOURCE_HOSTS'));
   assert.ok(source.includes('function isApprovedSource'));
   assert.ok(source.includes('async function isAllowedByRobots'));
+  assert.ok(source.includes('function isAccessPolicyFailure'));
+  assert.ok(source.includes('stopping retries without bypass'));
   assert.ok(source.includes("response.status === 404"));
 });
 
@@ -16,6 +18,8 @@ test('session isolation replaces anti-detection rotation', () => {
   assert.ok(source.includes('fresh isolated session per source'));
   assert.doesNotMatch(source, /sessionRotateEvery|Rotating browser session|avoid detection/i);
   assert.ok(source.includes('if (sourceSessionId) await closeSession(sourceSessionId)'));
+  const createSessionBlock = source.slice(source.indexOf('async function createSession'), source.indexOf('async function closeSession'));
+  assert.doesNotMatch(createSessionBlock, /captcha_solver|captchaSolver/);
 });
 
 test('scraped observations retain provenance and explicit non-legal verification status', () => {
