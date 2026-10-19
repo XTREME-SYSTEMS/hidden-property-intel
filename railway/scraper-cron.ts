@@ -43,6 +43,12 @@ if (!supabaseUrl || !supabaseServiceKey || !browserEngineUrl || !browserEngineAp
   process.exit(1);
 }
 
+const runtimeNodeMajor = Number(process.versions.node.split('.')[0] || 0);
+if (runtimeNodeMajor < 22) {
+  log('error', `Node.js 22+ is required for Supabase Realtime WebSocket support. Detected ${process.versions.node}.`);
+  process.exit(1);
+}
+
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 const CANONICAL_UPI_PROJECT_REF = process.env.UPI_SUPABASE_PROJECT_REF || 'fwtchbsebygwifmmqhur';
 const currentProjectRef = getSupabaseProjectRef(supabaseUrl);
