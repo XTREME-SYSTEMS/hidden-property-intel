@@ -55,7 +55,10 @@ export default function SmartContractShowcase() {
         </div>
 
         {/* Mock contract card */}
-        <div className="relative">
+        <div className="relative" data-content-provenance="ILLUSTRATIVE_DEMO">
+          <p className="mb-3 text-[10px] uppercase tracking-[0.22em] text-white/45">
+            Illustrative demo — parties, amounts, dates, hashes, and contract status are example data only.
+          </p>
           <div className="rounded-xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-sm sm:p-8">
             <div className="flex items-center justify-between border-b border-white/10 pb-5">
               <div className="flex items-center gap-3">

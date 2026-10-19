@@ -1,0 +1,107 @@
+{
+  "name": "RepairReceipt",
+  "type": "object",
+  "properties": {
+    "repair_id": {
+      "type": "string"
+    },
+    "finding_id": {
+      "type": "string"
+    },
+    "task_id": {
+      "type": "string"
+    },
+    "subsystem": {
+      "type": "string"
+    },
+    "agent": {
+      "type": "string",
+      "description": "Specialist that performed the repair"
+    },
+    "source_sha_before": {
+      "type": "string"
+    },
+    "source_sha_after": {
+      "type": "string"
+    },
+    "files_changed": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "entities_changed": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "action": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "test_results": {
+      "type": "object"
+    },
+    "validator": {
+      "type": "string",
+      "description": "Independent validator agent id"
+    },
+    "regression_results": {
+      "type": "object"
+    },
+    "rollback_method": {
+      "type": "string"
+    },
+    "approval_state": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "auto_approved"
+      ]
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "repair_id",
+    "finding_id",
+    "subsystem",
+    "agent",
+    "source_sha_before",
+    "source_sha_after",
+    "action",
+    "reason",
+    "validator",
+    "rollback_method",
+    "timestamp"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

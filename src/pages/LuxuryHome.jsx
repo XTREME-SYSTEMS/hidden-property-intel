@@ -14,7 +14,7 @@ import { ArrowRight, Radar, Brain, FileSignature, Building2, Users, Scale, Badge
 import Seo from "@/components/Seo";
 
 const INVESTOR_STEPS = [
-  { n: "01", t: "Browse off-market inventory", d: "Distressed, probate, tax-delinquent, and foreclosure properties scraped daily from county records — none of it on the MLS." },
+  { n: "01", t: "Browse off-market inventory", d: "Distressed, probate, tax-delinquent, and foreclosure properties sourced from governed Florida records and monitored for changes." },
   { n: "02", t: "Underwrite with AI", d: "Every property carries a 0–100 score, repair estimate, after-repair value, ownership chain, and comparable sales." },
   { n: "03", t: "Bid and close on-chain", d: "Place bids with proxy bidding, then close with smart-contract escrow on Polygon. Fast, verified, transparent." },
 ];
@@ -24,13 +24,13 @@ const SELLER_STEPS = [
   { n: "03", t: "Accept on your terms", d: "Review cash offers with our AI negotiation assistant coaching every counter. You stay in control." },
 ];
 const DIFFERENTIATORS = [
-  { icon: Radar, t: "Autonomous county-record scraping", d: "Our cloud browser scans assessor, tax, probate, foreclosure, and obituary records daily to surface inherited and under-stress properties before anyone else." },
+  { icon: Radar, t: "Autonomous county-record scraping", d: "Our governed Florida ingestion pipeline monitors assessor, tax, probate, foreclosure, and related public-record sources to surface inherited and under-stress properties." },
   { icon: Users, t: "Full ownership chain + heirs", d: "We trace current owners, previous owners, and potential heirs identified through probate — so you reach the right party, with context." },
   { icon: Brain, t: "AI negotiation assistant", d: "Sellers get a coach that analyzes every offer against market data and scripts the counter — no agent required." },
   { icon: FileSignature, t: "Smart-contract escrow", d: "Solidity contracts on Polygon manage earnest money, signatures, and deed transfer — closing in days, not months." },
 ];
 const INVESTOR_PERKS = [
-  { icon: Building2, t: "Off-market inventory", d: "12,800+ distressed properties tracked across 27 states." },
+  { icon: Building2, t: "Off-market inventory", d: "Governed Florida distressed-property intelligence with source-aware records." },
   { icon: Brain, t: "AI scoring & ownership chains", d: "0–100 scores, ARV, repair estimates, and full owner trace." },
   { icon: Scale, t: "Proxy bidding", d: "Set a max and let the system bid for you, auction-style." },
   { icon: FileSignature, t: "On-chain closing", d: "Smart-contract escrow on Polygon. No title-company delays." },
@@ -39,7 +39,7 @@ const SELLER_PERKS = [
   { icon: BadgeCheck, t: "List for free", d: "No commissions, no listing fees, no closing costs to us." },
   { icon: Brain, t: "AI pricing & listing optimization", d: "We write the listing and price it against comparable sales." },
   { icon: Users, t: "AI negotiation assistant", d: "Every offer analyzed — accept, counter, or reject with reasoning." },
-  { icon: Building2, t: "Cash offers from verified investors", d: "A curated pool of 1,200+ investors ready to close." },
+  { icon: Building2, t: "Cash offers from verified investors", d: "Connect with qualified investors through the marketplace." },
 ];
 const PLANS = [
   { name: "Starter", price: 49, tagline: "Explore the database", features: ["Browse all properties", "Search & filters", "Basic property details", "3 saved searches"], featured: false },
@@ -69,7 +69,7 @@ export default function LuxuryHome() {
     <div className="font-body">
       <Seo
         title="Hidden Property Intel — Find What Others Miss"
-        description="AI-powered distressed property intelligence. Find off-market pre-foreclosures, probate, tax-delinquent, and auction properties before they hit the MLS. AI deal scoring 0-100, ownership chain tracing, skip trace, ROI calculators, and Polygon smart-contract escrow for real estate investors."
+        description="AI-powered Florida distressed property intelligence. Find off-market pre-foreclosures, probate, tax-delinquent, and auction properties before they hit the MLS. AI deal scoring 0-100, ownership chain tracing, skip trace, ROI calculators, and Polygon smart-contract escrow for real estate investors."
         keywords="distressed property, off-market real estate, pre-foreclosure, foreclosure, probate property, tax delinquent homes, real estate investing, property intelligence, skip trace, ownership chain, distressed sellers, real estate investors, Florida foreclosures, auction properties, REO, smart contract escrow, AI property scoring, real estate investment platform, off-market deals, motivated seller leads, cash offer, we buy houses, sell house fast, investment property, real estate marketplace, property intelligence platform"
         path="/"
         jsonLd={[
@@ -77,7 +77,7 @@ export default function LuxuryHome() {
             "@context": "https://schema.org",
             "@type": "WebPage",
             "name": "Hidden Property Intel — Find What Others Miss",
-            "description": "AI-powered distressed property intelligence platform for off-market real estate investing.",
+            "description": "AI-powered Florida distressed property intelligence platform for off-market real estate investing.",
             "url": "https://hiddenpropertyintel.com/",
             "isPartOf": { "@id": "https://hiddenpropertyintel.com/#website" },
             "about": { "@id": "https://hiddenpropertyintel.com/#organization" }
@@ -88,8 +88,8 @@ export default function LuxuryHome() {
             "name": "Distressed Property Intelligence & Smart-Contract Escrow",
             "serviceType": "Real Estate Intelligence Platform",
             "provider": { "@id": "https://hiddenpropertyintel.com/#organization" },
-            "areaServed": { "@type": "Country", "name": "United States" },
-            "description": "AI-powered platform that finds off-market distressed properties, scores them for investment quality, traces ownership chains, and enables smart-contract escrow closings on Polygon.",
+            "areaServed": { "@type": "State", "name": "Florida" },
+            "description": "AI-powered platform for governed Florida distressed-property intelligence, investment analysis, ownership-chain research, and smart-contract escrow workflows on Polygon.",
             "offers": [
               { "@type": "Offer", "name": "Starter", "price": "49", "priceCurrency": "USD", "description": "Basic property access and search" },
               { "@type": "Offer", "name": "Pro", "price": "149", "priceCurrency": "USD", "description": "Full property data, bidding, and ownership chain access" },
@@ -109,7 +109,7 @@ export default function LuxuryHome() {
             <span className="text-gold-warm">serious investors.</span>
           </h1>
           <p className="mt-6 max-w-md text-[15px] leading-relaxed text-white/75 sm:mt-7 sm:text-base">
-            Off-market deals, AI-scored and ready to close — before they ever reach the MLS.
+            Florida off-market intelligence, AI-scored and built around governed source data.
           </p>
           <div className="mt-9 flex flex-wrap gap-3 sm:gap-4">
             <Link to="/listings" className="group inline-flex items-center gap-2.5 rounded-md bg-white px-6 py-3.5 font-brand text-[11px] font-semibold uppercase tracking-[0.22em] text-black transition-all duration-200 hover:bg-gold-warm hover:text-black sm:px-7 sm:py-4 sm:tracking-[0.25em]">
@@ -126,7 +126,7 @@ export default function LuxuryHome() {
             <span className="flex items-center gap-1.5"><Brain className="h-3.5 w-3.5 text-gold-warm" /> AI negotiation</span>
           </div>
           <dl className="mt-10 grid max-w-3xl grid-cols-2 gap-6 border-t border-white/10 pt-6 sm:mt-14 sm:grid-cols-4 sm:gap-8 sm:pt-8">
-            {[["12,847", "Properties tracked"], ["$340M", "In property value"], ["1,200+", "Active investors"], ["1,400+", "Deals closed"]].map(([v, l]) => (
+            {[["Florida", "Governed data scope"], ["Source-aware", "Property records"], ["AI-assisted", "Deal analysis"], ["On-chain", "Escrow workflow"]].map(([v, l]) => (
               <div key={l}>
                 <dd className="font-display text-2xl font-light tabular-nums sm:text-3xl">{v}</dd>
                 <dt className="mt-1 text-[10px] uppercase tracking-[0.3em] text-white/50">{l}</dt>
@@ -166,8 +166,8 @@ export default function LuxuryHome() {
             <p className="text-[11px] uppercase tracking-[0.4em] text-black/40">Two sides. One marketplace.</p>
             <p className="mt-6 font-display text-2xl font-light leading-snug tracking-tight text-black sm:text-3xl">
               Most platforms serve one side of the deal. Hidden Property Intel serves both — giving sellers a free, AI-guided
-              path to a fair cash offer, and investors a daily-refreshed pipeline of off-market distressed inventory
-              with the underwriting already done.
+              path to a fair cash offer, and investors a source-aware pipeline of Florida distressed inventory
+              with underwriting tools built in.
             </p>
           </div>
         </div>
@@ -321,7 +321,7 @@ export default function LuxuryHome() {
       <section className="border-t border-black/10 bg-white">
         <div className="mx-auto max-w-[1400px] px-6 py-24 lg:px-12 lg:py-32">
           <p className="text-[11px] uppercase tracking-[0.4em] text-black/40">Why Hidden Property Intel</p>
-          <h2 className="mt-3 max-w-2xl font-display text-4xl font-light tracking-tight sm:text-5xl">Four things no competitor does.</h2>
+          <h2 className="mt-3 max-w-2xl font-display text-4xl font-light tracking-tight sm:text-5xl">A governed intelligence workflow built for distressed-property decisions.</h2>
           <FloatIn className="mt-14 grid gap-px overflow-hidden rounded-sm border border-black/10 bg-black/10 sm:grid-cols-2">
             {DIFFERENTIATORS.map((d) => (
               <div key={d.t} className="bg-white p-8 lg:p-10 hpi-hover">

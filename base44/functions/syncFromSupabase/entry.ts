@@ -12,6 +12,10 @@ import { supabaseSelect, supabaseUpdate } from "../../shared/supabaseClient.ts";
  *   3. Manually from the admin dashboard
  */
 
+function isFloridaProperty(property: any): boolean {
+  return String(property?.state || '').trim().toUpperCase() === 'FL';
+}
+
 export default async function(req: Request): Promise<Response> {
   try {
     const base44 = createClientFromRequest(req);
@@ -49,16 +53,23 @@ export default async function(req: Request): Promise<Response> {
     const properties = await supabaseSelect("properties", params) as any[];
 
     if (!properties || properties.length === 0) {
-      return Response.json({ synced: 0, created: 0, updated: 0, lastSync, message: "No new properties" });
+      return Response.json({ synced: 0, created: 0, updated: 0, skipped_non_florida: 0, lastSync, message: "No new properties" });
     }
 
     let created = 0;
     let updated = 0;
+    let skippedNonFlorida = 0;
     const errors: string[] = [];
 
     // 3. Upsert each property into Base44 Property entity
     for (const prop of properties) {
       try {
+        // Florida-only ingress boundary. Non-FL records never reach Property writes.
+        if (!isFloridaProperty(prop)) {
+          skippedNonFlorida++;
+          continue;
+        }
+
         // Check if exists by source_url first (most reliable)
         let existing: any[] = [];
         if (prop.source_url) {
@@ -128,6 +139,7 @@ export default async function(req: Request): Promise<Response> {
       synced: properties.length,
       created,
       updated,
+      skipped_non_florida: skippedNonFlorida,
       errors: errors.length > 0 ? errors.slice(0, 5) : undefined,
       lastSync,
       newSyncTime: lastUpdated,
