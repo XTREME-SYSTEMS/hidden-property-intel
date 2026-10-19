@@ -5,7 +5,8 @@
   "scripts": {
     "build": "tsc scraper-cron.ts --outDir dist --module commonjs --target es2020 --lib es2020 --skipLibCheck --esModuleInterop --resolveJsonModule",
     "start": "node dist/scraper-cron.js",
-    "dev": "ts-node --compiler-options '{\"module\":\"commonjs\"}' scraper-cron.ts"
+    "dev": "ts-node --compiler-options '{\"module\":\"commonjs\"}' scraper-cron.ts",
+    "test": "node --test tests/*.test.cjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
