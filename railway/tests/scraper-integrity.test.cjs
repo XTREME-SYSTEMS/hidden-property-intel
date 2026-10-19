@@ -44,9 +44,11 @@ test('off-domain extracted URLs cannot be attributed to the visited source page'
   assert.ok(source.includes("target.hostname.toLowerCase() !== page.hostname.toLowerCase()"));
 });
 
-test('scraper runtime pins Node 22+ for Supabase Realtime WebSocket support', () => {
+test('scraper runtime pins and executes on Node 22+ for Supabase Realtime WebSocket support', () => {
   const dockerfile = fs.readFileSync(path.join(__dirname, '..', 'Dockerfile'), 'utf8');
   const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
+  const nodeMajor = Number(process.versions.node.split('.')[0]);
   assert.match(dockerfile, /^FROM node:22-alpine/m);
   assert.equal(packageJson.engines.node, '>=22');
+  assert.ok(nodeMajor >= 22, `test runtime must be Node 22+, received ${process.versions.node}`);
 });
