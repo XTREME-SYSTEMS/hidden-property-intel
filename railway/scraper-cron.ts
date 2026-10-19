@@ -187,6 +187,10 @@ function sha256(value: string): string {
   return createHash('sha256').update(value).digest('hex');
 }
 
+function isAccessPolicyFailure(message: string): boolean {
+  return /\b(401|403|407|429)\b|captcha|access denied|forbidden|rate limit|too many requests|robot check|blocked by robots|challenge page/i.test(message);
+}
+
 function isApprovedSource(source: ScrapeSource): boolean {
   try {
     const host = new URL(source.url).hostname.toLowerCase();
@@ -373,7 +377,12 @@ async function scrapeSourceWithRetries(sessionId: string, source: ScrapeSource):
         succeeded = true;
         break;
       } catch (e: any) {
-        log('warn', `  [${source.name}] page ${page} attempt ${attempt} failed: ${e.message}`);
+        const message = String(e?.message || e || '');
+        if (isAccessPolicyFailure(message)) {
+          log('warn', `  [${source.name}] access restriction or rate limit detected; stopping retries without bypass.`);
+          break;
+        }
+        log('warn', `  [${source.name}] page ${page} attempt ${attempt} failed: ${message.slice(0, 300)}`);
         if (attempt < maxRetries) await sleep(3000 * attempt);
       }
     }
