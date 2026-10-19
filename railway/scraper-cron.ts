@@ -2,7 +2,7 @@
  * Hidden Property Intel — Railway Scraper (Aggressive, FL-only)
  * Scrapes distressed properties across Florida counties via self-hosted
  * CloudBrowser-Control engine. Paginates through result pages, retries
- * failed sources, rotates browser sessions to avoid detection.
+ * failed sources, uses isolated sessions and honors source access policies.
  *
  * Writes raw rows to Supabase via upsert (dedup_key unique index).
  * Triggers Base44 sync webhook after each source batch.
@@ -15,6 +15,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import axios from 'axios';
+import { createHash } from 'crypto';
 
 const log = (level: string, msg: string, data?: any) => {
   console.log(`[${new Date().toISOString()}] [${level}] ${msg}`, data ?? '');
@@ -30,7 +31,11 @@ const syncToken = process.env.BASE44_SYNC_TOKEN || '';
 const dailyTarget = parseInt(process.env.DAILY_TARGET || '3000', 10);
 const maxPagesPerSource = parseInt(process.env.MAX_PAGES || '8', 10);
 const requestDelayMs = parseInt(process.env.REQUEST_DELAY_MS || '2000', 10);
-const sessionRotateEvery = parseInt(process.env.SESSION_ROTATE_EVERY || '10', 10);
+const approvedSourceHosts = new Set((process.env.APPROVED_SOURCE_HOSTS || '').split(',').map(h => h.trim().toLowerCase()).filter(Boolean));
+const SITE_KEY = 'hidden-property-intel';
+const SOURCE_SYSTEM = 'hpi-scraper';
+const ROBOTS_USER_AGENT = 'StrategicMindsAIResearchBot';
+const robotsCache = new Map<string, { blocked: boolean; rules: { path: string; allow: boolean }[] }>();
 const maxRetries = parseInt(process.env.MAX_RETRIES || '2', 10);
 
 if (!supabaseUrl || !supabaseServiceKey || !browserEngineUrl || !browserEngineApiKey || !base44SyncUrl) {
@@ -38,7 +43,29 @@ if (!supabaseUrl || !supabaseServiceKey || !browserEngineUrl || !browserEngineAp
   process.exit(1);
 }
 
+const runtimeNodeMajor = Number(process.versions.node.split('.')[0] || 0);
+if (runtimeNodeMajor < 22) {
+  log('error', `Node.js 22+ is required for Supabase Realtime WebSocket support. Detected ${process.versions.node}.`);
+  process.exit(1);
+}
+
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
+const CANONICAL_UPI_PROJECT_REF = process.env.UPI_SUPABASE_PROJECT_REF || 'fwtchbsebygwifmmqhur';
+const currentProjectRef = getSupabaseProjectRef(supabaseUrl);
+const upiUrl = process.env.UPI_SUPABASE_URL || (currentProjectRef === CANONICAL_UPI_PROJECT_REF ? supabaseUrl : '');
+const upiKey = process.env.UPI_SUPABASE_SERVICE_KEY || (currentProjectRef === CANONICAL_UPI_PROJECT_REF ? supabaseServiceKey : '');
+const upiSupabase = upiUrl && upiKey && getSupabaseProjectRef(upiUrl) === CANONICAL_UPI_PROJECT_REF
+  ? createClient(upiUrl, upiKey)
+  : null;
+let upiMirrorWarningLogged = false;
+
+function getSupabaseProjectRef(value: string): string {
+  try {
+    return new URL(value).hostname.split('.')[0].toLowerCase();
+  } catch {
+    return '';
+  }
+}
 
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
@@ -162,6 +189,113 @@ function dedupKey(address: string, zip: string): string {
   return Buffer.from(`${normalizeAddress(address)}|${(zip || '').trim()}`).toString('base64');
 }
 
+function sha256(value: string): string {
+  return createHash('sha256').update(value).digest('hex');
+}
+
+function isAccessPolicyFailure(message: string): boolean {
+  return /\b(401|403|407|429)\b|captcha|access denied|forbidden|rate limit|too many requests|robot check|blocked by robots|challenge page/i.test(message);
+}
+
+function isApprovedSource(source: ScrapeSource): boolean {
+  try {
+    const host = new URL(source.url).hostname.toLowerCase();
+    // Public government domains are the conservative default. Other providers
+    // require an explicit host allowlist after terms/access review.
+    return host.endsWith('.gov') || approvedSourceHosts.has(host);
+  } catch {
+    return false;
+  }
+}
+
+function parseRobots(text: string): { blocked: boolean; rules: { path: string; allow: boolean }[] } {
+  const groups: { agents: string[]; rules: { path: string; allow: boolean }[] }[] = [];
+  let agents: string[] = [];
+  let rules: { path: string; allow: boolean }[] = [];
+  let sawRule = false;
+  const flush = () => {
+    if (agents.length) groups.push({ agents, rules });
+    agents = [];
+    rules = [];
+    sawRule = false;
+  };
+
+  for (const rawLine of text.split(/\r?\n/)) {
+    const line = rawLine.split('#')[0].trim();
+    if (!line) continue;
+    const colon = line.indexOf(':');
+    if (colon < 0) continue;
+    const key = line.slice(0, colon).trim().toLowerCase();
+    const value = line.slice(colon + 1).trim();
+    if (key === 'user-agent') {
+      if (sawRule) flush();
+      agents.push(value.toLowerCase());
+    } else if ((key === 'allow' || key === 'disallow') && agents.length && value) {
+      rules.push({ path: value, allow: key === 'allow' });
+      sawRule = true;
+    }
+  }
+  flush();
+
+  const relevant = groups.filter(group => group.agents.includes('*') || group.agents.includes(ROBOTS_USER_AGENT.toLowerCase()));
+  return { blocked: false, rules: relevant.flatMap(group => group.rules) };
+}
+
+async function isAllowedByRobots(targetUrl: string): Promise<boolean> {
+  let url: URL;
+  try {
+    url = new URL(targetUrl);
+    if (url.protocol !== 'https:') return false;
+  } catch {
+    return false;
+  }
+
+  let policy = robotsCache.get(url.origin);
+  if (!policy) {
+    try {
+      const response = await axios.get(`${url.origin}/robots.txt`, {
+        timeout: 10000,
+        maxRedirects: 0,
+        validateStatus: () => true,
+        headers: { 'User-Agent': `${ROBOTS_USER_AGENT}/1.0` },
+      });
+      if (response.status === 404) {
+        policy = { blocked: false, rules: [] };
+      } else if (response.status < 200 || response.status >= 300) {
+        // Fail closed on redirects, authorization failures, throttling, and server errors.
+        policy = { blocked: true, rules: [] };
+      } else {
+        policy = parseRobots(String(response.data || ''));
+      }
+    } catch {
+      policy = { blocked: true, rules: [] };
+    }
+    robotsCache.set(url.origin, policy);
+  }
+
+  if (policy.blocked) return false;
+  const requestPath = url.pathname + url.search;
+  const matches = policy.rules
+    .filter(rule => requestPath.startsWith(rule.path.split('*')[0].replace(/\$/, '')))
+    .sort((a, b) => b.path.length - a.path.length || Number(b.allow) - Number(a.allow));
+  return matches.length === 0 || matches[0].allow;
+}
+
+function normalizeSourceUrl(candidate: string | undefined, pageUrl: string): string {
+  try {
+    const page = new URL(pageUrl);
+    if (!candidate) return page.toString();
+    const target = new URL(candidate, pageUrl);
+    // Do not attribute an extracted off-domain link as evidence for the page visited.
+    if (target.protocol !== 'https:' || target.hostname.toLowerCase() !== page.hostname.toLowerCase()) {
+      return page.toString();
+    }
+    return target.toString();
+  } catch {
+    return pageUrl;
+  }
+}
+
 function buildPageUrl(source: ScrapeSource, page: number): string {
   if (!source.paginated || page <= 1) return source.url;
   const sep = source.url.includes('?') ? '&' : '?';
@@ -228,7 +362,7 @@ async function scrapePage(sessionId: string, url: string, distressType: string, 
       ...p,
       state: p.state || defaultState,
       distress_type: p.distress_type || distressType,
-      source_url: p.source_url || url,
+      source_url: normalizeSourceUrl(p.source_url, url),
     }));
 }
 
@@ -249,7 +383,12 @@ async function scrapeSourceWithRetries(sessionId: string, source: ScrapeSource):
         succeeded = true;
         break;
       } catch (e: any) {
-        log('warn', `  [${source.name}] page ${page} attempt ${attempt} failed: ${e.message}`);
+        const message = String(e?.message || e || '');
+        if (isAccessPolicyFailure(message)) {
+          log('warn', `  [${source.name}] access restriction or rate limit detected; stopping retries without bypass.`);
+          break;
+        }
+        log('warn', `  [${source.name}] page ${page} attempt ${attempt} failed: ${message.slice(0, 300)}`);
         if (attempt < maxRetries) await sleep(3000 * attempt);
       }
     }
@@ -281,42 +420,256 @@ async function storeProperties(props: RawProperty[], sourceName: string): Promis
   let upserted = 0;
   let errors = 0;
 
-  const rows = props.map(p => ({
-    address: p.address,
-    normalized_address: normalizeAddress(p.address),
-    dedup_key: dedupKey(p.address, p.zip_code || ''),
-    city: p.city || null,
-    state: p.state || 'FL',
-    zip_code: p.zip_code || null,
-    distress_type: p.distress_type || 'foreclosure',
-    estimated_value: p.estimated_value || null,
-    bedrooms: p.bedrooms || null,
-    bathrooms: p.bathrooms || null,
-    square_footage: p.square_footage || null,
-    source: 'railway-scraper',
-    source_name: sourceName,
-    source_url: p.source_url || null,
-    scraped_at: new Date().toISOString(),
-    raw_data: p,
-    images: [],
-  }));
+  const rows = props.map(p => {
+    const capturedAt = new Date().toISOString();
+    const sourceUrl = p.source_url || null;
+    const extractedRecordHash = sha256(JSON.stringify(p));
+    const rawData = {
+      ...p,
+      _source_capture: {
+        source_url: sourceUrl,
+        captured_at: capturedAt,
+        capture_method: 'cloudbrowser_extract_table',
+        extracted_record_sha256: extractedRecordHash,
+        verification_level: 'source_observed_not_legal_ownership',
+      },
+    };
+    return {
+      address: p.address,
+      normalized_address: normalizeAddress(p.address),
+      dedup_key: dedupKey(p.address, p.zip_code || ''),
+      city: p.city || null,
+      state: p.state || 'FL',
+      zip_code: p.zip_code || null,
+      distress_type: p.distress_type || 'foreclosure',
+      estimated_value: p.estimated_value || null,
+      bedrooms: p.bedrooms || null,
+      bathrooms: p.bathrooms || null,
+      square_footage: p.square_footage || null,
+      source: 'railway-scraper',
+      source_name: sourceName,
+      source_url: sourceUrl,
+      scraped_at: capturedAt,
+      last_verified_at: capturedAt,
+      raw_data: rawData,
+      images: [],
+    };
+  });
 
-  // Batch upsert — 100 at a time
+  // Batch upsert — the existing dedup_key remains the canonical property identity.
   for (let i = 0; i < rows.length; i += 100) {
     const batch = rows.slice(i, i + 100);
-    const { error } = await supabase
+    const { data: storedRows, error } = await supabase
       .from('properties')
-      .upsert(batch, { onConflict: 'dedup_key' });
+      .upsert(batch, { onConflict: 'dedup_key' })
+      .select('id,dedup_key,source_url,created_date,updated_date,updated_at,address,normalized_address,city,state,zip_code,distress_type,estimated_value,source,source_name,scraped_at,last_verified_at,raw_data');
 
     if (error) {
-      log('warn', `Upsert batch ${i} failed: ${error.message}`);
+      log('warn', `Property upsert batch ${i} failed: ${error.message}`);
       errors += batch.length;
-    } else {
-      upserted += batch.length;
+      continue;
+    }
+
+    const saved = Array.isArray(storedRows) ? storedRows : [];
+    upserted += saved.length;
+    if (saved.length > 0) {
+      try {
+        await mirrorUniversalProperties(saved);
+      } catch (e: any) {
+        // Keep the canonical property upsert; retry the idempotent mirror on the next run.
+        log('error', `Universal property evidence mirror failed: ${String(e?.message || 'unknown error').slice(0, 300)}`);
+        errors += saved.length;
+      }
     }
   }
 
   return { upserted, errors };
+}
+
+async function mirrorUniversalProperties(rows: any[]): Promise<void> {
+  if (!rows.length) return;
+  if (!upiSupabase) {
+    if (!upiMirrorWarningLogged) {
+      log('warn', 'UPI mirror disabled: configure UPI_SUPABASE_URL and UPI_SUPABASE_SERVICE_KEY, or point SUPABASE_URL at the canonical UPI project. No cross-project writes were attempted.');
+      upiMirrorWarningLogged = true;
+    }
+    return;
+  }
+
+  const capturedAt = new Date().toISOString();
+  const candidates = rows.map(row => ({
+    id: row.id,
+    dedup_key: row.dedup_key,
+    address: row.address,
+    normalized_address: row.normalized_address,
+    city: row.city,
+    state: row.state,
+    zip_code: row.zip_code,
+    distress_type: row.distress_type,
+    estimated_value: row.estimated_value,
+    source_name: row.source_name,
+    source_url: row.source_url,
+    scraped_at: row.scraped_at,
+    last_verified_at: row.last_verified_at,
+    raw_data: row.raw_data,
+  }));
+  const dedupKeys = [...new Set(candidates.map(row => row.dedup_key).filter(Boolean))];
+  if (!dedupKeys.length) return;
+
+  // Never overwrite an existing canonical property's user edits or Base44 IDs.
+  const { data: existingCanonical, error: existingError } = await upiSupabase
+    .from('properties')
+    .select('id,dedup_key')
+    .in('dedup_key', dedupKeys);
+  if (existingError) throw new Error(`canonical property lookup failed: ${existingError.message}`);
+
+  const existingKeys = new Set((existingCanonical || []).map((row: any) => String(row.dedup_key)));
+  const missingCanonical = candidates
+    .filter(row => !existingKeys.has(String(row.dedup_key)))
+    .map(row => ({
+      address: row.address,
+      normalized_address: row.normalized_address,
+      dedup_key: row.dedup_key,
+      city: row.city,
+      state: row.state,
+      zip_code: row.zip_code,
+      property_type: 'residential',
+      distress_type: row.distress_type,
+      estimated_value: row.estimated_value,
+      status: 'active',
+      source: SOURCE_SYSTEM,
+      source_name: row.source_name,
+      source_url: row.source_url,
+      scraped_at: row.scraped_at,
+      last_verified_at: row.last_verified_at,
+      raw_data: row.raw_data,
+      images: [],
+    }));
+
+  if (missingCanonical.length) {
+    const { error: insertError } = await upiSupabase
+      .from('properties')
+      .upsert(missingCanonical, { onConflict: 'dedup_key', ignoreDuplicates: true });
+    if (insertError) throw new Error(`canonical property insert failed: ${insertError.message}`);
+  }
+
+  const { data: canonicalRows, error: canonicalError } = await upiSupabase
+    .from('properties')
+    .select('id,dedup_key')
+    .in('dedup_key', dedupKeys);
+  if (canonicalError) throw new Error(`canonical property resolution failed: ${canonicalError.message}`);
+  const canonicalByKey = new Map((canonicalRows || []).map((row: any) => [String(row.dedup_key), String(row.id)]));
+  if (dedupKeys.some(key => !canonicalByKey.has(String(key)))) {
+    throw new Error('One or more property observations could not be mapped to a canonical UPI property ID.');
+  }
+
+  const observations = candidates.map(row => {
+    const canonicalPropertyId = canonicalByKey.get(String(row.dedup_key))!;
+    const sourceId = sha256(`${SOURCE_SYSTEM}|${row.source_url || ''}|${row.dedup_key || ''}`);
+    const record = {
+      property_id: canonicalPropertyId,
+      address: row.address,
+      normalized_address: row.normalized_address,
+      city: row.city,
+      state: row.state,
+      zip_code: row.zip_code,
+      distress_type: row.distress_type,
+      estimated_value: row.estimated_value,
+      source_url: row.source_url,
+      source_name: row.source_name,
+      observed_at: row.scraped_at,
+      source_capture: row.raw_data?._source_capture || null,
+      raw_data: row.raw_data,
+      verification_level: 'source_observed_not_legal_ownership',
+    };
+    return {
+      source_system: SOURCE_SYSTEM,
+      entity_type: 'PropertyObservation',
+      source_id: sourceId,
+      site_key: SITE_KEY,
+      record,
+      record_hash: sha256(JSON.stringify(record)),
+      source_created_at: row.scraped_at || capturedAt,
+      source_updated_at: capturedAt,
+      migrated_at: capturedAt,
+      property_id: canonicalPropertyId,
+      dedup_key: row.dedup_key || '',
+    };
+  });
+
+  const sourceRecords = observations.map(({ property_id, dedup_key, ...record }) => record);
+  const { error: sourceError } = await upiSupabase
+    .from('universal_source_records')
+    .upsert(sourceRecords, { onConflict: 'source_system,entity_type,source_id' });
+  if (sourceError) throw new Error(`source-record upsert failed: ${sourceError.message}`);
+
+  const sourceLinks = observations.map(row => ({
+    source_system: SOURCE_SYSTEM,
+    entity_type: 'PropertyObservation',
+    source_id: row.source_id,
+    property_id: row.property_id,
+    dedup_key: row.dedup_key,
+    is_canonical: false,
+    linked_at: capturedAt,
+  }));
+  const { error: linkError } = await upiSupabase
+    .from('universal_property_source_links')
+    .upsert(sourceLinks, { onConflict: 'source_system,entity_type,source_id' });
+  if (linkError) throw new Error(`source-link upsert failed: ${linkError.message}`);
+
+  const canonicalIds = [...new Set(observations.map(row => row.property_id))];
+  const { data: existingSiteLinks, error: siteReadError } = await upiSupabase
+    .from('universal_site_properties')
+    .select('property_id')
+    .eq('site_key', SITE_KEY)
+    .in('property_id', canonicalIds);
+  if (siteReadError) throw new Error(`site-link lookup failed: ${siteReadError.message}`);
+
+  const existingIds = new Set((existingSiteLinks || []).map((row: any) => String(row.property_id)));
+  const missingSiteLinks = canonicalIds
+    .filter(id => !existingIds.has(String(id)))
+    .map(id => ({
+      site_key: SITE_KEY,
+      property_id: id,
+      listing_status: 'visible',
+      display_overrides: {},
+    }));
+  if (missingSiteLinks.length) {
+    const { error: siteWriteError } = await upiSupabase
+      .from('universal_site_properties')
+      .upsert(missingSiteLinks, { onConflict: 'site_key,property_id', ignoreDuplicates: true });
+    if (siteWriteError) throw new Error(`site-link upsert failed: ${siteWriteError.message}`);
+  }
+
+  const { data: existingCatalog, error: catalogReadError } = await upiSupabase
+    .from('universal_entity_catalog')
+    .select('first_source_created_at')
+    .eq('source_system', SOURCE_SYSTEM)
+    .eq('entity_type', 'PropertyObservation')
+    .eq('site_key', SITE_KEY)
+    .maybeSingle();
+  if (catalogReadError) throw new Error(`entity-catalog lookup failed: ${catalogReadError.message}`);
+
+  const { count, error: countError } = await upiSupabase
+    .from('universal_source_records')
+    .select('source_id', { count: 'exact', head: true })
+    .eq('source_system', SOURCE_SYSTEM)
+    .eq('entity_type', 'PropertyObservation')
+    .eq('site_key', SITE_KEY);
+  if (countError) throw new Error(`source-record count failed: ${countError.message}`);
+
+  const { error: catalogError } = await upiSupabase
+    .from('universal_entity_catalog')
+    .upsert({
+      source_system: SOURCE_SYSTEM,
+      entity_type: 'PropertyObservation',
+      site_key: SITE_KEY,
+      record_count: count || 0,
+      first_source_created_at: existingCatalog?.first_source_created_at || capturedAt,
+      latest_source_updated_at: capturedAt,
+      last_migrated_at: capturedAt,
+    }, { onConflict: 'source_system,entity_type,site_key' });
+  if (catalogError) throw new Error(`entity-catalog upsert failed: ${catalogError.message}`);
 }
 
 // --- Base44 sync trigger ---
@@ -337,59 +690,63 @@ async function triggerBase44Sync(): Promise<void> {
 
 // --- Main ---
 async function main() {
-  log('info', `=== Aggressive Scrape Cycle Starting (target: ${dailyTarget}, sources: ${SCRAPE_SOURCES.length}) ===`);
+  const approvedSources = SCRAPE_SOURCES.filter(isApprovedSource);
+  const blockedByAllowlist = SCRAPE_SOURCES.length - approvedSources.length;
+  log('info', `=== Source-observation cycle starting (target: ${dailyTarget}, configured sources: ${SCRAPE_SOURCES.length}, approved hosts: ${approvedSources.length}) ===`);
+  if (approvedSources.length === 0) {
+    log('warn', 'No sources are approved. Set APPROVED_SOURCE_HOSTS for reviewed non-.gov providers; no pages were visited.');
+    return;
+  }
+
   let totalUpserted = 0;
   let totalErrors = 0;
-  let sessionId: string | null = null;
   let sourcesProcessed = 0;
+  let sourcesSkipped = blockedByAllowlist;
 
-  try {
-    sessionId = await createSession();
-    log('info', `Browser session created: ${sessionId}`);
+  for (const source of SCRAPE_SOURCES) {
+    if (totalUpserted >= dailyTarget) {
+      log('info', `Daily target ${dailyTarget} reached, stopping.`);
+      break;
+    }
+    if (!isApprovedSource(source)) {
+      log('warn', `Skipping unapproved source host for ${source.name}`);
+      continue;
+    }
+    if (!(await isAllowedByRobots(source.url))) {
+      log('warn', `Skipping source blocked by robots/access policy: ${source.name}`);
+      sourcesSkipped++;
+      continue;
+    }
 
-    for (const source of SCRAPE_SOURCES) {
-      if (totalUpserted >= dailyTarget) {
-        log('info', `Daily target ${dailyTarget} reached, stopping.`);
-        break;
-      }
-
-      log('info', `Scraping ${source.name}...`);
-
-      // Rotate session periodically to avoid detection
-      if (sourcesProcessed > 0 && sourcesProcessed % sessionRotateEvery === 0) {
-        log('info', `Rotating browser session (every ${sessionRotateEvery} sources)...`);
-        if (sessionId) await closeSession(sessionId);
-        await sleep(2000);
-        sessionId = await createSession();
-        log('info', `New session: ${sessionId}`);
-      }
-
-      const { props, pages } = await scrapeSourceWithRetries(sessionId!, source);
-      log('info', `  ${source.name}: ${props.length} properties from ${pages} pages`);
+    let sourceSessionId: string | null = null;
+    try {
+      // Use a fresh isolated session per source; never rotate sessions to evade detection.
+      sourceSessionId = await createSession();
+      log('info', `Researching approved source ${source.name} in an isolated session.`);
+      const { props, pages } = await scrapeSourceWithRetries(sourceSessionId, source);
+      log('info', `${source.name}: ${props.length} source observations from ${pages} pages`);
 
       if (props.length > 0) {
         const { upserted, errors } = await storeProperties(props, source.name);
         totalUpserted += upserted;
         totalErrors += errors;
-        log('info', `  Upserted ${upserted} (errors: ${errors}) — running total: ${totalUpserted}`);
+        log('info', `Upserted ${upserted} property observations (errors: ${errors}) — running total: ${totalUpserted}`);
 
-        // Sync to Base44 after each source so data appears incrementally
-        if (upserted > 0) {
-          await triggerBase44Sync();
-        }
+        // Sync through the existing Base44 bridge after each source so the UI remains incremental.
+        if (upserted > 0) await triggerBase44Sync();
       }
-
       sourcesProcessed++;
-      await sleep(requestDelayMs);
+    } catch (e: any) {
+      totalErrors++;
+      log('warn', `Source failed without bypass or evasion: ${source.name}; ${String(e?.message || 'unknown error').slice(0, 300)}`);
+    } finally {
+      if (sourceSessionId) await closeSession(sourceSessionId);
     }
 
-    log('info', `=== Done: ${totalUpserted} upserted, ${totalErrors} errors, ${sourcesProcessed} sources processed ===`);
-  } catch (e: any) {
-    log('error', `Fatal: ${e.message}`);
-    process.exitCode = 1;
-  } finally {
-    if (sessionId) await closeSession(sessionId);
+    await sleep(requestDelayMs);
   }
+
+  log('info', `=== Cycle complete: ${totalUpserted} upserted, ${totalErrors} errors, ${sourcesProcessed} sources processed, ${sourcesSkipped} sources skipped ===`);
 }
 
 main();
