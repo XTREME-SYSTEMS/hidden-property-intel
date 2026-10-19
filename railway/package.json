@@ -8,6 +8,9 @@
     "dev": "ts-node --compiler-options '{\"module\":\"commonjs\"}' scraper-cron.ts",
     "test": "node --test tests/*.test.cjs"
   },
+  "engines": {
+    "node": ">=22"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
     "axios": "^1.6.0"
